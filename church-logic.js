@@ -60,7 +60,7 @@ function openModal(id) {
 
         // 3. ✨ NEW: Check if this is the appointment modal
         if (id === 'booking-modal') {
-            generateTimeSlots(); // This runs the code to build your grid!
+            loadLiveAvailability(); // <--- Changed this line!
         }
     }
 }
@@ -206,29 +206,41 @@ function showSleekNotification(status) {
     console.log("Status updated to: " + status);
     alert("Pastor has updated your request to: " + status);
 }
-function generateTimeSlots() {
+// This function listens to Firebase and builds the grid with colors
+function loadLiveAvailability() {
     const grid = document.getElementById('availability-grid');
-    const startHour = 9; // 9:00 AM
-    const endHour = 17;  // 5:00 PM
-    
-    grid.innerHTML = ''; // Clear the grid first
+    if (!grid) return;
 
-    for (let hour = startHour; hour <= endHour; hour++) {
-        // We convert the 24h number to a friendly string (e.g., 14 to "02:00 PM")
-        const timeString = formatTime(hour);
+    db.collection("pastorSchedule").orderBy("hour", "asc").onSnapshot(snap => {
+        grid.innerHTML = ""; // Clear the grid
         
-        // Create the HTML for the card
-        const card = document.createElement('div');
-        card.className = 'time-card available'; // Default to green/available
-        
-        card.innerHTML = `
-            <div class="status-dot"></div>
-            <span class="time-label">${timeString}</span>
-            <span class="status-text">AVAILABLE</span>
-        `;
-        
-        grid.appendChild(card);
-    }
+        snap.forEach(doc => {
+            const data = doc.data();
+            const status = data.status.toLowerCase(); 
+            
+            // This is where we set the color class based on status
+            const card = document.createElement('div');
+            card.className = `time-card ${status}`; // Will be 'available', 'busy', or 'away'
+            
+            card.innerHTML = `
+                <div class="status-dot"></div>
+                <span class="time-label">${data.displaytime}</span>
+                <span class="status-text">${status.toUpperCase()}</span>
+            `;
+            
+            // Make it clickable so it fills the booking form automatically
+            card.onclick = () => {
+                if(status === 'available') {
+                    document.getElementById('b_time').value = data.displaytime;
+                    alert("Selected " + data.displaytime);
+                } else {
+                    alert("This slot is " + status + ". Please choose a green slot.");
+                }
+            };
+
+            grid.appendChild(card);
+        });
+    });
 }
 
 // Simple helper to make the time look pretty
