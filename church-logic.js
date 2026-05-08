@@ -64,6 +64,12 @@ function openModal(id) {
         }
     }
 }
+container.innerHTML += card;
+    };
+ // <--- ADD THIS BRACKET HERE! It closes the createSleekGrid function.
+
+function openModal(id) { 
+    // Now this function will finally work!
 // ==========================================
 // 3. MISSION CONTROL SECURITY
 // ==========================================
@@ -85,7 +91,8 @@ function checkPass() {
 // 4. LIVE SERMON BROADCAST (RED ALERT)
 // ==========================================
 const broadcastTag = document.getElementById('broadcast-tag');
-const alertSound = document.getElementById('alert-sound');
+
+// We REMOVED the line that looks for 'alert-sound' here
 
 if (broadcastTag) {
     db.collection("churchSettings").doc("live_topic").onSnapshot(doc => {
@@ -95,22 +102,16 @@ if (broadcastTag) {
             // 1. Update text to uppercase
             broadcastTag.innerText = "🚨 LIVE NOW: " + sermonTitle.toUpperCase();
             
-            // 2. Turn on RED and FLASHING styles
+            // 2. This makes the screen flash/turn red (Keep this!)
             broadcastTag.classList.add('red-alert');
             
-            // 3. Play the Sound
-            if (alertSound) {
-                alertSound.play().catch(e => console.log("Sound blocked by browser until user clicks."));
-            }
+            // 3. SOUND REMOVED: No more 404 error here
+            console.log("Live Alert Active: " + sermonTitle);
+            
         } else {
             // 4. RESET to Normal
             broadcastTag.innerText = "CONNECTING TO MISSION...";
-            broadcastTag.classList.remove('red-alert'); // Kills the blinking
-            
-            if (alertSound) {
-                alertSound.pause();
-                alertSound.currentTime = 0;
-            }
+            broadcastTag.classList.remove('red-alert'); 
         }
     });
 }
