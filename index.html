@@ -7,12 +7,17 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     
+    <!-- 1. LOAD FIREBASE CORE FIRST -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <!-- 2. LOAD FIRESTORE SECOND -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 </head>
-<body style="overflow-y: auto;"> <div class="main-bg"></div>
+
+<body style="overflow-y: auto;"> 
+    <div class="main-bg"></div>
     <div class="overlay-tint"></div>
 
+    <!-- LOGIN SCREEN -->
     <div id="login-overlay" class="modal" style="display: flex; background: rgba(0,0,0,0.95); z-index: 9999;">
         <div class="glass-card">
             <h2 class="gold-text">Mission Control</h2>
@@ -22,34 +27,33 @@
         </div>
     </div>
 
+    <!-- ADMIN PANEL (Hidden until login) -->
     <div id="admin-ui" style="display: none; padding-top: 40px;">
-        
         <div style="text-align: center; margin-bottom: 30px;">
             <h1 class="gold-text" style="font-size: 2.5rem;">MISSION CONTROL</h1>
             <p style="letter-spacing: 3px; opacity: 0.7;">DIVINE LIFE CHRISTIAN CENTRE</p>
         </div>
 
         <div class="admin-dashboard-grid">
-            
+            <!-- SERMON ALERT -->
             <div class="admin-panel">
                 <h2 class="gold-text" style="font-size: 1.2rem; margin-bottom: 15px;">🚨 LIVE BROADCAST</h2>
                 <p class="form-hint">Type the sermon topic to trigger the Red Alert on all phones.</p>
                 <input type="text" id="sermon-input" placeholder="Current Sermon Topic..." class="sleek-input">
                 <button class="premium-gold-btn" onclick="updateSermon()">GO LIVE NOW</button>
-                
                 <button class="premium-gold-btn" onclick="document.getElementById('sermon-input').value=''; updateSermon();" 
                         style="margin-top: 10px; background: #333; color: white;">
                     END BROADCAST (RESET)
                 </button>
             </div>
 
+            <!-- PRAYER FEED -->
             <div class="admin-panel">
                 <h2 class="gold-text" style="font-size: 1.2rem;">🕊️ LIVE FEED</h2>
                 <div class="scroll-area" id="prayer-list">
                     <p style="opacity: 0.3; margin-top: 20px;">Waiting for mission data...</p>
                 </div>
             </div>
-
         </div>
 
         <div style="text-align: center; margin-top: 40px; padding-bottom: 40px;">
@@ -57,11 +61,7 @@
         </div>
     </div>
 
+    <!-- 3. LOAD YOUR CUSTOM LOGIC LAST -->
     <script src="church-logic.js"></script>
 </body>
 </html>
-
-
-
-
-
