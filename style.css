@@ -1,188 +1,154 @@
-/* DIVINE LIFE CHRISTIAN CENTRE - MISSION INTERFACE MASTER STYLE */
+/* DIVINE LIFE CHRISTIAN CENTRE - MISSION INTERFACE MASTER */
+
 :root {
     --gold: linear-gradient(135deg, #BF953F, #FCF6BA, #B38728, #FBF5B7, #AA771D);
     --gold-solid: #D4AF37;
-    --glass-bg: rgba(255, 255, 255, 0.04);
 }
 
-/* --- RESET & BASE --- */
-* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+/* --- 1. BASE SETUP --- */
+* { 
+    margin: 0; padding: 0; box-sizing: border-box; 
+    font-family: 'Poppins', sans-serif; 
+}
 
 body { 
-    font-family: 'Poppins', sans-serif; 
-    background: #020408; 
-    color: white; 
-    overflow: hidden; 
-    height: 100vh; 
-    width: 100vw;
+    background: #020408; color: white; 
+    overflow: hidden; height: 100vh; width: 100vw;
 }
 
-/* --- CINEMATIC BACKGROUND --- */
+/* --- 2. BACKGROUND (IMAGE VISIBILITY) --- */
 .main-bg {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    position: fixed; inset: 0;
     background: url('image2.png.jpg') no-repeat center center/cover; 
     z-index: -2;
 }
 
 .overlay-tint {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: radial-gradient(circle at center, transparent 0%, #020408 100%); 
+    position: fixed; inset: 0;
+    background: rgba(0, 0, 0, 0.4); 
     z-index: -1;
 }
 
-/* --- BRANDING --- */
+/* --- 3. POSITIONING (LOGO LEFT / MENU RIGHT) --- */
 .app-logo { 
-    position: fixed; top: 25px; left: 20px; 
-    width: 95px; z-index: 100; 
-    filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));
+    position: fixed; 
+    top: 25px; 
+    left: 20px; 
+    width: 75px; 
+    z-index: 1000; 
 }
 
 .menu-trigger { 
-    position: fixed; top: 40px; right: 30px; 
-    cursor: pointer; z-index: 5000; padding: 10px;
+    position: fixed; 
+    top: 35px; 
+    right: 25px; /* LOCKS TO RIGHT */
+    cursor: pointer; 
+    z-index: 5001; 
 }
 
 .line { 
-    width: 32px; height: 3px; background: var(--gold-solid); 
-    margin: 6px 0; box-shadow: 0 0 12px rgba(212, 175, 55, 0.8);
+    width: 30px; height: 3px; 
+    background: var(--gold-solid); 
+    margin: 6px 0; 
 }
 
-/* --- HERO CORE --- */
+/* --- 4. CENTER TEXT (HERO) --- */
 .hero-container {
     height: 100vh;
     display: flex; flex-direction: column;
     justify-content: center; align-items: center;
-    text-align: center; position: relative; z-index: 5;
+    text-align: center;
+    padding-top: 100px;
 }
 
 .main-heading {
     font-family: 'Montserrat', sans-serif;
     font-size: clamp(2.5rem, 10vw, 3.5rem);
-    font-weight: 900; text-transform: uppercase;
-    background: var(--gold); -webkit-background-clip: text;
+    font-weight: 900;
+    text-transform: uppercase;
+    background: var(--gold);
+    -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    line-height: 1;
 }
 
 .church-name {
-    letter-spacing: 8px; font-size: 0.8rem;
-    opacity: 0.6; text-transform: uppercase; margin-top: 10px;
+    letter-spacing: 8px; font-size: 0.8rem; 
+    color: white; opacity: 0.9; text-transform: uppercase;
+    margin-top: 10px;
 }
 
-/* --- THE MISSION INTERFACE (SIDE MENU) --- */
+/* --- 5. THE MISSION PANELS (TRANSPARENT GLASS) --- */
 .nav-overlay {
-    position: fixed; top: 0; right: 0; 
-    width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.9);
+    position: fixed; inset: 0;
+    background: rgba(0, 0, 0, 0.8); 
     transform: translateX(100%);
     transition: 0.5s cubic-bezier(0.7, 0, 0.3, 1);
-    z-index: 6000;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
+    z-index: 5000;
 }
 
 .nav-overlay.open { transform: translateX(0); }
 
-.admin-dashboard-grid {
-    width: 100%;
-    max-width: 500px;
-    margin: 0 auto;
-    padding: 100px 20px;
+/* This aligns your menu items properly */
+.nav-content {
+    width: 90%; max-width: 440px;
+    margin: 130px auto; 
 }
 
-/* --- THE MISSION CONTROL CARDS (IMAGE MATCHED) --- */
-.admin-panel {
-    background: var(--glass-bg) !important;
-    backdrop-filter: blur(15px) saturate(160%) !important;
-    -webkit-backdrop-filter: blur(15px) saturate(160%);
+/* THE EXACT ADMIN-STYLE TRANSPARENT PANEL */
+.menu-item {
+    background: rgba(255, 255, 255, 0.05) !important;
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
     
-    /* THE GOLD PLATED EDGE */
-    border-left: 5px solid var(--gold-solid) !important;
-    border-top: 1px solid rgba(212, 175, 55, 0.15);
-    border-right: 1px solid rgba(212, 175, 55, 0.15);
-    border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+    border-left: 4px solid var(--gold-solid) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
     
-    border-radius: 4px 20px 20px 4px;
+    border-radius: 4px 15px 15px 4px;
     padding: 22px;
-    margin-bottom: 18px;
-    text-align: left; /* Matched to image feed */
-    transition: 0.3s;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-}
-
-.admin-panel:active {
-    transform: scale(0.98);
-}
-
-/* --- CARD INTERNALS --- */
-.gold-text {
-    color: var(--gold-solid);
-    font-size: 0.8rem;
-    font-weight: 900;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    margin-bottom: 6px;
-    display: block;
-}
-
-.form-hint { 
+    margin-bottom: 15px;
     color: white;
-    font-size: 1.1rem;
     font-weight: 600;
-    opacity: 1; 
-    margin: 0;
-}
-
-/* --- MISSION BUTTONS --- */
-.premium-gold-btn {
-    background: var(--gold);
-    border: none;
-    padding: 10px 20px;
-    border-radius: 6px;
-    width: auto;
-    display: inline-block;
-    font-weight: 900;
-    color: #121212;
-    text-transform: uppercase;
-    font-size: 0.7rem;
+    font-size: 1.1rem;
     cursor: pointer;
-    margin-top: 15px;
+    transition: 0.3s;
+    display: block;
+    text-align: left;
 }
 
-/* --- MODAL SYSTEM --- */
-.modal { 
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-    background: rgba(0,0,0,0.85); display: none;
-    justify-content: center; align-items: center; z-index: 9000; 
+.menu-item:active { transform: scale(0.98); background: rgba(255, 255, 255, 0.1) !important; }
+
+/* --- 6. MODALS & FORMS --- */
+.modal {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.9);
+    display: none; place-items: center; z-index: 9999;
+}
+.modal.open { display: grid; }
+
+.glass-card {
+    background: rgba(20, 20, 20, 0.95);
+    padding: 40px;
+    border-radius: 20px;
+    border: 1px solid var(--gold-solid);
+    width: 90%; max-width: 400px;
+    text-align: center;
 }
 
-.modal.open { display: flex; }
-
-.glass-card { 
-    background: rgba(15, 15, 15, 0.95); padding: 35px; 
-    border-radius: 30px; border: 1px solid rgba(212, 175, 55, 0.3); 
-    backdrop-filter: blur(20px); width: 92%; max-width: 400px; text-align: center; 
+.gold-text {
+    background: var(--gold); -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent; font-weight: 900;
 }
 
 .sleek-input {
     width: 100%; background: rgba(255,255,255,0.05);
-    border: 1px solid #333; color: white; padding: 12px;
-    border-radius: 10px; margin-top: 15px; outline: none;
+    border: 1px solid #444; color: white; padding: 12px;
+    border-radius: 8px; margin-top: 15px; outline: none;
 }
 
-.cancel-link { margin-top: 15px; opacity: 0.4; cursor: pointer; font-size: 0.8rem; }
-
-/* --- LIVE INDICATOR --- */
-.live-indicator {
-    position: absolute; top: 120px; 
-    font-weight: 600; letter-spacing: 3px; font-size: 0.75rem;
-    color: #FCF6BA; animation: glow 2s infinite;
+.premium-gold-btn {
+    background: var(--gold); border: none; padding: 15px;
+    border-radius: 8px; width: 100%; font-weight: 900;
+    color: #000; text-transform: uppercase; margin-top: 20px;
+    cursor: pointer;
 }
-
-.live-indicator.red-alert {
-    color: #ff4444 !important;
-    text-shadow: 0 0 20px #ff0000;
-    font-weight: 900; animation: flash-red 0.8s infinite;
-}
-
-@keyframes glow { 50% { opacity: 0.5; } }
-@keyframes flash-red { 50% { opacity: 0.4; transform: scale(1.05); } }
