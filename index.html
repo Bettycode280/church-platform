@@ -1,96 +1,67 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DLCC | Official App</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DLCC | Mission Control</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 </head>
-
-<body>
-    <div class="main-bg"></div>
+<body style="overflow-y: auto;"> <div class="main-bg"></div>
     <div class="overlay-tint"></div>
-    <img src="logo.png.jpg" class="app-logo" alt="DLCC Logo">
 
-    <div id="broadcast-tag" class="live-indicator">CONNECTING TO MISSION...</div>
-
-    <div class="admin-dashboard-grid" style="margin-top: 160px; height: calc(100vh - 180px); overflow-y: auto; padding-bottom: 100px;">
-        
-        <div class="admin-panel" style="height: auto; min-height: 180px;" onclick="window.open('https://youtube.com/@DivineLifeChristianCentre/live')">
-            <h2 class="gold-text">📹 WATCH LIVE</h2>
-            <p class="form-hint">Join the Global Broadcast</p>
-            <div class="premium-gold-btn" style="margin-top: auto; padding: 12px; font-size: 0.8rem;">ENTER STREAM</div>
-        </div>
-
-        <div class="admin-panel" style="height: auto; min-height: 180px;" onclick="openModal('prayer-modal')">
-            <h2 class="gold-text">🕊️ PRAYER LINE</h2>
-            <p class="form-hint">Direct to the Pastor's Screen</p>
-            <div class="premium-gold-btn" style="margin-top: auto; padding: 12px; font-size: 0.8rem;">SEND REQUEST</div>
-        </div>
-
-        <div class="admin-panel" style="height: auto; min-height: 180px;" onclick="openModal('booking-modal')">
-            <h2 class="gold-text">📅 APPOINTMENT</h2>
-            <p class="form-hint">Request a Private Meeting</p>
-            <div class="premium-gold-btn" style="margin-top: auto; padding: 12px; font-size: 0.8rem;">BOOK SESSION</div>
-        </div>
-
-        <div class="admin-panel" style="height: auto; min-height: 180px;" onclick="openModal('giving-modal')">
-            <h2 class="gold-text">💰 TITHES & GIVING</h2>
-            <p class="form-hint">Official DLCC Financial Seed</p>
-            <div class="premium-gold-btn" style="margin-top: auto; padding: 12px; font-size: 0.8rem;">OFFER SEED</div>
-        </div>
-
-    </div>
-
-    <div id="prayer-modal" class="modal">
+    <div id="login-overlay" class="modal" style="display: flex; background: rgba(0,0,0,0.95); z-index: 9999;">
         <div class="glass-card">
-            <h2 class="gold-text">Prayer Line</h2>
-            <p class="form-hint">Direct to the Pastor's Screen</p>
-            <input type="text" id="p_name" placeholder="Your Name" class="sleek-input">
-            <textarea id="p_msg" placeholder="Type your prayer request..." rows="4" class="sleek-input"></textarea>
-            <button class="premium-gold-btn" onclick="submitPrayer()">SEND TO PASTOR</button>
-            <div class="cancel-link" onclick="closeModals()">Cancel</div>
+            <h2 class="gold-text">Mission Control</h2>
+            <p class="form-hint" style="color: white; opacity: 0.8;">Enter Authorized Security Key</p>
+            <input type="password" id="pass-input" placeholder="••••••••" class="sleek-input" style="text-align: center; letter-spacing: 5px;">
+            <button class="premium-gold-btn" onclick="checkPass()">UNLOCK DASHBOARD</button>
         </div>
     </div>
 
-    <div id="booking-modal" class="modal">
-    <div class="glass-card">
-        <h2 class="gold-text">Appointment</h2>
-        <p class="form-hint">Request a Private Meeting</p>
-
-        <div id="availability-grid" class="sleek-grid-container"></div>
-
-        <input type="text" id="b_name" placeholder="Full Name" class="sleek-input">
+    <div id="admin-ui" style="display: none; padding-top: 40px;">
         
-        <select id="b_day" class="sleek-input">
-            <option value="Monday">Monday</option>
-            <option value="Tuesday">Tuesday</option>
-            <option value="Wednesday">Wednesday</option>
-            <option value="Thursday">Thursday</option>
-            <option value="Friday">Friday</option>
-        </select>
-        
-        <input type="time" id="b_time" value="14:00" class="sleek-input">
+        <div style="text-align: center; margin-bottom: 30px;">
+            <h1 class="gold-text" style="font-size: 2.5rem;">MISSION CONTROL</h1>
+            <p style="letter-spacing: 3px; opacity: 0.7;">DIVINE LIFE CHRISTIAN CENTRE</p>
+        </div>
 
-        <button class="premium-gold-btn" onclick="submitBooking()">REQUEST MEETING</button>
-        <div class="cancel-link" onclick="closeModals()">Back</div>
-        
-    </div> </div> ```
-    <div id="giving-modal" class="modal">
-        <div class="glass-card">
-            <h2 class="gold-text">Giving</h2>
-            <p class="form-hint">Contact Finance Office for official details.</p>
-            <button class="premium-gold-btn" onclick="closeModals()">RETURN</button>
+        <div class="admin-dashboard-grid">
+            
+            <div class="admin-panel">
+                <h2 class="gold-text" style="font-size: 1.2rem; margin-bottom: 15px;">🚨 LIVE BROADCAST</h2>
+                <p class="form-hint">Type the sermon topic to trigger the Red Alert on all phones.</p>
+                <input type="text" id="sermon-input" placeholder="Current Sermon Topic..." class="sleek-input">
+                <button class="premium-gold-btn" onclick="updateSermon()">GO LIVE NOW</button>
+                
+                <button class="premium-gold-btn" onclick="document.getElementById('sermon-input').value=''; updateSermon();" 
+                        style="margin-top: 10px; background: #333; color: white;">
+                    END BROADCAST (RESET)
+                </button>
+            </div>
+
+            <div class="admin-panel">
+                <h2 class="gold-text" style="font-size: 1.2rem;">🕊️ LIVE FEED</h2>
+                <div class="scroll-area" id="prayer-list">
+                    <p style="opacity: 0.3; margin-top: 20px;">Waiting for mission data...</p>
+                </div>
+            </div>
+
+        </div>
+
+        <div style="text-align: center; margin-top: 40px; padding-bottom: 40px;">
+            <button onclick="location.reload()" style="background:none; border:none; color:rgba(255,255,255,0.3); cursor:pointer;">Logout & Lock</button>
         </div>
     </div>
 
-    <audio id="alert-sound" src="alert.mp3" preload="auto"></audio>
     <script src="church-logic.js"></script>
 </body>
+</html>
+
+
+
+
+
