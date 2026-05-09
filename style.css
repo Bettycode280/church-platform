@@ -82,46 +82,60 @@ body {
     animation: flash-red 0.8s infinite;
 }
 
-/* --- NAVIGATION OVERLAY --- */
-.nav-overlay {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.96);
-    display: flex; justify-content: center; align-items: center;
-    transform: translateX(100%); transition: 0.5s cubic-bezier(0.77, 0, 0.175, 1);
-    z-index: 1000;
-}
-
-.nav-overlay.open { transform: translateX(0); }
-
+/* --- UPDATED SLEEK PUBLIC NAVIGATION --- */
 .nav-content {
-    display: flex; flex-direction: column; gap: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
 .menu-item {
-    width: 280px; padding: 18px; 
-    border-radius: 50px; cursor: pointer;
-    text-align: center; font-weight: 900;
-    text-transform: uppercase; letter-spacing: 1px;
+    width: 300px;
+    padding: 20px;
+    border-radius: 20px; /* Sleek rectangular curves */
+    cursor: pointer;
+    text-align: center;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    
+    /* The Transparent Gold-Plated Look */
+    background: rgba(255, 255, 255, 0.03); 
+    border: 1px solid rgba(212, 175, 55, 0.3); /* Gold tint border */
+    backdrop-filter: blur(10px);
+    transition: all 0.4s ease;
+    
+    /* Gold Text Effect */
+    color: var(--gold-solid);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
-.btn-red { border: 1px solid #ff4444; color: #ff4444; }
-.btn-gold { border: 1px solid var(--gold-solid); color: var(--gold-solid); }
-.btn-green { border: 1px solid #00c851; color: #00c851; }
-.btn-teal { border: 1px solid #33b5e5; color: #33b5e5; }
-
-/* --- GLASS MODALS --- */
-.modal { 
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-    background: rgba(0,0,0,0.85); display: none;
-    justify-content: center; align-items: center; z-index: 2000; 
+.menu-item:hover {
+    background: rgba(212, 175, 55, 0.1);
+    border: 1px solid var(--gold-solid);
+    transform: translateY(-3px);
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
 }
 
-.modal.open { display: flex; }
-
+/* --- UPDATED SLEEK MODALS (GLASS-CARD) --- */
 .glass-card { 
-    background: rgba(20, 20, 20, 0.85); padding: 40px 30px; 
-    border-radius: 35px; border: 1px solid rgba(212,175,55,0.2); 
-    backdrop-filter: blur(25px); width: 90%; max-width: 400px; text-align: center; 
+    background: rgba(10, 10, 10, 0.7); /* Darker transparency */
+    padding: 40px 30px; 
+    border-radius: 30px; 
+    border: 1px solid rgba(212, 175, 55, 0.4); /* Stronger gold plate border */
+    backdrop-filter: blur(40px); /* Deep cinematic blur */
+    width: 90%; 
+    max-width: 420px; 
+    text-align: center;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+/* Specific Pillared Styles for the 4 Buttons */
+/* You can now use these classes in your HTML if you want unique glows */
+.btn-gold, .btn-red, .btn-green, .btn-teal {
+    /* Uniform sleek look as requested */
+    border: 1px solid rgba(212, 175, 55, 0.3); 
+    color: var(--gold-solid);
 }
 
 /* --- ADMIN DASHBOARD --- */
