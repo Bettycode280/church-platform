@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,6 +8,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     
     <link rel="stylesheet" href="style.css">
+    <!-- Mobile Home Screen Icons -->
+    <link rel="icon" type="image/png" href="dlcc-logo.png">
+    <link rel="apple-touch-icon" href="logo.png.jpg">
     
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
@@ -17,37 +19,32 @@
 <body>
     <div class="main-bg"></div>
     <div class="overlay-tint"></div>
+
     <img src="logo.png.jpg" class="app-logo" alt="DLCC Logo">
 
-    <div id="broadcast-tag" class="live-indicator">CONNECTING TO MISSION...</div>
-
-    <div class="admin-dashboard-grid" style="margin-top: 160px; height: calc(100vh - 180px); overflow-y: auto; padding-bottom: 100px;">
-        
-        <div class="admin-panel" style="height: auto; min-height: 180px;" onclick="window.open('https://youtube.com/@DivineLifeChristianCentre/live')">
-            <h2 class="gold-text">📹 WATCH LIVE</h2>
-            <p class="form-hint">Join the Global Broadcast</p>
-            <div class="premium-gold-btn" style="margin-top: auto; padding: 12px; font-size: 0.8rem;">ENTER STREAM</div>
-        </div>
-
-        <div class="admin-panel" style="height: auto; min-height: 180px;" onclick="openModal('prayer-modal')">
-            <h2 class="gold-text">🕊️ PRAYER LINE</h2>
-            <p class="form-hint">Direct to the Pastor's Screen</p>
-            <div class="premium-gold-btn" style="margin-top: auto; padding: 12px; font-size: 0.8rem;">SEND REQUEST</div>
-        </div>
-
-        <div class="admin-panel" style="height: auto; min-height: 180px;" onclick="openModal('booking-modal')">
-            <h2 class="gold-text">📅 APPOINTMENT</h2>
-            <p class="form-hint">Request a Private Meeting</p>
-            <div class="premium-gold-btn" style="margin-top: auto; padding: 12px; font-size: 0.8rem;">BOOK SESSION</div>
-        </div>
-
-        <div class="admin-panel" style="height: auto; min-height: 180px;" onclick="openModal('giving-modal')">
-            <h2 class="gold-text">💰 TITHES & GIVING</h2>
-            <p class="form-hint">Official DLCC Financial Seed</p>
-            <div class="premium-gold-btn" style="margin-top: auto; padding: 12px; font-size: 0.8rem;">OFFER SEED</div>
-        </div>
-
+    <div class="menu-trigger" onclick="toggleMenu()">
+        <div class="line"></div>
+        <div class="line"></div>
+        <div class="line"></div>
     </div>
+
+    <div class="hero-container">
+        <div id="broadcast-tag" class="live-indicator">CONNECTING TO MISSION...</div>
+        <h1 class="main-heading">Divine Life</h1>
+        <p class="church-name">CHRISTIAN CENTRE</p>
+    </div>
+
+    <nav id="side-menu" class="nav-overlay">
+        <div class="close-nav" onclick="toggleMenu()" style="position:absolute; top:40px; right:30px; font-size:2.5rem; color:#D4AF37; cursor:pointer;">&times;</div>
+        
+        <div class="nav-content">
+            <div class="menu-item btn-red" onclick="window.open('https://youtube.com/@DivineLifeChristianCentre/live')">📹 WATCH LIVE</div>
+            <div class="menu-item btn-gold" onclick="openModal('giving-modal')">💰 TITHES & GIVING</div>
+            <div class="menu-item btn-green" onclick="openModal('prayer-modal')">🕊️ PRAYER REQUEST</div>
+            <div class="menu-item btn-teal" onclick="openModal('booking-modal')">📅 APPOINTMENT</div>
+            <div class="menu-item" onclick="toggleMenu()" style="margin-top:20px; opacity:0.5; font-size:0.8rem; border:none;">CLOSE MENU</div>
+        </div>
+    </nav>
 
     <div id="prayer-modal" class="modal">
         <div class="glass-card">
@@ -61,28 +58,23 @@
     </div>
 
     <div id="booking-modal" class="modal">
-    <div class="glass-card">
-        <h2 class="gold-text">Appointment</h2>
-        <p class="form-hint">Request a Private Meeting</p>
+        <div class="glass-card">
+            <h2 class="gold-text">Appointment</h2>
+            <p class="form-hint">Request a Private Meeting</p>
+            <input type="text" id="b_name" placeholder="Full Name" class="sleek-input">
+            <select id="b_day" class="sleek-input">
+                <option value="Monday">Monday</option>
+                <option value="Tuesday">Tuesday</option>
+                <option value="Wednesday">Wednesday</option>
+                <option value="Thursday">Thursday</option>
+                <option value="Friday">Friday</option>
+            </select>
+            <input type="time" id="b_time" value="14:00" class="sleek-input">
+            <button class="premium-gold-btn" onclick="submitBooking()">REQUEST MEETING</button>
+            <div class="cancel-link" onclick="closeModals()">Back</div>
+        </div>
+    </div>
 
-        <div id="availability-grid" class="sleek-grid-container"></div>
-
-        <input type="text" id="b_name" placeholder="Full Name" class="sleek-input">
-        
-        <select id="b_day" class="sleek-input">
-            <option value="Monday">Monday</option>
-            <option value="Tuesday">Tuesday</option>
-            <option value="Wednesday">Wednesday</option>
-            <option value="Thursday">Thursday</option>
-            <option value="Friday">Friday</option>
-        </select>
-        
-        <input type="time" id="b_time" value="14:00" class="sleek-input">
-
-        <button class="premium-gold-btn" onclick="submitBooking()">REQUEST MEETING</button>
-        <div class="cancel-link" onclick="closeModals()">Back</div>
-        
-    </div> </div> ```
     <div id="giving-modal" class="modal">
         <div class="glass-card">
             <h2 class="gold-text">Giving</h2>
@@ -94,3 +86,6 @@
     <audio id="alert-sound" src="alert.mp3" preload="auto"></audio>
     <script src="church-logic.js"></script>
 </body>
+</html>
+
+
