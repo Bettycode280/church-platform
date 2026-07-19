@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 /* DIVINE LIFE CHRISTIAN CENTRE - MISSION INTERFACE MASTER STYLE */
 :root {
@@ -195,3 +196,195 @@ body {
 
 @keyframes glow { 50% { opacity: 0.5; } }
 @keyframes flash-red { 50% { opacity: 0.4; transform: scale(1.05); } }
+=======
+/* DIVINE LIFE CHRISTIAN CENTRE - MASTER STYLE SHEET */
+:root {
+    --gold: linear-gradient(135deg, #BF953F, #FCF6BA, #B38728, #FBF5B7, #AA771D);
+    --gold-solid: #D4AF37;
+}
+
+/* --- RESET & BASE --- */
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+body { 
+    font-family: 'Poppins', sans-serif; 
+    background: #020408; 
+    color: white; 
+    overflow: hidden; 
+    height: 100vh; 
+    width: 100vw;
+}
+
+/* --- CINEMATIC BACKGROUND --- */
+.main-bg {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: url('image2.png.jpg') no-repeat center center/cover; 
+    z-index: -2;
+    filter: brightness(0.4);
+}
+
+.overlay-tint {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(circle at center, transparent 0%, #020408 100%); 
+    z-index: -1;
+}
+
+/* --- BRANDING & MENU TRIGGER --- */
+.app-logo { position: fixed; top: 30px; left: 30px; width: 65px; z-index: 100; }
+
+.menu-trigger { 
+    position: fixed; top: 40px; right: 30px; 
+    cursor: pointer; z-index: 1100; padding: 10px;
+}
+
+.line { 
+    width: 28px; height: 2px; background: var(--gold-solid); 
+    margin: 6px 0; box-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
+}
+
+/* --- HERO CORE (Center Display) --- */
+.hero-container {
+    height: 100vh;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    text-align: center; position: relative; z-index: 5;
+}
+
+.main-heading {
+    font-family: 'Montserrat', sans-serif;
+    font-size: clamp(2rem, 10vw, 3.8rem);
+    font-weight: 900; text-transform: uppercase;
+    background: var(--gold); -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.church-name {
+    position: absolute; bottom: 50px; 
+    letter-spacing: 8px; font-size: 0.8rem;
+    opacity: 0.6; text-transform: uppercase;
+}
+
+/* --- LIVE INDICATOR & RED ALERT --- */
+.live-indicator {
+    position: absolute; top: 120px; left: 50%;
+    transform: translateX(-50%); width: 90%;
+    white-space: pre-line; color: #FCF6BA;
+    font-weight: 600; letter-spacing: 3px; font-size: 0.8rem;
+    text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+    animation: glow 2s infinite; z-index: 100;
+}
+
+.live-indicator.red-alert {
+    color: #ff4444 !important;
+    text-shadow: 0 0 20px #ff0000;
+    font-size: 1rem; font-weight: 900;
+    animation: flash-red 0.8s infinite;
+}
+
+/* --- UPDATED SLEEK PUBLIC NAVIGATION --- */
+.nav-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.menu-item {
+    width: 300px;
+    padding: 20px;
+    border-radius: 20px; /* Sleek rectangular curves */
+    cursor: pointer;
+    text-align: center;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    
+    /* The Transparent Gold-Plated Look */
+    background: rgba(255, 255, 255, 0.03); 
+    border: 1px solid rgba(212, 175, 55, 0.3); /* Gold tint border */
+    backdrop-filter: blur(10px);
+    transition: all 0.4s ease;
+    
+    /* Gold Text Effect */
+    color: var(--gold-solid);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.menu-item:hover {
+    background: rgba(212, 175, 55, 0.1);
+    border: 1px solid var(--gold-solid);
+    transform: translateY(-3px);
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+}
+
+/* --- UPDATED SLEEK MODALS (GLASS-CARD) --- */
+.glass-card { 
+    background: rgba(10, 10, 10, 0.7); /* Darker transparency */
+    padding: 40px 30px; 
+    border-radius: 30px; 
+    border: 1px solid rgba(212, 175, 55, 0.4); /* Stronger gold plate border */
+    backdrop-filter: blur(40px); /* Deep cinematic blur */
+    width: 90%; 
+    max-width: 420px; 
+    text-align: center;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+/* Specific Pillared Styles for the 4 Buttons */
+/* You can now use these classes in your HTML if you want unique glows */
+.btn-gold, .btn-red, .btn-green, .btn-teal {
+    /* Uniform sleek look as requested */
+    border: 1px solid rgba(212, 175, 55, 0.3); 
+    color: var(--gold-solid);
+}
+
+/* --- ADMIN DASHBOARD --- */
+.admin-dashboard-grid {
+    display: grid; grid-template-columns: 1fr; gap: 20px;
+    padding: 20px; width: 100%; margin-top: 20px;
+}
+
+@media (min-width: 850px) {
+    .admin-dashboard-grid { grid-template-columns: 1fr 1fr; }
+}
+
+.admin-panel {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(212, 175, 55, 0.1);
+    border-radius: 25px; padding: 25px; height: 65vh; 
+    display: flex; flex-direction: column; overflow: hidden;
+}
+
+.request-card {
+    background: rgba(255,255,255,0.04); border-left: 4px solid var(--gold-solid);
+    padding: 15px; border-radius: 12px; margin-bottom: 12px;
+    text-align: left; word-wrap: break-word;
+}
+
+.scroll-area { flex-grow: 1; overflow-y: auto; padding-right: 5px; }
+
+/* --- INPUTS & BUTTONS --- */
+.sleek-input { 
+    width: 100%; background: rgba(255,255,255,0.05); 
+    border: 1px solid #333; color: white; padding: 15px; 
+    border-radius: 12px; margin-bottom: 15px; outline: none; 
+}
+
+.premium-gold-btn { 
+    background: var(--gold); border: none; padding: 16px; 
+    border-radius: 12px; width: 100%; font-weight: 900; 
+    cursor: pointer; color: #121212; text-transform: uppercase;
+}
+
+.gold-text { background: var(--gold); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; font-size: 1.8rem; }
+
+/* --- ANIMATIONS --- */
+@keyframes glow {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; text-shadow: 0 0 15px var(--gold-solid); }
+}
+
+@keyframes flash-red {
+    0%, 100% { opacity: 1; transform: translateX(-50%) scale(1); }
+    50% { opacity: 0.4; transform: translateX(-50%) scale(1.05); }
+}
+>>>>>>> 6d59bf9727b4b21b894e251ede0e85ff501c9c76
