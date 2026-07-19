@@ -9,7 +9,6 @@ const firebaseConfig = {
     messagingSenderId: "369831733781",
     appId: "1:369831733781:web:a7402fd123de519d7e3c1c"
 };
-
 // Initialize Firebase
 if (!firebase.apps.length) { 
     firebase.initializeApp(firebaseConfig); 
@@ -21,7 +20,6 @@ const db = firebase.firestore();
 // ==========================================
 
 function toggleMenu() { 
-    // Checks both possible IDs from your screenshots
     const nav = document.getElementById('side-nav') || document.getElementById('side-menu');
     if (nav) {
         nav.classList.toggle('open'); 
@@ -41,65 +39,49 @@ function closeModals() {
 }
 
 // ==========================================
-// 3. MISSION CONTROL SECURITY
-// ==========================================
-
-function checkPass() {
-    const input = document.getElementById('pass-input').value;
-    // Your updated password
-    if (input === "DLCC2026") {
-        document.getElementById('login-overlay').style.display = 'none';
-        document.getElementById('admin-ui').style.display = 'block';
-        loadPrayers(); // Load the dashboard data
-        console.log("Mission Control Unlocked.");
-    } else { 
-        alert("Unauthorized Key."); 
-    }
-}
-
-// ==========================================
-// 4. LIVE SERMON BROADCAST (RED ALERT)
+// 3. LIVE SERMON BROADCAST (RED ALERT)
 // ==========================================
 const broadcastTag = document.getElementById('broadcast-tag');
 const alertSound = document.getElementById('alert-sound');
 
-if (broadcastTag) {
-    db.collection("churchSettings").doc("live_topic").onSnapshot(doc => {
-        if (doc.exists && doc.data().title && doc.data().title.trim() !== "") { 
-            const sermonTitle = doc.data().title.trim();
-            
-            // 1. Update text to uppercase
-            broadcastTag.innerText = "🚨 LIVE NOW: " + sermonTitle.toUpperCase();
-            
-            // 2. Turn on RED and FLASHING styles
-            broadcastTag.classList.add('red-alert');
-            
-            // 3. Play the Sound
-            if (alertSound) {
-                alertSound.play().catch(e => console.log("Sound blocked by browser until user clicks."));
+// Runs automatically on page load now
+function startSermonListener() {
+    if (broadcastTag) {
+        db.collection("churchSettings").doc("live_topic").onSnapshot(doc => {
+            if (doc.exists && doc.data().title && doc.data().title.trim() !== "") { 
+                const sermonTitle = doc.data().title.trim();
+                
+                broadcastTag.innerText = "🚨 LIVE NOW: " + sermonTitle.toUpperCase();
+                broadcastTag.classList.add('red-alert');
+                
+                if (alertSound) {
+                    alertSound.play().catch(e => console.log("Sound blocked by browser until user clicks."));
+                }
+            } else {
+                broadcastTag.innerText = "CONNECTING TO MISSION...";
+                broadcastTag.classList.remove('red-alert');
+                
+                if (alertSound) {
+                    alertSound.pause();
+                    alertSound.currentTime = 0;
+                }
             }
-        } else {
-            // 4. RESET to Normal
-            broadcastTag.innerText = "CONNECTING TO MISSION...";
-            broadcastTag.classList.remove('red-alert'); // Kills the blinking
-            
-            if (alertSound) {
-                alertSound.pause();
-                alertSound.currentTime = 0;
-            }
-        }
-    });
+        }, error => {
+            console.error("Database stream error: Check Firebase Firestore rule access.", error);
+        });
+    }
 }
 
 // ==========================================
-// 5. DATA SUBMISSION & DASHBOARD
+// 4. DATA SUBMISSION & DASHBOARD
 // ==========================================
 
 async function updateSermon() {
-    const topic = document.getElementById('sermon-input').value;
+    const topicInput = document.getElementById('sermon-input');
+    if (!topicInput) return;
     
-    // This allows an empty topic to be sent, which stops the Red Alert
-    const titleToSend = topic ? topic : ""; 
+    const topic = topicInput.value;
+    const titleToSend = topic ? topic.trim() : ""; 
 
     try {
         await db.collection("churchSettings").doc("live_topic").set({ 
@@ -108,15 +90,13 @@ async function updateSermon() {
         });
         
         if (titleToSend === "") {
-            // This confirms the "End Broadcast" worked
             alert("Broadcast Ended. All congregant screens reset.");
         } else {
-            // This confirms a new "Live" topic was sent
-            alert("Update Sent! All 1,500 phones updated.");
+            alert("Update Sent! All screens updated.");
         }
     } catch (error) {
         console.error("Error updating sermon: ", error);
-        alert("Mission Update Failed. Check Connection.");
+        alert("Mission Update Failed. Make sure your Firestore Rules allow public writes.");
     }
 }
 
@@ -166,6 +146,15 @@ function loadPrayers() {
                     <p>${data.text}</p>
                 </div>`;
         });
+    }, error => {
+        console.error("Prayer feed connection error: ", error);
     });
 }
+
+// ==========================================
+// 5. INITIALIZATION RUNNERS
+// ==========================================
+// Auto-start data feeds immediately upon loading the page
+loadPrayers();
+startSermonListener();
 

@@ -6,11 +6,6 @@
     <title>DLCC | Mission Control</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="style.css">
-    
-    <!-- Mobile & Browser Icons -->
-    <link rel="icon" type="image/jpeg" href="logo.jpg">
-    <link rel="apple-touch-icon" href="logo.jpg">
     
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
@@ -18,16 +13,29 @@
 <body style="overflow-y: auto;"> <div class="main-bg"></div>
     <div class="overlay-tint"></div>
 
-    <div id="login-overlay" class="modal" style="display: flex; background: rgba(0,0,0,0.95); z-index: 9999;">
-        <div class="glass-card">
-            <h2 class="gold-text">Mission Control</h2>
-            <p class="form-hint" style="color: white; opacity: 0.8;">Enter Authorized Security Key</p>
-            <input type="password" id="pass-input" placeholder="••••••••" class="sleek-input" style="text-align: center; letter-spacing: 5px;">
-            <button class="premium-gold-btn" onclick="checkPass()">UNLOCK DASHBOARD</button>
+   
+
+   <!-- ========================================== -->
+    <!-- MISSION CONTROL SECURITY LOGIN OVERLAY     -->
+    <!-- ========================================== -->
+    <div id="login-overlay" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; text-align: center;">
+        <div style="margin-bottom: 20px;">
+            <h1 class="gold-text" style="font-size: 2rem; margin-bottom: 5px;">DIVINE LIFE</h1>
+            <p style="letter-spacing: 2px; opacity: 0.6; font-size: 0.8rem;">MISSION CONTROL LOCK</p>
         </div>
+        
+        <!-- Removed "Access Key" from placeholder and name to stop Google/Windows from intercepting -->
+        <input type="text" id="pass-input" placeholder="Enter Code..." autocomplete="new-password" name="dlcc-code"
+               style="background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); padding: 12px 20px; border-radius: 5px; color: white; text-align: center; margin-bottom: 15px; font-size: 1rem; width: 250px; -webkit-text-security: disc;">
+        
+        <!-- The button that triggers checkPass() -->
+        <button onclick="checkPass()" class="premium-gold-btn" style="width: 250px; padding: 12px;">UNLOG & ENTER</button>
     </div>
 
-    <div id="admin-ui" style="display: none; padding-top: 40px;">
+    <!-- ========================================== -->
+    <!-- DASHBOARD CONTENT (Your Existing HTML)     -->
+    <!-- ========================================== -->
+    <div id="admin-ui" style="display: block; padding-top: 40px;">
         
         <div style="text-align: center; margin-bottom: 30px;">
             <h1 class="gold-text" style="font-size: 2.5rem;">MISSION CONTROL</h1>
@@ -62,40 +70,7 @@
         </div>
     </div>
 
-    <!-- 1. Firebase Core Tools (Keep these at the top) -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-
-    <!-- 2. Your Firebase Credentials (Must be inside <script> tags) -->
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyDhLq4p_W0ArYVXYHmOZbsuyyvLqWde6js",
-            authDomain: "glorywheels-507df.firebaseapp.com",
-            projectId: "glorywheels-507df",
-            storageBucket: "glorywheels-507df.firebasestorage.app",
-            messagingSenderId: "369831733781",
-            appId: "1:369831733781:web:a7402fd123de519d7e3c1c"
-        };
-
-        // Initialize Firebase connection
-        if (!firebase.apps.length) { 
-            firebase.initializeApp(firebaseConfig); 
-        }
-        var db = firebase.firestore();
-    </script>
-
-    <!-- 3. Your App Logic (MUST BE LAST) -->
+    <!-- Note: Make sure your Firebase script links (from earlier) sit right here if they aren't already! -->
     <script src="church-logic.js"></script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
