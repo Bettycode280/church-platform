@@ -9,15 +9,36 @@ const firebaseConfig = {
     messagingSenderId: "369831733781",
     appId: "1:369831733781:web:a7402fd123de519d7e3c1c"
 };
-// Initialize Firebase
-if (!firebase.apps.length) { 
-    firebase.initializeApp(firebaseConfig); 
-}
-const db = firebase.firestore();
 
 // ==========================================
 // 2. NAVIGATION & UI CONTROLS
 // ==========================================
+
+const SECRET_KEY = "DLCC2026"; 
+
+function checkPass() {
+    const passwordInput = document.getElementById('pass-input');
+    const loginOverlay = document.getElementById('login-overlay');
+    const adminUi = document.getElementById('admin-ui');
+    
+    if (!passwordInput || !loginOverlay || !adminUi) {
+        console.error("Layout target error: One or more dashboard IDs are missing from your HTML structure.");
+        return;
+    }
+
+    if (passwordInput.value === SECRET_KEY) {
+        // Force-hide the login overlay card
+        loginOverlay.style.setProperty('display', 'none', 'important');
+        loginOverlay.classList.remove('open');
+        
+        // Force-reveal the management platform interface panel
+        adminUi.style.setProperty('display', 'block', 'important');
+        console.log("Access Granted. Mission Control UI unlocked.");
+    } else {
+        alert("ACCESS DENIED: Unauthorized Security Key.");
+        passwordInput.value = ""; 
+    }
+}
 
 function toggleMenu() { 
     const nav = document.getElementById('side-nav') || document.getElementById('side-menu');
@@ -44,7 +65,6 @@ function closeModals() {
 const broadcastTag = document.getElementById('broadcast-tag');
 const alertSound = document.getElementById('alert-sound');
 
-// Runs automatically on page load now
 function startSermonListener() {
     if (broadcastTag) {
         db.collection("churchSettings").doc("live_topic").onSnapshot(doc => {
@@ -101,8 +121,12 @@ async function updateSermon() {
 }
 
 async function submitPrayer() {
-    const name = document.getElementById('p_name').value;
-    const text = document.getElementById('p_msg').value;
+    const nameEl = document.getElementById('p_name');
+    const msgEl = document.getElementById('p_msg');
+    if (!nameEl || !msgEl) return;
+
+    const name = nameEl.value.trim();
+    const text = msgEl.value.trim();
     if(!name || !text) return alert("Fill all fields.");
     
     await db.collection("churchPrayers").add({ 
@@ -112,13 +136,20 @@ async function submitPrayer() {
         time: firebase.firestore.FieldValue.serverTimestamp() 
     });
     alert("Sent to Pastor."); 
+    nameEl.value = "";
+    msgEl.value = "";
     closeModals();
 }
 
 async function submitBooking() {
-    const name = document.getElementById('b_name').value;
-    const day = document.getElementById('b_day').value;
-    const time = document.getElementById('b_time').value;
+    const nameEl = document.getElementById('b_name');
+    const dayEl = document.getElementById('b_day');
+    const timeEl = document.getElementById('b_time');
+    if (!nameEl || !dayEl || !timeEl) return;
+
+    const name = nameEl.value.trim();
+    const day = dayEl.value;
+    const time = timeEl.value;
     if(!name) return alert("Name required.");
     
     await db.collection("churchPrayers").add({ 
@@ -128,6 +159,7 @@ async function submitBooking() {
         time: firebase.firestore.FieldValue.serverTimestamp() 
     });
     alert("Request Sent."); 
+    nameEl.value = "";
     closeModals();
 }
 
@@ -142,8 +174,8 @@ function loadPrayers() {
             list.innerHTML += `
                 <div class="request-card">
                     <small style="color:#D4AF37; font-weight:bold;">${data.type}</small>
-                    <p><strong>${data.name}</strong></p>
-                    <p>${data.text}</p>
+                    <p><strong>${data.name || 'Anonymous'}</strong></p>
+                    <p>${data.text || ''}</p>
                 </div>`;
         });
     }, error => {
@@ -154,7 +186,9 @@ function loadPrayers() {
 // ==========================================
 // 5. INITIALIZATION RUNNERS
 // ==========================================
-// Auto-start data feeds immediately upon loading the page
-loadPrayers();
-startSermonListener();
-
+if (document.getElementById('prayer-list')) {
+    loadPrayers();
+}
+if (document.getElementById('broadcast-tag')) {SS
+    startSermonListener();
+}
