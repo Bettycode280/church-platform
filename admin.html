@@ -7,72 +7,74 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght=900&family=Poppins:wght=400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     
-    <!-- Firebase App and Firestore SDKs -->
+    <!-- Firebase core dependencies -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 </head>
-<body style="overflow-y: auto;"> 
+<body> 
     <div class="main-bg"></div>
     <div class="overlay-tint"></div>
+
+    <!-- MENU HAMBURGER TRIGGER (Controls the dashboard drawer drawer) -->
+    <div class="menu-trigger" onclick="toggleMenu()">
+        <div class="line"></div>
+        <div class="line"></div>
+        <div class="line"></div>
+    </div>
 
     <!-- ========================================== -->
     <!-- MISSION CONTROL SECURITY LOGIN OVERLAY     -->
     <!-- ========================================== -->
-    <div id="login-overlay" class="modal" style="display: flex; flex-direction: column; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.95); z-index: 100000; text-align: center;">
-        <div style="margin-bottom: 20px;">
-            <h1 class="gold-text" style="font-size: 2rem; margin-bottom: 5px;">DIVINE LIFE</h1>
-            <p style="letter-spacing: 2px; opacity: 0.6; font-size: 0.8rem; color: white;">MISSION CONTROL LOCK</p>
-        </div>
-        
-        <!-- Webkit-text-security stops Google from forcing password fill issues -->
-        <input type="text" id="pass-input" placeholder="Enter Code..." autocomplete="new-password" name="dlcc-code"
-               style="background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); padding: 12px 20px; border-radius: 5px; color: white; text-align: center; margin-bottom: 15px; font-size: 1rem; width: 250px; -webkit-text-security: disc;">
-        
-        <button type="button" onclick="checkPass()" class="premium-gold-btn" style="width: 250px; padding: 12px;">UNLOG &amp; ENTER</button>
-
-    <!-- ========================================== -->
-    <!-- DASHBOARD CONTENT                          -->
-    <!-- ========================================== -->
-    <div id="admin-ui" style="display: none; padding-top: 40px; position: relative; z-index: 10; max-width: 1200px; margin: 0 auto; color: white;">
-        
-        <div style="text-align: center; margin-bottom: 30px;"> 
-            <h1 class="gold-text" style="font-size: 2.5rem;">MISSION CONTROL</h1>
-            <p style="letter-spacing: 3px; opacity: 0.7;">DIVINE LIFE CHRISTIAN CENTRE</p>
-        </div>
-
-        <div class="admin-dashboard-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; padding: 0 20px;">
+    <div id="login-overlay" class="modal open">
+        <div class="glass-card">
+            <div style="margin-bottom: 20px;">
+                <h1 class="gold-text" style="font-size: 2rem;">DIVINE LIFE</h1>
+                <p style="letter-spacing: 2px; opacity: 0.6; font-size: 0.8rem; color: white;">MISSION CONTROL LOCK</p>
+            </div>
             
+            <input type="text" id="pass-input" placeholder="Enter Code..." autocomplete="new-password" name="dlcc-code" class="sleek-input" style="-webkit-text-security: disc; text-align: center;">
+            <button type="button" onclick="checkPass()" class="premium-gold-btn" style="width: 100%; margin-top: 20px;">UNLOG &amp; ENTER</button>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- THE MISSION INTERFACE SIDE DRAWER          -->
+    <!-- ========================================== -->
+    <!-- CRITICAL: Linked to your CSS .nav-overlay and structuralized wrapper properties -->
+    <div id="side-nav" class="nav-overlay">
+        <div id="admin-ui" class="admin-dashboard-grid">
+            
+            <div style="text-align: center; margin-bottom: 40px;">
+                <h1 class="main-heading" style="font-size: 2rem; -webkit-text-fill-color: initial; background: none; color: #D4AF37;">MISSION CONTROL</h1>
+                <p class="church-name">DIVINE LIFE CHRISTIAN CENTRE</p>
+            </div>
+
             <!-- Broadcast Controller Block -->
-            <div class="admin-panel" style="background: rgba(255,255,255,0.05); padding: 25px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
-                <h2 class="gold-text" style="font-size: 1.2rem; margin-bottom: 15px; color: #D4AF37;">🚨 LIVE BROADCAST</h2>
-                <p class="form-hint" style="font-size: 0.85rem; color: #aaa; margin-bottom: 15px;">Type the sermon topic to trigger the Red Alert on all phones.</p>
-                <input type="text" id="sermon-input" placeholder="Current Sermon Topic..." class="sleek-input" style="width: 100%; padding: 12px; margin-bottom: 15px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 4px;">
-                <button class="premium-gold-btn" onclick="updateSermon()" style="width: 100%; padding: 12px; background: #D4AF37; color: black; font-weight: bold; border: none; border-radius: 4px; cursor: pointer;">GO LIVE NOW</button>
-                
-                <button class="premium-gold-btn" onclick="document.getElementById('sermon-input').value=''; updateSermon();" 
-                        style="margin-top: 10px; background: #333; color: white; width: 100%; padding: 12px; font-weight: bold; border: none; border-radius: 4px; cursor: pointer;">
+            <div class="admin-panel">
+                <span class="gold-text">🚨 LIVE BROADCAST</span>
+                <p class="form-hint">Type the sermon topic to trigger the Red Alert on all phones.</p>
+                <input type="text" id="sermon-input" placeholder="Current Sermon Topic..." class="sleek-input">
+                <button class="premium-gold-btn" onclick="updateSermon()" style="width: 100%;">GO LIVE NOW</button>
+                <button class="premium-gold-btn" onclick="document.getElementById('sermon-input').value=''; updateSermon();" style="margin-top: 10px; background: #333; color: white; width: 100%;">
                     END BROADCAST (RESET)
                 </button>
             </div>
 
             <!-- Prayer Feed Block -->
-            <div class="admin-panel" style="background: rgba(255,255,255,0.05); padding: 25px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
-                <h2 class="gold-text" style="font-size: 1.2rem; color: #D4AF37; margin-bottom: 15px;">🕊️ LIVE FEED</h2>
-                <div class="scroll-area" id="prayer-list" style="max-height: 400px; overflow-y: auto;">
-                    <p style="opacity: 0.3; margin-top: 20px; text-align: center;">Waiting for mission data...</p>
+            <div class="admin-panel">
+                <span class="gold-text">🕊️ LIVE FEED</span>
+                <div class="scroll-area" id="prayer-list" style="max-height: 300px; overflow-y: auto; margin-top: 15px;">
+                    <p style="opacity: 0.3; text-align: center; font-size: 0.9rem;">Waiting for mission data...</p>
                 </div>
             </div>
 
-        </div>
-
-        <!-- Lock Control Interface Footer -->
-        <div style="text-align: center; margin-top: 40px; padding-bottom: 40px;">
-            <button onclick="location.reload()" style="background:none; border:none; color:rgba(255,255,255,0.3); cursor:pointer; font-size: 1rem;">Logout & Lock</button>
+            <!-- Lock Control Interface Footer -->
+            <div style="text-align: center; margin-top: 30px;">
+                <button onclick="location.reload()" style="background:none; border:none; color:rgba(255,255,255,0.3); cursor:pointer; font-size: 1rem;">Logout &amp; Lock</button>
+            </div>
         </div>
     </div>
 
-    <!-- Linked to your production javascript file with version validation -->
-    <!-- Correctly linked to the right file name -->
-    <script src="church-logic.js?v=3.0"></script>
+    <script src="church-logic.js?v=4.0"></script>
 </body>
 </html>
