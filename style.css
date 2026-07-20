@@ -266,8 +266,9 @@ body {
 
 .live-indicator.red-alert {
     color: #ff4444 !important;
+    border-color: rgba(255, 68, 68, 0.4) !important;
     text-shadow: 0 0 20px #ff0000;
-    font-size: 1rem; 
+    font-size: 0.9rem; 
     font-weight: 900;
     animation: flash-red 0.8s infinite;
 }
@@ -278,6 +279,12 @@ body {
 }
 
 @keyframes flash-red {
-    0%, 100% { opacity: 1; transform: translateX(-50%) scale(1); }
-    50% { opacity: 0.4; transform: translateX(-50%) scale(1.05); }
+    0%, 100% { 
+        opacity: 1; 
+        transform: translateX(-50%) scale(1); 
+    }
+    50% { 
+        opacity: 0.4; 
+        transform: translateX(-50%) scale(1.05); 
+    }
 }
