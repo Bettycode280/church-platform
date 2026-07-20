@@ -9,7 +9,6 @@ const firebaseConfig = {
     messagingSenderId: "369831733781",
     appId: "1:369831733781:web:a7402fd123de519d7e3c1c"
 };
-
 // ==========================================
 // 2. NAVIGATION & UI CONTROLS
 // ==========================================
@@ -24,9 +23,15 @@ function checkPass() {
         return;
     }
 
-    // Clean up input: convert to UPPERCASE and remove any accidental spaces
-    const userEnteredKey = passwordInput.value.trim().toUpperCase();
+    // Force pull value directly and sanitize immediately
+    const rawValue = passwordInput.value || "";
+    const userEnteredKey = rawValue.replace(/\s+/g, '').toUpperCase(); 
 
+    // Diagnostic console logs — look at your browser F12 inspection tool to view these
+    console.log("Raw text received from input:", rawValue);
+    console.log("Cleaned text comparing against target:", userEnteredKey);
+
+    // Hardcoded direct validation check
     if (userEnteredKey === "DLCC2026") {
         // Force-hide the login overlay card
         loginOverlay.style.setProperty('display', 'none', 'important');
@@ -38,12 +43,6 @@ function checkPass() {
     } else {
         alert("ACCESS DENIED: Unauthorized Security Key.");
         passwordInput.value = ""; 
-    }
-}
-function toggleMenu() { 
-    const nav = document.getElementById('side-nav') || document.getElementById('side-menu');
-    if (nav) {
-        nav.classList.toggle('open'); 
     }
 }
 
@@ -189,6 +188,6 @@ function loadPrayers() {
 if (document.getElementById('prayer-list')) {
     loadPrayers();
 }
-if (document.getElementById('broadcast-tag')) {SS
+if (document.getElementById('broadcast-tag')) {
     startSermonListener();
 }
