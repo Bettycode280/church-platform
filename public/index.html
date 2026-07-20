@@ -6,36 +6,34 @@
     <title>DLCC | Official App</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
     
+    <link rel="stylesheet" href="style.css">
     <!-- Mobile Home Screen Icons -->
     <link rel="icon" type="image/jpeg" href="logo.jpg">
     <link rel="apple-touch-icon" href="logo.jpg">
-    
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 </head>
+
 <body>
     <div class="main-bg"></div>
     <div class="overlay-tint"></div>
 
+    
     <img src="logo.jpg" class="app-logo" alt="DLCC Logo">
 
-    <!-- Burger Menu Trigger Icon -->
     <div class="menu-trigger" onclick="toggleMenu()">
         <div class="line"></div>
         <div class="line"></div>
         <div class="line"></div>
     </div>
 
-    <!-- Main Hero Branding Panel -->
     <div class="hero-container">
         <div id="broadcast-tag" class="live-indicator">CONNECTING TO MISSION...</div>
         <h1 class="main-heading">Divine Life</h1>
         <p class="church-name">CHRISTIAN CENTRE</p>
     </div>
 
-    <!-- FIXED: Complete Navigation Slide-out Container -->
     <nav id="side-menu" class="nav-overlay">
         <div class="close-nav" onclick="toggleMenu()" style="position:absolute; top:40px; right:30px; font-size:2.5rem; color:#D4AF37; cursor:pointer;">&times;</div>
         
@@ -48,7 +46,6 @@
         </div>
     </nav>
 
-    <!-- FIXED: Prayer Request Modal with correct closing tag -->
     <div id="prayer-modal" class="modal">
         <div class="glass-card">
             <h2 class="gold-text">Prayer Line</h2>
@@ -60,7 +57,6 @@
         </div>
     </div>
 
-    <!-- Appointment Scheduling Modal -->
     <div id="booking-modal" class="modal">
         <div class="glass-card">
             <h2 class="gold-text">Appointment</h2>
@@ -79,7 +75,6 @@
         </div>
     </div>
 
-    <!-- Tithes & Giving Informational Modal -->
     <div id="giving-modal" class="modal">
         <div class="glass-card">
             <h2 class="gold-text">Giving</h2>
@@ -89,8 +84,9 @@
     </div>
 
     <audio id="alert-sound" src="alert.mp3" preload="auto"></audio>
-
-    </script>
     <script src="church-logic.js"></script>
 </body>
 </html>
+
+
+
