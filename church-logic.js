@@ -13,12 +13,10 @@ const firebaseConfig = {
         safeDb = firebase.firestore();
         console.log("Firebase Engine successfully initialized.");
     }
- 
     console.error("Firebase critical initialization failure, running offline mode:", e);
 
-
 // ==========================================
-// 2. NAVIGATION & UI CONTROLS (ISOLATED & SAFE)
+// 2. NAVIGATION & UI CONTROLS
 // ==========================================
 function checkPass() {
     console.log("UNLOG & ENTER button clicked.");
@@ -29,27 +27,42 @@ function checkPass() {
     
     if (!passwordInput || !loginOverlay || !adminUi) {
         console.error("UI Layout Error: Dashboard containers are missing from the DOM.");
-        alert("System Error: Layout wrapper targets not found.");
         return;
     }
 
     const rawValue = passwordInput.value || "";
-    // Strips out all spaces and forces characters to uppercase
     const userEnteredKey = rawValue.replace(/\s+/g, '').toUpperCase(); 
 
-    console.log("Processed input key matching check:", userEnteredKey);
-
     if (userEnteredKey === "DLCC2026") {
-        // Remove overlay panel immediately using direct styles
         loginOverlay.style.display = 'none';
-        
-        // Expose management engine console view grid
         adminUi.style.display = 'block';
         console.log("Access Granted. Mission Control UI unlocked.");
     } else {
         alert("ACCESS DENIED: Unauthorized Security Key.");
         passwordInput.value = ""; 
     }
+}
+
+// Fixed Navigation Menu Actions
+function toggleMenu() { 
+    const nav = document.getElementById('side-nav') || document.getElementById('side-menu');
+    if (nav) {
+        nav.classList.toggle('open'); 
+    } else {
+        console.error("Navigation menu element ('side-nav' or 'side-menu') not found in HTML.");
+    }
+}
+
+function openModal(id) { 
+    const nav = document.getElementById('side-nav') || document.getElementById('side-menu');
+    if (nav) nav.classList.remove('open'); 
+    
+    const modal = document.getElementById(id);
+    if (modal) modal.classList.add('open'); 
+}
+
+function closeModals() { 
+    document.querySelectorAll('.modal').forEach(m => m.classList.remove('open')); 
 }
 
 // ==========================================
@@ -79,7 +92,7 @@ async function updateSermon() {
         }
     } catch (error) {
         console.error("Error updating sermon: ", error);
-        alert("Firestore transaction failed. Check security rules permissions.");
+        alert("Firestore transaction failed.");
     }
 }
 
@@ -88,10 +101,7 @@ async function updateSermon() {
 // ==========================================
 function loadPrayers() {
     const list = document.getElementById('prayer-list');
-    if (!list || !safeDb) {
-        console.warn("Prayer list container or database context missing. Skipping feed hook.");
-        return;
-    }
+    if (!list || !safeDb) return;
 
     try {
         safeDb.collection("churchPrayers").orderBy("time", "desc").onSnapshot(snap => {
