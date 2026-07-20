@@ -1,63 +1,83 @@
-/* DIVINE LIFE CHRISTIAN CENTRE - MISSION INTERFACE MASTER STYLE */
+/* ==========================================================================
+   1. CORE ARCHITECTURE & CSS VARIABLES
+   ========================================================================== */
 :root {
-    /* Keep the gold for headings and borders */
-    --gold: linear-gradient(135deg, #BF953F, #FCF6BA, #B38728, #FBF5B7, #AA771D);
+    --gold: linear-gradient(135deg, #D4AF37 0%, #F3E5AB 50%, #AA7C11 100%);
     --gold-solid: #D4AF37;
+    --bg-dark: #0A0A0E;
+    --text-light: #FFFFFF;
+    --glass-bg: rgba(255, 255, 255, 0.06);
+    --glass-border: rgba(255, 255, 255, 0.1);
     
-    /* Add the blue for the specific panel text */
-    --velvet-blue: #0A1128; 
-    
-    --glass-bg: rgba(255, 255, 255, 0.04);
+    /* Action Button Accents */
+    --accent-red: #D32F2F;
+    --accent-green: #2E7D32;
+    --accent-teal: #00695C;
 }
 
-/* --- RESET & BASE --- */
-* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
-body { 
-    font-family: 'Poppins', sans-serif; 
-    background: #020408; 
-    color: rgb(255, 255, 255); 
-    overflow: hidden; 
-    height: 100vh; 
-    width: 100vw;
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
 }
 
-/* --- CINEMATIC BACKGROUND --- */
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-light);
+    font-family: 'Poppins', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* ==========================================================================
+   2. IMMERSIVE COMPOSITED BACKGROUNDS
+   ========================================================================== */
 .main-bg {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: url('image2.png.jpg') no-repeat center center/cover; 
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: url('logo.jpg') no-repeat center center;
+    background-size: cover;
+    filter: blur(15px) scale(1.05);
     z-index: -2;
 }
 
 .overlay-tint {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: radial-gradient(circle at center, transparent 0%, #020408 100%); 
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(180deg, rgba(10, 10, 14, 0.85) 0%, rgba(5, 5, 8, 0.98) 100%);
     z-index: -1;
 }
 
-/* --- BRANDING --- */
-.app-logo { 
-    position: fixed; top: 25px; left: 20px; 
-    width: 95px; z-index: 100; 
-    filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));
+/* ==========================================================================
+   3. PUBLIC APPLICATION HEADER & BRANDING
+   ========================================================================== */
+.app-logo {
+    position: absolute;
+    top: 25px;
+    left: 25px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 1.5px solid var(--gold-solid);
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.25);
+    z-index: 5;
 }
 
-.menu-trigger { 
-    position: fixed; top: 40px; right: 30px; 
-    cursor: pointer; z-index: 5000; padding: 10px;
-}
-
-.line { 
-    width: 32px; height: 3px; background: var(--gold-solid); 
-    margin: 6px 0; box-shadow: 0 0 12px rgba(212, 175, 55, 0.8);
-}
-
-/* --- HERO CORE --- */
 .hero-container {
-    height: 100vh;
-    display: flex; flex-direction: column;
-    justify-content: center; align-items: center;
-    text-align: center; position: relative; z-index: 5;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 90vh;
+    padding: 0 20px;
+    text-align: center;
 }
 
 .main-heading {
@@ -67,138 +87,295 @@ body {
     text-transform: uppercase;
     background: var(--gold); 
     -webkit-background-clip: text;
-    background-clip: text; /* Standard property for cross-browser safety */
     -webkit-text-fill-color: transparent;
-} /* <-- THIS CLOSING BRACE FIXES THE HOLE IN THE STYLESHEET */
-.church-name {
-    letter-spacing: 8px; font-size: 0.8rem;
-    opacity: 0.6; text-transform: uppercase; margin-top: 10px;
-}
-
-/* --- THE MISSION INTERFACE (SIDE MENU) --- */
-.nav-overlay {
-    position: fixed; 
-    top: 0; 
-    left: 0; 
-    width: 100%; 
-    height: 100%;
-    background: rgba(0,0,0,0.96);
-    display: block; 
-    overflow-y: auto; 
-    transform: translateX(100%); 
-    transition: 0.5s cubic-bezier(0.77, 0, 0.175, 1);
-    z-index: 1000;
-}
-
-/* CRITICAL: This class pulls the navigation window on-screen when toggled by JavaScript */
-.nav-overlay.open { 
-    transform: translateX(0); 
-}
-
-.admin-dashboard-grid {
-    width: 100%;
-    max-width: 500px;
-    margin: 0 auto;
-    padding: 100px 20px;
-}
-
-/* --- THE MISSION CONTROL CARDS (IMAGE MATCHED) --- */
-.admin-panel {
-    background: var(--glass-bg) !important;
-    backdrop-filter: blur(15px) saturate(160%) !important;
-    -webkit-backdrop-filter: blur(15px) saturate(160%);
-    
-    /* THE GOLD PLATED EDGE */
-    border-left: 5px solid var(--gold-solid) !important;
-    border-top: 1px solid rgba(212, 175, 55, 0.15);
-    border-right: 1px solid rgba(212, 175, 55, 0.15);
-    border-bottom: 1px solid rgba(212, 175, 55, 0.15);
-    
-    border-radius: 4px 20px 20px 4px;
-    padding: 22px;
-    margin-bottom: 18px;
-    text-align: left; /* Matched to image feed */
-    transition: 0.3s;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-}
-
-.admin-panel {
-    background: rgba(255, 255, 255, 0.08) !important; /* Slightly lighter glass */
-    backdrop-filter: blur(15px) saturate(160%) !important;
-    /* ... rest of your border settings ... */
-}
-
-/* --- CARD INTERNALS --- */
-.gold-text {
-    color: var(--gold-solid);
-    font-size: 0.8rem;
-    font-weight: 900;
     letter-spacing: 2px;
+    line-height: 1.1;
+}
+
+.church-name {
+    font-family: 'Poppins', sans-serif;
+    font-size: clamp(0.9rem, 4vw, 1.2rem);
+    font-weight: 600;
+    letter-spacing: 6px;
+    color: var(--text-light);
+    opacity: 0.9;
+    margin-top: 5px;
     text-transform: uppercase;
-    margin-bottom: 6px;
-    display: block;
 }
 
-.form-hint { 
-    color: var(--velvet-blue); /* Velvet Blue text */
-    font-size: 1.4rem;        /* Increased font size */
-    font-weight: 800;        /* Extra bold for clarity */
-    opacity: 1; 
-    margin: 0;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.3); /* Adds depth to the blue */
-}
-
-/* --- MISSION BUTTONS --- */
-.premium-gold-btn {
-    background: var(--gold);
-    border: none;
-    padding: 10px 20px;
-    border-radius: 6px;
-    width: auto;
-    display: inline-block;
-    font-weight: 900;
-    color: #121212;
-    text-transform: uppercase;
-    font-size: 0.7rem;
-    cursor: pointer;
-    margin-top: 15px;
-}
-
-/* --- MODAL SYSTEM --- */
-.modal { 
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-    background: rgba(0,0,0,0.85); display: none;
-    justify-content: center; align-items: center; z-index: 9000; 
-}
-
-.modal.open { display: flex; }
-
-.glass-card { 
-    background: rgba(15, 15, 15, 0.95); padding: 35px; 
-    border-radius: 30px; border: 1px solid rgba(212, 175, 55, 0.3); 
-    backdrop-filter: blur(20px); width: 92%; max-width: 400px; text-align: center; 
-}
-
-.sleek-input {
-    width: 100%; background: rgba(255,255,255,0.05);
-    border: 1px solid #333; color: white; padding: 12px;
-    border-radius: 10px; margin-top: 15px; outline: none;
-}
-
-.cancel-link { margin-top: 15px; opacity: 0.4; cursor: pointer; font-size: 0.8rem; }
-
-/* --- LIVE INDICATOR --- */
+/* ==========================================================================
+   4. CRITICAL INTERACTIVE BROADCAST TAG (RED ALERT)
+   ========================================================================== */
 .live-indicator {
-    position: absolute; top: 120px; 
-    font-weight: 600; letter-spacing: 3px; font-size: 0.75rem;
-    color: #FCF6BA; animation: glow 2s infinite;
+    padding: 8px 18px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 1.5px;
+    color: #FFF;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 50px;
+    margin-bottom: 25px;
+    text-transform: uppercase;
+    transition: all 0.4s ease-in-out;
 }
 
 .live-indicator.red-alert {
-    color: #ff4444 !important;
-    text-shadow: 0 0 20px #ff0000;
-    font-weight: 900; animation: flash-red 0.8s infinite;
+    background: #FF0000;
+    border-color: #FF3333;
+    box-shadow: 0 0 25px rgba(255, 0, 0, 0.6);
+    animation: broadcastPulse 1.5s infinite alternate;
 }
 
-@keyframes glow { 50% { opacity: 0.5; } }
-@keyframes flash-red { 50% { opacity: 0.4; transform: scale(1.05); } }
+@keyframes broadcastPulse {
+    0% { transform: scale(1); box-shadow: 0 0 15px rgba(255, 0, 0, 0.4); }
+    100% { transform: scale(1.04); box-shadow: 0 0 30px rgba(255, 0, 0, 0.7); }
+}
+
+/* ==========================================================================
+   5. NAVIGATION LAYER (SLIDE OUT OVERLAY)
+   ========================================================================== */
+.menu-trigger {
+    position: absolute;
+    top: 35px;
+    right: 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    cursor: pointer;
+    z-index: 100;
+    padding: 5px;
+}
+
+.menu-trigger .line {
+    width: 28px;
+    height: 3px;
+    background: var(--gold-solid);
+    border-radius: 2px;
+    transition: all 0.3s ease;
+}
+
+.nav-overlay {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(10, 10, 14, 0.96);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    z-index: 90;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nav-overlay.open {
+    right: 0;
+}
+
+.nav-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 85%;
+    max-width: 360px;
+}
+
+.menu-item {
+    padding: 18px;
+    text-align: center;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: 1px;
+    border-radius: 12px;
+    color: #FFF;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.menu-item:active {
+    transform: scale(0.98);
+}
+
+.btn-red { background: var(--accent-red); border-color: rgba(255,255,255,0.15); }
+.btn-gold { background: linear-gradient(135deg, #AA7C11 0%, #D4AF37 100%); color: #000; }
+.btn-green { background: var(--accent-green); border-color: rgba(255,255,255,0.15); }
+.btn-teal { background: var(--accent-teal); border-color: rgba(255,255,255,0.15); }
+
+/* ==========================================================================
+   6. GLASSMORPHISM MODAL DESIGN COMPONENT
+   ========================================================================== */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(5, 5, 8, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 120;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    padding: 20px;
+}
+
+.modal.open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.glass-card {
+    width: 100%;
+    max-width: 440px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+    position: relative;
+}
+
+.gold-text {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    color: var(--gold-solid);
+    margin-bottom: 4px;
+}
+
+.form-hint {
+    font-size: 0.85rem;
+    opacity: 0.6;
+    margin-bottom: 20px;
+}
+
+/* ==========================================================================
+   7. FORM UTILITIES & PREMIUM INTERFACE ELEMENTS
+   ========================================================================== */
+.sleek-input {
+    width: 100%;
+    padding: 14px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    color: var(--text-light);
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.95rem;
+    margin-bottom: 15px;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+.sleek-input:focus {
+    border-color: var(--gold-solid);
+}
+
+select.sleek-input option {
+    background: #121216;
+    color: #FFF;
+}
+
+textarea.sleek-input {
+    resize: none;
+}
+
+.premium-gold-btn {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 8px;
+    background: var(--gold);
+    color: #000;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: 1px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
+    margin-top: 5px;
+}
+
+.cancel-link {
+    text-align: center;
+    margin-top: 15px;
+    font-size: 0.85rem;
+    opacity: 0.5;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: opacity 0.2s ease;
+}
+
+.cancel-link:hover {
+    opacity: 0.9;
+}
+
+/* ==========================================================================
+   8. ADMINISTRATIVE LEDGER WORKSPACE LAYOUTS
+   ========================================================================== */
+.admin-workspace {
+    animation: fadeInPage 0.5s ease-out;
+}
+
+.request-card {
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-left: 4px solid var(--gold-solid);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 12px;
+    animation: slideInCard 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+}
+
+.request-card p {
+    margin-top: 4px;
+    font-size: 0.95rem;
+    line-height: 1.4;
+}
+
+/* Custom Webkit Scrollbars for Real-time Feeds */
+.feed-container::-webkit-scrollbar {
+    width: 6px;
+}
+.feed-container::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+}
+.feed-container::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+}
+
+@keyframes fadeInPage {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideInCard {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ==========================================================================
+   9. DEVICE RESPONSIVENESS MEDIA OVERRIDES
+   ========================================================================== */
+@media (min-width: 768px) {
+    .menu-trigger { top: 45px; right: 40px; }
+    .app-logo { top: 35px; left: 40px; width: 65px; height: 65px; }
+    
+    .nav-overlay {
+        width: 400px;
+        box-shadow: -10px 0 40px rgba(0,0,0,0.6);
+    }
+}

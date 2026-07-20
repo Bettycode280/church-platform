@@ -3,72 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DLCC | Mission Control</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=1.1">
+    <title>DLCC | Mission Control (Admin)</title>
     
+    <!-- Design Typography Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <!-- Central Application Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Mobile Home Screen Icons -->
+    <link rel="icon" type="image/jpeg" href="logo.jpg">
+    <link rel="apple-touch-icon" href="logo.jpg">
+    
+    <!-- Legacy Firebase SDK App Core & Firestore Database Components -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 </head>
-<body style="overflow-y: auto;"> <div class="main-bg"></div>
+
+<body class="admin-body" style="margin: 0; padding: 0; min-height: 100vh; font-family: 'Poppins', sans-serif; color: #fff;">
+    
+    <!-- Shared Visual Background Elements Matching The Index Page -->
+    <div class="main-bg"></div>
     <div class="overlay-tint"></div>
 
-   <!-- ========================================== -->
-    <!-- MISSION CONTROL SECURITY LOGIN OVERLAY     -->
-    <!-- ========================================== -->
-    <div id="login-overlay" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; text-align: center;">
-        <div style="margin-bottom: 20px;">
-            <h1 class="gold-text" style="font-size: 2rem; margin-bottom: 5px;">DIVINE LIFE</h1>
-            <p style="letter-spacing: 2px; opacity: 0.6; font-size: 0.8rem;">MISSION CONTROL LOCK</p>
-        </div>
+    <!-- Main Workspace Container -->
+    <div class="admin-workspace" style="position: relative; z-index: 10; max-width: 900px; margin: 0 auto; padding: 40px 20px;">
         
-        <!-- Removed "Access Key" from placeholder and name to stop Google/Windows from intercepting -->
-        <input type="text" id="pass-input" placeholder="Enter Code..." autocomplete="new-password" name="dlcc-code"
-               style="background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); padding: 12px 20px; border-radius: 5px; color: white; text-align: center; margin-bottom: 15px; font-size: 1rem; width: 250px; -webkit-text-security: disc;">
-        
-        <!-- The button that triggers checkPass() -->
-        <button onclick="checkPass()" class="premium-gold-btn" style="width: 250px; padding: 12px;">UNLOG & ENTER</button>
-    </div>
+        <!-- Dashboard Header Panel -->
+        <header style="text-align: center; margin-bottom: 40px;">
+            <img src="logo.jpg" alt="DLCC Logo" style="width: 80px; height: 80px; border-radius: 50%; border: 2px solid #D4AF37; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);">
+            <h1 class="gold-text" style="font-family: 'Montserrat', sans-serif; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; margin: 0 0 5px 0; color: #D4AF37;">DLCC Mission Control</h1>
+            <p style="margin: 0; font-weight: 300; opacity: 0.8; font-size: 0.95rem;">Administrative Management Portal</p>
+        </header>
 
-    <!-- ========================================== -->
-    <!-- DASHBOARD CONTENT (Your Existing HTML)     -->
-    <!-- ========================================== -->
-    <div id="admin-ui" style="display: block; padding-top: 40px;">
-        
-        <div style="text-align: center; margin-bottom: 30px;">
-            <h1 class="gold-text" style="font-size: 2.5rem;">MISSION CONTROL</h1>
-            <p style="letter-spacing: 3px; opacity: 0.7;">DIVINE LIFE CHRISTIAN CENTRE</p>
-        </div>
-
-        <div class="admin-dashboard-grid">
+        <!-- Section 1: Live Broadcast Controls (Triggers Red Alert State) -->
+        <section class="glass-card" style="margin-bottom: 35px; padding: 30px; border-radius: 16px; background: rgba(255, 255, 255, 0.06); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);">
+            <h2 style="font-family: 'Montserrat', sans-serif; font-weight: 700; color: #D4AF37; margin-top: 0; margin-bottom: 10px; font-size: 1.4rem; display: flex; align-items: center; gap: 10px;">
+                📹 Live Broadcast Control
+            </h2>
+            <p class="form-hint" style="font-size: 0.85rem; opacity: 0.7; margin-bottom: 20px; line-height: 1.5;">
+                Enter the current sermon theme below to display the <strong>🚨 LIVE NOW</strong> flash bar and trigger an audible chime across all active congregant devices in real time. Clearing the input field and saving will safely shut down the alert sequence.
+            </p>
             
-            <div class="admin-panel">
-                <h2 class="gold-text" style="font-size: 1.2rem; margin-bottom: 15px;">🚨 LIVE BROADCAST</h2>
-                <p class="form-hint">Type the sermon topic to trigger the Red Alert on all phones.</p>
-                <input type="text" id="sermon-input" placeholder="Current Sermon Topic..." class="sleek-input">
-                <button class="premium-gold-btn" onclick="updateSermon()">GO LIVE NOW</button>
-                
-                <button class="premium-gold-btn" onclick="document.getElementById('sermon-input').value=''; updateSermon();" 
-                        style="margin-top: 10px; background: #333; color: white;">
-                    END BROADCAST (RESET)
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                <input type="text" id="sermon-input" placeholder="Type sermon topic or title here..." class="sleek-input" style="width: 100%; box-sizing: border-box; padding: 14px 20px; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 8px; color: #fff; font-size: 1rem; outline: none; transition: all 0.3s ease;">
+                <button class="premium-gold-btn" onclick="updateSermon()" style="width: 100%; padding: 14px; border: none; border-radius: 8px; background: linear-gradient(135deg, #D4AF37 0%, #AA7C11 100%); color: #000; font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 0.95rem; letter-spacing: 1px; cursor: pointer; transform: translateZ(0); transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);">
+                    PUBLISH STATUS TO SCREENS
                 </button>
             </div>
+        </section>
 
-            <div class="admin-panel">
-                <h2 class="gold-text" style="font-size: 1.2rem;">🕊️ LIVE FEED</h2>
-                <div class="scroll-area" id="prayer-list">
-                    <p style="opacity: 0.3; margin-top: 20px;">Waiting for mission data...</p>
-                </div>
+        <!-- Section 2: Real-time Interactive Request Ledger -->
+        <section class="glass-card" style="padding: 30px; border-radius: 16px; background: rgba(255, 255, 255, 0.06); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);">
+            <h2 style="font-family: 'Montserrat', sans-serif; font-weight: 700; color: #D4AF37; margin-top: 0; margin-bottom: 10px; font-size: 1.4rem;">
+                🕊️ Incoming Prayers &amp; Appointments
+            </h2>
+            <p class="form-hint" style="font-size: 0.85rem; opacity: 0.7; margin-bottom: 20px;">
+                Live database synchronization stream active. Submissions appear instantly below as they are sent from the field.
+            </p>
+            
+            <!-- Target container component parsed by the logic script file -->
+            <div id="prayer-list" class="feed-container" style="display: flex; flex-direction: column; gap: 15px; max-height: 550px; overflow-y: auto; padding-right: 8px; margin-top: 15px;">
+                <!-- Fallback content display while waiting for the database connection layer -->
+                <p style="text-align: center; opacity: 0.5; font-style: italic; padding: 20px; border: 1px dashed rgba(255,255,255,0.1); border-radius: 8px;">
+                    Listening for database connections...
+                </p>
             </div>
+        </section>
 
-        </div>
-
-        <div style="text-align: center; margin-top: 40px; padding-bottom: 40px;">
-            <button onclick="location.reload()" style="background:none; border:none; color:rgba(255,255,255,0.3); cursor:pointer;">Logout & Lock</button>
-        </div>
+        <!-- Navigation Utilities Menu Footer -->
+        <footer style="margin-top: 30px; text-align: center;">
+            <a href="index.html" style="color: #D4AF37; text-decoration: none; font-size: 0.9rem; font-weight: 600; opacity: 0.7; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">
+                ← Return to Public Church App
+            </a>
+        </footer>
     </div>
 
-    <!-- Note: Make sure your Firebase script links (from earlier) sit right here if they aren't already! -->
+    <!-- CORE CONFIGURATION ENGINE BLOCK -->
+    </script>
+    const firebaseConfig = {
+    apiKey: "AIzaSyDhLq4p_W0ArYVXYHmOZbsuyyvLqWde6js",
+    authDomain: "glorywheels-507df.firebaseapp.com",
+    projectId: "glorywheels-507df",
+    storageBucket: "glorywheels-507df.firebasestorage.app",
+    messagingSenderId: "369831733781",
+    appId: "1:369831733781:web:a7402fd123de519d7e3c1c"
+};
+// Initialize Firebase
+if (!firebase.apps.length) { 
+    firebase.initializeApp(firebaseConfig); 
+}
+const db = firebase.firestore();
+    
+    <!-- Core External Event Architecture Driver -->
     <script src="church-logic.js"></script>
 </body>
 </html>
