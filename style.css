@@ -41,15 +41,40 @@ body {
     width: 95px; z-index: 100; 
     filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));
 }
-
 .menu-trigger { 
-    position: fixed; top: 40px; right: 30px; 
-    cursor: pointer; z-index: 5000; padding: 10px;
+    position: fixed; 
+    top: 40px; 
+    right: 30px; 
+    cursor: pointer; 
+    z-index: 5000; 
+    padding: 10px;
+    display: block; /* Guarantees layout boundaries on desktop */
 }
 
-.line { 
-    width: 32px; height: 3px; background: var(--gold-solid); 
-    margin: 6px 0; box-shadow: 0 0 12px rgba(212, 175, 55, 0.8);
+.menu-trigger .line {
+    pointer-events: none;
+    background-color: #D4AF37; /* Ensures your lines are colored if they weren't showing */
+    height: 3px;
+    width: 30px;
+    margin: 5px 0;
+}
+/* When the menu is closed, make sure it ignores mouse clicks entirely */
+#side-menu {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 300px; /* or your menu width */
+    height: 100%;
+    z-index: 6000; /* Higher than the trigger when open */
+    transform: translateX(100%); /* Slides it completely off-screen */
+    transition: transform 0.3s ease;
+    pointer-events: none; /* Crucial: stops the invisible layer from blocking clicks on desktop */
+}
+
+/* When the menu has the .open class, bring it back onto the screen */
+#side-menu.open {
+    transform: translateX(0);
+    pointer-events: auto; /* Restores clicking so you can tap menu items */
 }
 
 /* --- HERO CORE --- */
