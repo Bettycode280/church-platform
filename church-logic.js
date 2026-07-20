@@ -14,35 +14,15 @@ const firebaseConfig = {
 // ==========================================
 
 function checkPass() {
-    const passwordInput = document.getElementById('pass-input');
-    const loginOverlay = document.getElementById('login-overlay');
-    const adminUi = document.getElementById('admin-ui');
-    
-    if (!passwordInput || !loginOverlay || !adminUi) {
-        console.error("Layout target error: One or more dashboard IDs are missing from your HTML structure.");
-        return;
-    }
-
-    // Force pull value directly and sanitize immediately
-    const rawValue = passwordInput.value || "";
-    const userEnteredKey = rawValue.replace(/\s+/g, '').toUpperCase(); 
-
-    // Diagnostic console logs — look at your browser F12 inspection tool to view these
-    console.log("Raw text received from input:", rawValue);
-    console.log("Cleaned text comparing against target:", userEnteredKey);
-
-    // Hardcoded direct validation check
-    if (userEnteredKey === "DLCC2026") {
-        // Force-hide the login overlay card
-        loginOverlay.style.setProperty('display', 'none', 'important');
-        loginOverlay.classList.remove('open');
-        
-        // Force-reveal the management platform interface panel
-        adminUi.style.setProperty('display', 'block', 'important');
-        console.log("Access Granted. Mission Control UI unlocked.");
-    } else {
-        alert("ACCESS DENIED: Unauthorized Security Key.");
-        passwordInput.value = ""; 
+    const input = document.getElementById('pass-input').value;
+    // Your updated password
+    if (input === "DLCC2026") {
+        document.getElementById('login-overlay').style.display = 'none';
+        document.getElementById('admin-ui').style.display = 'block';
+        loadPrayers(); // Load the dashboard data
+        console.log("Mission Control Unlocked.");
+    } else { 
+        alert("Unauthorized Key."); 
     }
 }
 
