@@ -2,38 +2,43 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DLCC | Official App</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DLCC | Mission Control</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <!-- Mobile Home Screen Icons -->
-    <link rel="icon" type="image/jpeg" href="logo.jpg">
-    <link rel="apple-touch-icon" href="logo.jpg">
+    
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 </head>
-
-<body>
+<body style="overflow-y: auto;"> 
     <div class="main-bg"></div>
     <div class="overlay-tint"></div>
 
-    
+    <!-- ========================================== -->
+    <!-- INTERACTIVE BRANDING & GLOBAL NAVIGATION   -->
+    <!-- ========================================== -->
     <img src="logo.jpg" class="app-logo" alt="DLCC Logo">
 
-    <div class="menu-trigger" onclick="toggleMenu()">
+    <!-- Elevated with inline style z-index to stay above background containers -->
+    <div class="menu-trigger" onclick="toggleMenu()" style="z-index: 9999 !important; position: fixed;">
         <div class="line"></div>
         <div class="line"></div>
         <div class="line"></div>
     </div>
 
-    <div class="hero-container">
+    <!-- ========================================== -->
+    <!-- HERO CONTENT LAYER (Bypasses Mouse Collisions) -->
+    <!-- ========================================== -->
+    <!-- pointer-events: none stops this massive 100vh box from stealing your clicks -->
+    <div class="hero-container" style="pointer-events: none;">
         <div id="broadcast-tag" class="live-indicator">CONNECTING TO MISSION...</div>
         <h1 class="main-heading">Divine Life</h1>
         <p class="church-name">CHRISTIAN CENTRE</p>
     </div>
 
+    <!-- ========================================== -->
+    <!-- SIDE NAV OVERLAY INTERFACE                 -->
+    <!-- ========================================== -->
     <nav id="side-menu" class="nav-overlay">
         <div class="close-nav" onclick="toggleMenu()" style="position:absolute; top:40px; right:30px; font-size:2.5rem; color:#D4AF37; cursor:pointer;">&times;</div>
         
@@ -42,10 +47,13 @@
             <div class="menu-item btn-gold" onclick="openModal('giving-modal')">💰 TITHES & GIVING</div>
             <div class="menu-item btn-green" onclick="openModal('prayer-modal')">🕊️ PRAYER REQUEST</div>
             <div class="menu-item btn-teal" onclick="openModal('booking-modal')">📅 APPOINTMENT</div>
-            <div class="menu-item" onclick="toggleMenu()" style="margin-top:20px; opacity:0.5; font-size:0.8rem; border:none;">CLOSE MENU</div>
+            <div class="menu-item" onclick="toggleMenu()" style="margin-top:20px; opacity:0.5; font-size:0.8rem; border:none; color: white;">CLOSE MENU</div>
         </div>
     </nav>
 
+    <!-- ========================================== -->
+    <!-- MODAL POPUP SYSTEM                         -->
+    <!-- ========================================== -->
     <div id="prayer-modal" class="modal">
         <div class="glass-card">
             <h2 class="gold-text">Prayer Line</h2>
@@ -87,6 +95,3 @@
     <script src="church-logic.js"></script>
 </body>
 </html>
-
-
-
