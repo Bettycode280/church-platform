@@ -9,81 +9,65 @@ const firebaseConfig = {
     messagingSenderId: "369831733781",
     appId: "1:369831733781:web:a7402fd123de519d7e3c1c"
 };
-// ==========================================
-// 2. NAVIGATION & UI CONTROLS
-// ==========================================
+    if (typeof firebase !== 'undefined') {
+        safeDb = firebase.firestore();
+        console.log("Firebase Engine successfully initialized.");
+    }
+ 
+    console.error("Firebase critical initialization failure, running offline mode:", e);
 
+
+// ==========================================
+// 2. NAVIGATION & UI CONTROLS (ISOLATED & SAFE)
+// ==========================================
 function checkPass() {
-    const input = document.getElementById('pass-input').value;
-    // Your updated password
-    if (input === "DLCC2026") {
-        document.getElementById('login-overlay').style.display = 'none';
-        document.getElementById('admin-ui').style.display = 'block';
-        loadPrayers(); // Load the dashboard data
-        console.log("Mission Control Unlocked.");
-    } else { 
-        alert("Unauthorized Key."); 
-    }
-}
-
-function openModal(id) { 
-    const nav = document.getElementById('side-nav') || document.getElementById('side-menu');
-    if (nav) nav.classList.remove('open'); // Close menu first
+    console.log("UNLOG & ENTER button clicked.");
     
-    const modal = document.getElementById(id);
-    if (modal) modal.classList.add('open'); 
-}
+    const passwordInput = document.getElementById('pass-input');
+    const loginOverlay = document.getElementById('login-overlay');
+    const adminUi = document.getElementById('admin-ui');
+    
+    if (!passwordInput || !loginOverlay || !adminUi) {
+        console.error("UI Layout Error: Dashboard containers are missing from the DOM.");
+        alert("System Error: Layout wrapper targets not found.");
+        return;
+    }
 
-function closeModals() { 
-    document.querySelectorAll('.modal').forEach(m => m.classList.remove('open')); 
-}
+    const rawValue = passwordInput.value || "";
+    // Strips out all spaces and forces characters to uppercase
+    const userEnteredKey = rawValue.replace(/\s+/g, '').toUpperCase(); 
 
-// ==========================================
-// 3. LIVE SERMON BROADCAST (RED ALERT)
-// ==========================================
-const broadcastTag = document.getElementById('broadcast-tag');
-const alertSound = document.getElementById('alert-sound');
+    console.log("Processed input key matching check:", userEnteredKey);
 
-function startSermonListener() {
-    if (broadcastTag) {
-        db.collection("churchSettings").doc("live_topic").onSnapshot(doc => {
-            if (doc.exists && doc.data().title && doc.data().title.trim() !== "") { 
-                const sermonTitle = doc.data().title.trim();
-                
-                broadcastTag.innerText = "🚨 LIVE NOW: " + sermonTitle.toUpperCase();
-                broadcastTag.classList.add('red-alert');
-                
-                if (alertSound) {
-                    alertSound.play().catch(e => console.log("Sound blocked by browser until user clicks."));
-                }
-            } else {
-                broadcastTag.innerText = "CONNECTING TO MISSION...";
-                broadcastTag.classList.remove('red-alert');
-                
-                if (alertSound) {
-                    alertSound.pause();
-                    alertSound.currentTime = 0;
-                }
-            }
-        }, error => {
-            console.error("Database stream error: Check Firebase Firestore rule access.", error);
-        });
+    if (userEnteredKey === "DLCC2026") {
+        // Remove overlay panel immediately using direct styles
+        loginOverlay.style.display = 'none';
+        
+        // Expose management engine console view grid
+        adminUi.style.display = 'block';
+        console.log("Access Granted. Mission Control UI unlocked.");
+    } else {
+        alert("ACCESS DENIED: Unauthorized Security Key.");
+        passwordInput.value = ""; 
     }
 }
 
 // ==========================================
-// 4. DATA SUBMISSION & DASHBOARD
+// 3. LIVE SERMON BROADCAST ENGINE
 // ==========================================
-
 async function updateSermon() {
     const topicInput = document.getElementById('sermon-input');
     if (!topicInput) return;
+    if (!safeDb) {
+        alert("Database connection offline. Unable to update sermon topic.");
+        return;
+    }
     
     const topic = topicInput.value;
     const titleToSend = topic ? topic.trim() : ""; 
 
     try {
-        await db.collection("churchSettings").doc("live_topic").set({ 
+        await safeDb.collection("churchSettings").doc("live_topic").set({ 
             title: titleToSend, 
             time: firebase.firestore.FieldValue.serverTimestamp() 
         });
@@ -95,79 +79,45 @@ async function updateSermon() {
         }
     } catch (error) {
         console.error("Error updating sermon: ", error);
-        alert("Mission Update Failed. Make sure your Firestore Rules allow public writes.");
+        alert("Firestore transaction failed. Check security rules permissions.");
     }
 }
 
-async function submitPrayer() {
-    const nameEl = document.getElementById('p_name');
-    const msgEl = document.getElementById('p_msg');
-    if (!nameEl || !msgEl) return;
-
-    const name = nameEl.value.trim();
-    const text = msgEl.value.trim();
-    if(!name || !text) return alert("Fill all fields.");
-    
-    await db.collection("churchPrayers").add({ 
-        type: "PRAYER", 
-        name, 
-        text, 
-        time: firebase.firestore.FieldValue.serverTimestamp() 
-    });
-    alert("Sent to Pastor."); 
-    nameEl.value = "";
-    msgEl.value = "";
-    closeModals();
-}
-
-async function submitBooking() {
-    const nameEl = document.getElementById('b_name');
-    const dayEl = document.getElementById('b_day');
-    const timeEl = document.getElementById('b_time');
-    if (!nameEl || !dayEl || !timeEl) return;
-
-    const name = nameEl.value.trim();
-    const day = dayEl.value;
-    const time = timeEl.value;
-    if(!name) return alert("Name required.");
-    
-    await db.collection("churchPrayers").add({ 
-        type: "APPOINTMENT", 
-        name, 
-        text: `${day} at ${time}`, 
-        time: firebase.firestore.FieldValue.serverTimestamp() 
-    });
-    alert("Request Sent."); 
-    nameEl.value = "";
-    closeModals();
-}
-
+// ==========================================
+// 4. LIVE FEED PRAYER DATA READS
+// ==========================================
 function loadPrayers() {
     const list = document.getElementById('prayer-list');
-    if (!list) return;
+    if (!list || !safeDb) {
+        console.warn("Prayer list container or database context missing. Skipping feed hook.");
+        return;
+    }
 
-    db.collection("churchPrayers").orderBy("time", "desc").onSnapshot(snap => {
-        list.innerHTML = "";
-        snap.forEach(doc => {
-            const data = doc.data();
-            list.innerHTML += `
-                <div class="request-card">
-                    <small style="color:#D4AF37; font-weight:bold;">${data.type}</small>
-                    <p><strong>${data.name || 'Anonymous'}</strong></p>
-                    <p>${data.text || ''}</p>
-                </div>`;
+    try {
+        safeDb.collection("churchPrayers").orderBy("time", "desc").onSnapshot(snap => {
+            list.innerHTML = "";
+            snap.forEach(doc => {
+                const data = doc.data();
+                list.innerHTML += `
+                    <div class="request-card" style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 4px; border-left: 4px solid #D4AF37; margin-bottom: 10px;">
+                        <small style="color:#D4AF37; font-weight:bold;">${data.type || 'REQUEST'}</small>
+                        <p style="margin: 5px 0;"><strong>${data.name || 'Anonymous'}</strong></p>
+                        <p style="margin: 5px 0; color: #ccc;">${data.text || ''}</p>
+                    </div>`;
+            });
+        }, error => {
+            console.error("Firestore real-time sync stream failed:", error);
         });
-    }, error => {
-        console.error("Prayer feed connection error: ", error);
-    });
+    } catch (err) {
+        console.error("Failed to setup real-time prayer listener:", err);
+    }
 }
 
 // ==========================================
-// 5. INITIALIZATION RUNNERS
+// 5. SECURE SAFE EXECUTION RUNNERS
 // ==========================================
-if (document.getElementById('prayer-list')) {
-    loadPrayers();
-}
-if (document.getElementById('broadcast-tag')) {
-    startSermonListener();
-}
+window.addEventListener('DOMContentLoaded', () => {
+    if (document.getElementById('prayer-list')) {
+        loadPrayers();
+    }
+});
