@@ -20,15 +20,15 @@ const db = firebase.firestore();
 // ==========================================
 
 function toggleMenu() { 
-    const nav = document.getElementById('side-nav') || document.getElementById('side-menu');
+    const nav = document.getElementById('side-menu') || document.getElementById('side-nav');
     if (nav) {
         nav.classList.toggle('open'); 
     }
 }
 
 function openModal(id) { 
-    const nav = document.getElementById('side-nav') || document.getElementById('side-menu');
-    if (nav) nav.classList.remove('open'); // Close menu first
+    const nav = document.getElementById('side-menu') || document.getElementById('side-nav');
+    if (nav) nav.classList.remove('open'); // Close menu drawer first
     
     const modal = document.getElementById(id);
     if (modal) modal.classList.add('open'); 
@@ -44,7 +44,6 @@ function closeModals() {
 const broadcastTag = document.getElementById('broadcast-tag');
 const alertSound = document.getElementById('alert-sound');
 
-// Runs automatically on page load now
 function startSermonListener() {
     if (broadcastTag) {
         db.collection("churchSettings").doc("live_topic").onSnapshot(doc => {
@@ -133,8 +132,8 @@ async function submitBooking() {
 
 function loadPrayers() {
     const list = document.getElementById('prayer-list');
-    // SAFE GUARD: If this element doesn't exist (like on the main page), stop quietly
-    if (!list) return; 
+    // SAFE GUARD: If this container doesn't exist on the page, stop gracefully
+    if (!list) return;
 
     db.collection("churchPrayers").orderBy("time", "desc").onSnapshot(snap => {
         list.innerHTML = "";
@@ -155,8 +154,7 @@ function loadPrayers() {
 // ==========================================
 // 5. INITIALIZATION RUNNERS
 // ==========================================
-// Wrapping these inside a DOMContentLoaded listener ensures the HTML elements 
-// are fully loaded before the triggers try to bind.
+// Wait completely for the HTML to compile before executing element watchers
 document.addEventListener("DOMContentLoaded", () => {
     loadPrayers();
     startSermonListener();
