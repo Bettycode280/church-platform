@@ -20,27 +20,18 @@ const db = firebase.firestore();
 // ==========================================
 
 function toggleMenu() { 
-    const nav = document.getElementById('side-menu') || document.getElementById('side-nav');
+    const nav = document.getElementById('side-nav') || document.getElementById('side-menu');
     if (nav) {
         nav.classList.toggle('open'); 
     }
 }
 
 function openModal(id) { 
-    // Cleanly close the menu element drawer right before launching target modals
-    const nav = document.getElementById('side-menu') || document.getElementById('side-nav');
-    if (nav) {
-        nav.classList.remove('open'); 
-    }
+    const nav = document.getElementById('side-nav') || document.getElementById('side-menu');
+    if (nav) nav.classList.remove('open'); // Close menu first
     
     const modal = document.getElementById(id);
-    if (modal) {
-        modal.classList.add('open'); 
-    }
-}
-
-function closeModals() { 
-    document.querySelectorAll('.modal').forEach(m => m.classList.remove('open')); 
+    if (modal) modal.classList.add('open'); 
 }
 
 function closeModals() { 
