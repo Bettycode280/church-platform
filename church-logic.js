@@ -14,8 +14,6 @@ const firebaseConfig = {
 // 2. NAVIGATION & UI CONTROLS
 // ==========================================
 
-const SECRET_KEY = "DLCC2026"; 
-
 function checkPass() {
     const passwordInput = document.getElementById('pass-input');
     const loginOverlay = document.getElementById('login-overlay');
@@ -26,7 +24,10 @@ function checkPass() {
         return;
     }
 
-    if (passwordInput.value === SECRET_KEY) {
+    // Clean up input: convert to UPPERCASE and remove any accidental spaces
+    const userEnteredKey = passwordInput.value.trim().toUpperCase();
+
+    if (userEnteredKey === "DLCC2026") {
         // Force-hide the login overlay card
         loginOverlay.style.setProperty('display', 'none', 'important');
         loginOverlay.classList.remove('open');
@@ -39,7 +40,6 @@ function checkPass() {
         passwordInput.value = ""; 
     }
 }
-
 function toggleMenu() { 
     const nav = document.getElementById('side-nav') || document.getElementById('side-menu');
     if (nav) {
