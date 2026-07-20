@@ -6,18 +6,20 @@
     <title>DLCC | Official App</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-    
     <link rel="stylesheet" href="style.css">
+    
+    <!-- Mobile Home Screen Icons -->
+    <link rel="icon" type="image/jpeg" href="logo.jpg">
+    <link rel="apple-touch-icon" href="logo.jpg">
     
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 </head>
-
 <body>
     <div class="main-bg"></div>
     <div class="overlay-tint"></div>
 
-    <img src="logo.png.jpg" class="app-logo" alt="DLCC Logo">
+    <img src="logo.jpg" class="app-logo" alt="DLCC Logo">
 
     <div class="menu-trigger" onclick="toggleMenu()">
         <div class="line"></div>
@@ -81,6 +83,18 @@
     </div>
 
     <audio id="alert-sound" src="alert.mp3" preload="auto"></audio>
+
+    <!-- Essential Firebase App Connection Credentials Config Block -->
+
     <script src="church-logic.js"></script>
+    const firebaseConfig = {
+    apiKey: "AIzaSyDhLq4p_W0ArYVXYHmOZbsuyyvLqWde6js",
+    authDomain: "glorywheels-507df.firebaseapp.com",
+    projectId: "glorywheels-507df",
+    storageBucket: "glorywheels-507df.firebasestorage.app",
+    messagingSenderId: "369831733781",
+    appId: "1:369831733781:web:a7402fd123de519d7e3c1c"
+    </script>
+};
 </body>
 </html>
