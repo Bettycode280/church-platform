@@ -23,11 +23,12 @@
     
     <img src="logo.jpg" class="app-logo" alt="DLCC Logo">
 
-    <div class="menu-trigger" onclick="toggleMenu()">
-        <div class="line"></div>
-        <div class="line"></div>
-        <div class="line"></div>
-    </div>
+    <!-- Check that onclick is exactly toggleMenu() -->
+<div class="menu-trigger" onclick="toggleMenu()">
+    <div class="line"></div>
+    <div class="line"></div>
+    <div class="line"></div>
+</div>
 
     <div class="hero-container">
         <div id="broadcast-tag" class="live-indicator">CONNECTING TO MISSION...</div>
@@ -37,16 +38,17 @@
 
     <nav id="side-menu" class="nav-overlay">
         <div class="close-nav" onclick="toggleMenu()" style="position:absolute; top:40px; right:30px; font-size:2.5rem; color:#D4AF37; cursor:pointer;">&times;</div>
-        
-        <div class="nav-content">
-            <div class="menu-item btn-red" onclick="window.open('https://youtube.com/@DivineLifeChristianCentre/live')">📹 WATCH LIVE</div>
-            <div class="menu-item btn-gold" onclick="openModal('giving-modal')">💰 TITHES & GIVING</div>
-            <div class="menu-item btn-green" onclick="openModal('prayer-modal')">🕊️ PRAYER REQUEST</div>
-            <div class="menu-item btn-teal" onclick="openModal('booking-modal')">📅 APPOINTMENT</div>
-            <div class="menu-item" onclick="toggleMenu()" style="margin-top:20px; opacity:0.5; font-size:0.8rem; border:none;">CLOSE MENU</div>
-        </div>
-    </nav>
 
+<!-- Ensure the id is exactly "side-menu" to align with your script -->
+<nav id="side-menu" class="nav-overlay">
+    <div class="close-nav" onclick="toggleMenu()">&times;</div>
+    <div class="nav-content">
+        <div class="menu-item btn-red" onclick="window.open('https://youtube.com/@DivineLifeChristianCentre/live')">📹 WATCH LIVE</div>
+        <div class="menu-item btn-gold" onclick="openModal('giving-modal')">💰 TITHES & GIVING</div>
+        <div class="menu-item btn-green" onclick="openModal('prayer-modal')">🕊️ PRAYER REQUEST</div>
+        <div class="menu-item btn-teal" onclick="openModal('booking-modal')">📅 APPOINTMENT</div>
+    </div>
+</nav>
     <div id="prayer-modal" class="modal">
         <div class="glass-card">
             <h2 class="gold-text">Prayer Line</h2>

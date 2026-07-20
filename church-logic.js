@@ -133,7 +133,8 @@ async function submitBooking() {
 
 function loadPrayers() {
     const list = document.getElementById('prayer-list');
-    if (!list) return;
+    // SAFE GUARD: If this element doesn't exist (like on the main page), stop quietly
+    if (!list) return; 
 
     db.collection("churchPrayers").orderBy("time", "desc").onSnapshot(snap => {
         list.innerHTML = "";
@@ -154,7 +155,9 @@ function loadPrayers() {
 // ==========================================
 // 5. INITIALIZATION RUNNERS
 // ==========================================
-// Auto-start data feeds immediately upon loading the page
-loadPrayers();
-startSermonListener();
-
+// Wrapping these inside a DOMContentLoaded listener ensures the HTML elements 
+// are fully loaded before the triggers try to bind.
+document.addEventListener("DOMContentLoaded", () => {
+    loadPrayers();
+    startSermonListener();
+});
