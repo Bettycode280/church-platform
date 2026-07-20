@@ -9,97 +9,152 @@ const firebaseConfig = {
     messagingSenderId: "369831733781",
     appId: "1:369831733781:web:a7402fd123de519d7e3c1c"
 };
-    if (typeof firebase !== 'undefined') {
-        safeDb = firebase.firestore();
-    }
-    console.error("Firebase running offline mode:", e);
+// Initialize Firebase
+if (!firebase.apps.length) { 
+    firebase.initializeApp(firebaseConfig); 
+}
+const db = firebase.firestore();
 
 // ==========================================
-// 2. UNLOCK ENGINE & DRAWER CONTROLS
+// 2. NAVIGATION & UI CONTROLS
 // ==========================================
+
 function toggleMenu() { 
-    const nav = document.getElementById('side-nav');
+    const nav = document.getElementById('side-nav') || document.getElementById('side-menu');
     if (nav) {
         nav.classList.toggle('open'); 
     }
 }
 
+function openModal(id) { 
+    const nav = document.getElementById('side-nav') || document.getElementById('side-menu');
+    if (nav) nav.classList.remove('open'); // Close menu first
+    
+    const modal = document.getElementById(id);
+    if (modal) modal.classList.add('open'); 
+}
+
+function closeModals() { 
+    document.querySelectorAll('.modal').forEach(m => m.classList.remove('open')); 
+}
+
 // ==========================================
-// 3. FIRESTORE TRANS-ACTIONS
+// 3. LIVE SERMON BROADCAST (RED ALERT)
 // ==========================================
+const broadcastTag = document.getElementById('broadcast-tag');
+const alertSound = document.getElementById('alert-sound');
+
+// Runs automatically on page load now
+function startSermonListener() {
+    if (broadcastTag) {
+        db.collection("churchSettings").doc("live_topic").onSnapshot(doc => {
+            if (doc.exists && doc.data().title && doc.data().title.trim() !== "") { 
+                const sermonTitle = doc.data().title.trim();
+                
+                broadcastTag.innerText = "🚨 LIVE NOW: " + sermonTitle.toUpperCase();
+                broadcastTag.classList.add('red-alert');
+                
+                if (alertSound) {
+                    alertSound.play().catch(e => console.log("Sound blocked by browser until user clicks."));
+                }
+            } else {
+                broadcastTag.innerText = "CONNECTING TO MISSION...";
+                broadcastTag.classList.remove('red-alert');
+                
+                if (alertSound) {
+                    alertSound.pause();
+                    alertSound.currentTime = 0;
+                }
+            }
+        }, error => {
+            console.error("Database stream error: Check Firebase Firestore rule access.", error);
+        });
+    }
+}
+
+// ==========================================
+// 4. DATA SUBMISSION & DASHBOARD
+// ==========================================
+
 async function updateSermon() {
     const topicInput = document.getElementById('sermon-input');
-    if (!topicInput || !safeDb) return;
+    if (!topicInput) return;
     
-    const titleToSend = topicInput.value ? topicInput.value.trim() : ""; 
+    const topic = topicInput.value;
+    const titleToSend = topic ? topic.trim() : ""; 
+
     try {
-        await safeDb.collection("churchSettings").doc("live_topic").set({ 
+        await db.collection("churchSettings").doc("live_topic").set({ 
             title: titleToSend, 
             time: firebase.firestore.FieldValue.serverTimestamp() 
         });
-        alert(titleToSend === "" ? "Broadcast Reset." : "Update Sent Live!");
+        
+        if (titleToSend === "") {
+            alert("Broadcast Ended. All congregant screens reset.");
+        } else {
+            alert("Update Sent! All screens updated.");
+        }
     } catch (error) {
-        alert("Update failed. Running offline environment.");
+        console.error("Error updating sermon: ", error);
+        alert("Mission Update Failed. Make sure your Firestore Rules allow public writes.");
     }
+}
+
+async function submitPrayer() {
+    const name = document.getElementById('p_name').value;
+    const text = document.getElementById('p_msg').value;
+    if(!name || !text) return alert("Fill all fields.");
+    
+    await db.collection("churchPrayers").add({ 
+        type: "PRAYER", 
+        name, 
+        text, 
+        time: firebase.firestore.FieldValue.serverTimestamp() 
+    });
+    alert("Sent to Pastor."); 
+    closeModals();
+}
+
+async function submitBooking() {
+    const name = document.getElementById('b_name').value;
+    const day = document.getElementById('b_day').value;
+    const time = document.getElementById('b_time').value;
+    if(!name) return alert("Name required.");
+    
+    await db.collection("churchPrayers").add({ 
+        type: "APPOINTMENT", 
+        name, 
+        text: `${day} at ${time}`, 
+        time: firebase.firestore.FieldValue.serverTimestamp() 
+    });
+    alert("Request Sent."); 
+    closeModals();
 }
 
 function loadPrayers() {
     const list = document.getElementById('prayer-list');
-    if (!list || !safeDb) return;
-    try {
-        safeDb.collection("churchPrayers").orderBy("time", "desc").onSnapshot(snap => {
-            list.innerHTML = "";
-            snap.forEach(doc => {
-                const data = doc.data();
-                list.innerHTML += `
-                    <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 4px; border-left: 4px solid #D4AF37; margin-bottom: 10px; text-align: left;">
-                        <small style="color:#D4AF37; font-weight:bold;">${data.type || 'REQUEST'}</small>
-                        <p style="margin: 2px 0; font-size: 0.95rem;"><strong>${data.name || 'Anonymous'}</strong></p>
-                        <p style="margin: 0; color: #ccc; font-size: 0.85rem;">${data.text || ''}</p>
-                    </div>`;
-            });
+    if (!list) return;
+
+    db.collection("churchPrayers").orderBy("time", "desc").onSnapshot(snap => {
+        list.innerHTML = "";
+        snap.forEach(doc => {
+            const data = doc.data();
+            list.innerHTML += `
+                <div class="request-card">
+                    <small style="color:#D4AF37; font-weight:bold;">${data.type}</small>
+                    <p><strong>${data.name}</strong></p>
+                    <p>${data.text}</p>
+                </div>`;
         });
-    } catch (err) {
-        console.warn(err);
-    }
-}
-
-window.addEventListener('DOMContentLoaded', () => {
-    if (document.getElementById('prayer-list')) loadPrayers();
-});
-
-// ==========================================
-// 4. LIVE FEED PRAYER DATA READS
-// ==========================================
-function loadPrayers() {
-    const list = document.getElementById('prayer-list');
-    if (!list || !safeDb) return;
-
-    try {
-        safeDb.collection("churchPrayers").orderBy("time", "desc").onSnapshot(snap => {
-            list.innerHTML = "";
-            snap.forEach(doc => {
-                const data = doc.data();
-                list.innerHTML += `
-                    <div class="request-card" style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 4px; border-left: 4px solid #D4AF37; margin-bottom: 10px;">
-                        <small style="color:#D4AF37; font-weight:bold;">${data.type || 'REQUEST'}</small>
-                        <p style="margin: 5px 0;"><strong>${data.name || 'Anonymous'}</strong></p>
-                        <p style="margin: 5px 0; color: #ccc;">${data.text || ''}</p>
-                    </div>`;
-            });
-        }, error => {
-            console.error("Firestore real-time sync stream failed:", error);
-        });
-    } catch (err) {
-        console.error("Failed to setup real-time prayer listener:", err);
-    }
+    }, error => {
+        console.error("Prayer feed connection error: ", error);
+    });
 }
 
 // ==========================================
-// 5. SECURE SAFE EXECUTION RUNNERS
+// 5. INITIALIZATION RUNNERS
 // ==========================================
-window.addEventListener('DOMContentLoaded', () => {
-    if (document.getElementById('prayer-list')) {
-        loadPrayers();
-    }
-});
+// Auto-start data feeds immediately upon loading the page
+loadPrayers();
+startSermonListener();
+
