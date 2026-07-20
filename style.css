@@ -1,7 +1,12 @@
 /* DIVINE LIFE CHRISTIAN CENTRE - MISSION INTERFACE MASTER STYLE */
 :root {
+    /* Keep the gold for headings and borders */
     --gold: linear-gradient(135deg, #BF953F, #FCF6BA, #B38728, #FBF5B7, #AA771D);
     --gold-solid: #D4AF37;
+    
+    /* Add the blue for the specific panel text */
+    --velvet-blue: #0A1128; 
+    
     --glass-bg: rgba(255, 255, 255, 0.04);
 }
 
@@ -11,7 +16,7 @@
 body { 
     font-family: 'Poppins', sans-serif; 
     background: #020408; 
-    color: white; 
+    color: rgb(255, 255, 255); 
     overflow: hidden; 
     height: 100vh; 
     width: 100vw;
@@ -109,8 +114,10 @@ body {
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
 
-.admin-panel:active {
-    transform: scale(0.98);
+.admin-panel {
+    background: rgba(255, 255, 255, 0.08) !important; /* Slightly lighter glass */
+    backdrop-filter: blur(15px) saturate(160%) !important;
+    /* ... rest of your border settings ... */
 }
 
 /* --- CARD INTERNALS --- */
@@ -125,11 +132,12 @@ body {
 }
 
 .form-hint { 
-    color: white;
-    font-size: 1.1rem;
-    font-weight: 600;
+    color: var(--velvet-blue); /* Velvet Blue text */
+    font-size: 1.4rem;        /* Increased font size */
+    font-weight: 800;        /* Extra bold for clarity */
     opacity: 1; 
     margin: 0;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3); /* Adds depth to the blue */
 }
 
 /* --- MISSION BUTTONS --- */
@@ -186,6 +194,3 @@ body {
 
 @keyframes glow { 50% { opacity: 0.5; } }
 @keyframes flash-red { 50% { opacity: 0.4; transform: scale(1.05); } }
-
-
-
