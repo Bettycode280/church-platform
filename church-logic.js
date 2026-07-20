@@ -17,29 +17,6 @@ const firebaseConfig = {
 // ==========================================
 // 2. UNLOCK ENGINE & DRAWER CONTROLS
 // ==========================================
-function checkPass() {
-    const passwordInput = document.getElementById('pass-input');
-    const loginOverlay = document.getElementById('login-overlay');
-    const sideNav = document.getElementById('side-nav');
-    
-    if (!passwordInput || !loginOverlay || !sideNav) return;
-
-    const rawValue = passwordInput.value || "";
-    const userEnteredKey = rawValue.replace(/\s+/g, '').toUpperCase(); 
-
-    if (userEnteredKey === "DLCC2026") {
-        // Closes login security gate modal layout
-        loginOverlay.classList.remove('open');
-        
-        // Slide out the control pane immediately using your style configurations
-        sideNav.classList.add('open');
-        console.log("Mission UI unlocked.");
-    } else {
-        alert("ACCESS DENIED: Unauthorized Security Key.");
-        passwordInput.value = ""; 
-    }
-}
-
 function toggleMenu() { 
     const nav = document.getElementById('side-nav');
     if (nav) {
