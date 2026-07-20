@@ -68,7 +68,9 @@ body {
     font-family: 'Montserrat', sans-serif;
     font-size: clamp(2.5rem, 10vw, 3.5rem);
     font-weight: 900; text-transform: uppercase;
-    background: var(--gold); -webkit-background-clip: text;
+    background: var(--gold); 
+    -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
@@ -110,13 +112,10 @@ body {
     background: rgba(255, 255, 255, 0.06) !important;
     backdrop-filter: blur(20px) saturate(160%) !important;
     -webkit-backdrop-filter: blur(20px) saturate(160%);
-    
-    /* THE GOLD PLATED EDGE */
     border-left: 5px solid var(--gold-solid) !important;
     border-top: 1px solid rgba(212, 175, 55, 0.15);
     border-right: 1px solid rgba(212, 175, 55, 0.15);
     border-bottom: 1px solid rgba(212, 175, 55, 0.15);
-    
     border-radius: 4px 20px 20px 4px;
     padding: 22px;
     text-align: left;
@@ -156,7 +155,10 @@ body {
 
 /* --- CARD INTERNALS --- */
 .gold-text {
-    color: var(--gold-solid);
+    background: var(--gold); 
+    -webkit-background-clip: text; 
+    background-clip: text;
+    -webkit-text-fill-color: transparent; 
     font-size: 1.6rem;
     font-weight: 900;
     letter-spacing: 2px;
