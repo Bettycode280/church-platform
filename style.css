@@ -96,10 +96,10 @@ body {
 
 /* --- Luxury Gold Glass & Gold Ambience Menu Items --- */
 .nav-content .menu-item {
-    background: rgba(212, 175, 55, 0.08); /* Transparent gold glass tint */
+    background: rgba(212, 175, 55, 0.08);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
-    border: 1.8px solid rgba(212, 175, 55, 0.6); /* Radiant gold borders/hedges */
+    border: 1.8px solid rgba(212, 175, 55, 0.6);
     border-radius: 14px;
     padding: 16px 24px;
     margin: 12px 0;
@@ -108,14 +108,14 @@ body {
     font-weight: 600;
     text-align: center;
     cursor: pointer;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 0 20px rgba(212, 175, 55, 0.25); /* Rich gold ambience glow */
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 0 20px rgba(212, 175, 55, 0.25);
     transition: all 0.3s ease;
 }
 
 /* Radiant Gold Hover State */
 .nav-content .menu-item:hover {
     background: rgba(212, 175, 55, 0.18);
-    border-color: #FFD700; /* Brilliant Gold */
+    border-color: #FFD700;
     box-shadow: 0 0 25px rgba(212, 175, 55, 0.8), inset 0 0 25px rgba(212, 175, 55, 0.4);
     transform: translateY(-2px);
 }
