@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DLCC | Official App</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Mobile Home Screen Icons -->
+    <link rel="icon" type="image/jpeg" href="logo.jpg">
+    <link rel="apple-touch-icon" href="logo.jpg">
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+</head>
+<body>
+    <div class="main-bg"></div>
+    <div class="overlay-tint"></div>
+
+    <img src="logo.jpg" class="app-logo" alt="DLCC Logo">
+
+    <div class="menu-trigger" onclick="toggleMenu()">
+        <div class="line"></div>
+        <div class="line"></div>
+        <div class="line"></div>
+    </div>
+
+    <div class="hero-container">
+        <div id="broadcast-tag" class="live-indicator">CONNECTING TO MISSION...</div>
+        <h1 class="main-heading">Divine Life</h1>
+        <p class="church-name">CHRISTIAN CENTRE</p>
+    </div>
+
+    <nav id="side-menu" class="nav-overlay">
+        <div class="close-nav" onclick="toggleMenu()" style="position:absolute; top:40px; right:30px; font-size:2.5rem; color:#D4AF37; cursor:pointer;">&times;</div>
+        
+        <div class="nav-content">
+            <div class="menu-item btn-red" onclick="window.open('https://youtube.com/@DivineLifeChristianCentre/live')">📹 WATCH LIVE</div>
+            <div class="menu-item btn-gold" onclick="openModal('giving-modal')">💰 TITHES & GIVING</div>
+            <div class="menu-item btn-green" onclick="openModal('prayer-modal')">🕊️ PRAYER REQUEST</div>
+            <div class="menu-item btn-teal" onclick="openModal('booking-modal')">📅 APPOINTMENT</div>
+            <div class="menu-item" onclick="toggleMenu()" style="margin-top:20px; opacity:0.5; font-size:0.8rem; border:none;">CLOSE MENU</div>
+        </div>
+    </nav>
+
+    <div id="prayer-modal" class="modal">
+        <div class="glass-card">
+            <h2 class="gold-text">Prayer Line</h2>
+            <p class="form-hint">Direct to the Pastor's Screen</p>
+            <input type="text" id="p_name" placeholder="Your Name" class="sleek-input">
+            <textarea id="p_msg" placeholder="Type your prayer request..." rows="4" class="sleek-input"></textarea>
+            <button class="premium-gold-btn" onclick="submitPrayer()">SEND TO PASTOR</button>
+            <div class="cancel-link" onclick="closeModals()">Cancel</div>
+        </div>
+    </div>
+
+    <div id="booking-modal" class="modal">
+        <div class="glass-card">
+            <h2 class="gold-text">Appointment</h2>
+            <p class="form-hint">Request a Private Meeting</p>
+            <input type="text" id="b_name" placeholder="Full Name" class="sleek-input">
+            <select id="b_day" class="sleek-input">
+                <option value="Monday">Monday</option>
+                <option value="Tuesday">Tuesday</option>
+                <option value="Wednesday">Wednesday</option>
+                <option value="Thursday">Thursday</option>
+                <option value="Friday">Friday</option>
+            </select>
+            <input type="time" id="b_time" value="14:00" class="sleek-input">
+            <button class="premium-gold-btn" onclick="submitBooking()">REQUEST MEETING</button>
+            <div class="cancel-link" onclick="closeModals()">Back</div>
+        </div>
+    </div>
+
+    <div id="giving-modal" class="modal">
+        <div class="glass-card">
+            <h2 class="gold-text">Giving</h2>
+            <p class="form-hint">Contact Finance Office for official details.</p>
+            <button class="premium-gold-btn" onclick="closeModals()">RETURN</button>
+        </div>
+    </div>
+
+    <audio id="alert-sound" src="alert.mp3" preload="auto"></audio>
+
+    <!-- Essential Firebase App Connection Credentials Config Block -->
+
+    <script src="church-logic.js"></script>
+    const firebaseConfig = {
+    apiKey: "AIzaSyDhLq4p_W0ArYVXYHmOZbsuyyvLqWde6js",
+    authDomain: "glorywheels-507df.firebaseapp.com",
+    projectId: "glorywheels-507df",
+    storageBucket: "glorywheels-507df.firebasestorage.app",
+    messagingSenderId: "369831733781",
+    appId: "1:369831733781:web:a7402fd123de519d7e3c1c"
+    </script>
+};
+</body>
+</html>
