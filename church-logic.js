@@ -169,17 +169,14 @@ function loadPrayers() {
         });
     });
 }
-
-// NEW FUNCTION: Enables Pastor to wipe old items out of the churchPrayers data model feed
-function deleteFeedItem(docId) {
-    if (confirm("Remove this item from the Mission Control feed permanently?")) {
-        db.collection("churchPrayers").doc(docId).delete()
-        .then(() => {
-            console.log("Feed item successfully deleted.");
-        })
-        .catch((error) => {
-            console.error("Error removing document: ", error);
-            alert("Delete action failed. Check connection.");
-        });
-    }
+function deleteFeedItem(id) {
+    // Retrieve current feed items from localStorage
+    let feedItems = JSON.parse(localStorage.getItem('church_feed')) || [];
+    
+    // Filter out the item matching the ID
+    feedItems = feedItems.filter(item => item.id !== id);
+    
+    // Save back to localStorage and re-render the feed locally
+    localStorage.setItem('church_feed', JSON.stringify(feedItems));
+    renderFeed(); // Refresh the screen instantly without needing a server connection
 }
