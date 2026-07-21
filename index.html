@@ -82,7 +82,7 @@
     </div>
 </div>
 
-    <div id="giving-modal" class="modal">
+   <div id="giving-modal" class="modal">
         <div class="glass-card">
             <h2 class="gold-text">Giving</h2>
             
@@ -93,13 +93,15 @@
                 <p style="margin: 5px 0;"><strong>Sort Code:</strong> 677736</p>
             </div>
 
-            <button class="premium-gold-btn" onclick="closeModals()">RETURN</button
+            <button class="premium-gold-btn" onclick="closeModals()">RETURN</button>
+        </div>
     </div>
+
     <audio id="alert-sound" src="alert.mp3" preload="auto"></audio>
 
     <!-- Essential Firebase App Connection Credentials Config Block -->
 
-    <script src="church-logic.js"></script>
+    <script>
     const firebaseConfig = {
     apiKey: "AIzaSyDhLq4p_W0ArYVXYHmOZbsuyyvLqWde6js",
     authDomain: "glorywheels-507df.firebaseapp.com",
@@ -107,7 +109,9 @@
     storageBucket: "glorywheels-507df.firebasestorage.app",
     messagingSenderId: "369831733781",
     appId: "1:369831733781:web:a7402fd123de519d7e3c1c"
+    };
     </script>
-};
+
+    <script src="church-logic.js"></script>
 </body>
 </html>
