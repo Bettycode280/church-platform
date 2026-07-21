@@ -94,6 +94,31 @@ body {
     padding: 100px 20px;
 }
 
+/* --- Velvet Gold Radiant Menu Items --- */
+.nav-content .menu-item {
+    background: rgba(20, 20, 20, 0.65);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1.5px solid rgba(212, 175, 55, 0.4);
+    border-radius: 12px;
+    padding: 16px 24px;
+    margin: 12px 0;
+    color: #ffffff;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37), inset 0 0 15px rgba(212, 175, 55, 0.15);
+    transition: all 0.3s ease;
+}
+
+.nav-content .menu-item:hover {
+    background: rgba(40, 35, 20, 0.75);
+    border-color: #D4AF37;
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.6), inset 0 0 20px rgba(212, 175, 55, 0.3);
+    transform: translateY(-2px);
+}
+
 /* --- THE MISSION CONTROL CARDS (IMAGE MATCHED) --- */
 .admin-panel {
     background: var(--glass-bg) !important;
