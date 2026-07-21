@@ -169,7 +169,7 @@ function loadPrayers() {
         });
     });
 }
-function deleteFeedItem(id) {
+unction deleteFeedItem(id) {
     // Retrieve current feed items from localStorage
     let feedItems = JSON.parse(localStorage.getItem('church_feed')) || [];
     
