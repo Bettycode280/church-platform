@@ -54,38 +54,45 @@
             <button class="premium-gold-btn" onclick="submitPrayer()">SEND TO PASTOR</button>
             <div class="cancel-link" onclick="closeModals()">Cancel</div>
         </div>
-    </div>
-<div id="booking-modal" class="modal">
-        <div class="glass-card">
-            <h2 class="gold-text">Appointment</h2>
-            <p class="form-hint">Request a Private Meeting</p>
-            
-            <input type="text" id="b_name" placeholder="Full Name" class="sleek-input">
-            
-            <input type="email" id="b_email" placeholder="Email Address" class="sleek-input">
-            
-            <input type="tel" id="b_phone" placeholder="Phone Number" class="sleek-input">
-            
-            <select id="b_day" class="sleek-input">
-                <option value="Monday">Monday</option>
-                <option value="Tuesday">Tuesday</option>
-                <option value="Wednesday">Wednesday</option>
-                <option value="Thursday">Thursday</option>
-                <option value="Friday">Friday</option>
-            </select>
-            
-            <input type="time" id="b_time" value="14:00" class="sleek-input">
-            
-            <select id="b_purpose" class="sleek-input">
-                <option value="" disabled selected>Select Purpose</option>
-                <option value="prayer">Prayer</option>
-                <option value="cancelling">Cancelling</option>
-                <option value="church matters">Church Matters</option>
-            </select>
+    <div id="appointment-modal" class="modal">
+    <div class="glass-card">
+        <h2 class="gold-text">Book an Appointment</h2>
+        
+        <form id="appointment-form" onsubmit="submitAppointment(event)" style="text-align: left; margin: 15px 0;">
+            <div style="margin-bottom: 10px;">
+                <label style="color: #fff; font-size: 14px;">Full Name</label>
+                <input type="text" id="appointment-name" required style="width: 100%; padding: 8px; margin-top: 4px; border-radius: 4px; border: 1px solid #ccc;">
+            </div>
 
-            <button class="premium-gold-btn" onclick="submitBooking()">REQUEST MEETING</button>
-            <div class="cancel-link" onclick="closeModals()">Back</div>
-        </div>
+            <div style="margin-bottom: 10px;">
+                <label style="color: #fff; font-size: 14px;">Email</label>
+                <input type="email" id="appointment-email" required style="width: 100%; padding: 8px; margin-top: 4px; border-radius: 4px; border: 1px solid #ccc;">
+            </div>
+
+            <div style="margin-bottom: 10px;">
+                <label style="color: #fff; font-size: 14px;">Day</label>
+                <input type="text" id="appointment-day" placeholder="e.g., Wednesday" required style="width: 100%; padding: 8px; margin-top: 4px; border-radius: 4px; border: 1px solid #ccc;">
+            </div>
+
+            <div style="margin-bottom: 10px;">
+                <label style="color: #fff; font-size: 14px;">Time</label>
+                <input type="text" id="appointment-time" placeholder="e.g., 2:00 PM" required style="width: 100%; padding: 8px; margin-top: 4px; border-radius: 4px; border: 1px solid #ccc;">
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <label style="color: #fff; font-size: 14px;">Purpose</label>
+                <select id="appointment-purpose" required style="width: 100%; padding: 8px; margin-top: 4px; border-radius: 4px; border: 1px solid #ccc; background: #fff; color: #000;">
+                    <option value="" disabled selected>Select an option...</option>
+                    <option value="prayer">Prayer</option>
+                    <option value="cancelling">Cancelling</option>
+                    <option value="church matters">Church Matters</option>
+                </select>
+            </div>
+
+            <button type="submit" class="premium-gold-btn" style="width: 100%; margin-bottom: 10px;">Submit Appointment</button>
+        </form>
+
+        <button class="premium-gold-btn" onclick="closeModals()" style="width: 100%;">RETURN</button>
     </div>
    <div id="giving-modal" class="modal">
         <div class="glass-card">
