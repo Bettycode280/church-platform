@@ -195,6 +195,13 @@ body {
     border-radius: 30px; border: 1px solid rgba(212, 175, 55, 0.3); 
     backdrop-filter: blur(20px); width: 92%; max-width: 400px; text-align: center; 
 }
+/* --- GLASS FEED FIX --- */
+.glass-feed {
+    max-height: 400px;
+    overflow-y: auto;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    padding: 15px;
 
 .sleek-input {
     width: 100%; background: rgba(255,255,255,0.05);
@@ -216,6 +223,5 @@ body {
     text-shadow: 0 0 20px #ff0000;
     font-weight: 900; animation: flash-red 0.8s infinite;
 }
-
 @keyframes glow { 50% { opacity: 0.5; } }
 @keyframes flash-red { 50% { opacity: 0.4; transform: scale(1.05); } }

@@ -33,7 +33,7 @@
         <p class="church-name">CHRISTIAN CENTRE</p>
     </div>
 
-    <nav id="side-menu" class="nav-overlay">
+   <nav id="side-menu" class="nav-overlay">
         <div class="close-nav" onclick="toggleMenu()" style="position:absolute; top:40px; right:30px; font-size:2.5rem; color:#D4AF37; cursor:pointer;">&times;</div>
         
         <div class="nav-content">
@@ -44,6 +44,11 @@
             <div class="menu-item" onclick="toggleMenu()" style="margin-top:20px; opacity:0.5; font-size:0.8rem; border:none;">CLOSE MENU</div>
         </div>
     </nav>
+
+    <!-- Pastor's Live Feed Container -->
+    <div id="pastor-feed-container" class="glass-feed">
+        <!-- Feed items are populated here by JavaScript -->
+    </div>
 
     <div id="prayer-modal" class="modal">
         <div class="glass-card">
@@ -70,7 +75,7 @@
             </select>
             <input type="time" id="b_time" value="14:00" class="sleek-input">
             <button class="premium-gold-btn" onclick="submitBooking()">REQUEST MEETING</button>
-            <div class="cancel-link" onclick="closeModals()">Back</div>
+            <div class="cancel-link" onclick="closeModals(); toggleMenu();">Back</div>
         </div>
     </div>
 
