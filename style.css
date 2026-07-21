@@ -7,7 +7,7 @@
     /* Add the blue for the specific panel text */
     --velvet-blue: #0A1128; 
     
-    --glass-bg: rgba(255, 255, 255, 0.08);
+    --glass-bg: rgba(255, 255, 255, 0.04);
 }
 
 /* --- RESET & BASE --- */
@@ -17,55 +17,90 @@ body {
     font-family: 'Poppins', sans-serif; 
     background: #020408; 
     color: rgb(255, 255, 255); 
-    min-height: 100vh; 
-    overflow-x: hidden;
-    overflow-y: auto;
+    overflow: hidden; 
+    height: 100vh; 
+    width: 100vw;
 }
 
-/* --- BRANDING & MENU CONTROLS --- */
-.toggle-menu-btn {
-    background: rgba(251, 191, 36, 0.15);
-    border: 1px solid #fbbf24;
-    color: #fbbf24;
-    padding: 14px 20px;
-    border-radius: 12px;
-    font-size: 16px;
-    font-weight: 700;
-    cursor: pointer;
-    width: 100%;
-    text-align: center;
-    margin-bottom: 12px;
-    transition: all 0.3s ease;
+/* --- CINEMATIC BACKGROUND --- */
+.main-bg {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: url('image2.png.jpg') no-repeat center center/cover; 
+    z-index: -2;
 }
 
-.toggle-menu-btn:hover {
-    background: rgba(251, 191, 36, 0.25);
+.overlay-tint {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(circle at center, transparent 0%, #020408 100%); 
+    z-index: -1;
 }
 
-/* Side Menu Container */
-#side-menu {
-    position: fixed;
-    top: 0;
-    right: 0;
-    width: 300px;
-    height: 100%;
-    z-index: 6000;
+/* --- BRANDING --- */
+.app-logo { 
+    position: fixed; top: 25px; left: 20px; 
+    width: 95px; z-index: 100; 
+    filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));
+}
+
+.menu-trigger { 
+    position: fixed; top: 40px; right: 30px; 
+    cursor: pointer; z-index: 5000; padding: 10px;
+}
+
+.line { 
+    width: 32px; height: 3px; background: var(--gold-solid); 
+    margin: 6px 0; box-shadow: 0 0 12px rgba(212, 175, 55, 0.8);
+}
+
+/* --- HERO CORE --- */
+.hero-container {
+    height: 100vh;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    text-align: center; position: relative; z-index: 5;
+}
+
+.main-heading {
+    font-family: 'Montserrat', sans-serif;
+    font-size: clamp(2.5rem, 10vw, 3.5rem);
+    font-weight: 900; text-transform: uppercase;
+    background: var(--gold); -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.church-name {
+    letter-spacing: 8px; font-size: 0.8rem;
+    opacity: 0.6; text-transform: uppercase; margin-top: 10px;
+}
+
+/* --- THE MISSION INTERFACE (SIDE MENU) --- */
+.nav-overlay {
+    position: fixed; top: 0; right: 0; 
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.9);
     transform: translateX(100%);
-    transition: transform 0.3s ease;
-    pointer-events: none;
+    transition: 0.5s cubic-bezier(0.7, 0, 0.3, 1);
+    z-index: 6000;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
-#side-menu.open {
-    transform: translateX(0);
-    pointer-events: auto;
+.nav-overlay.open { transform: translateX(0); }
+
+.admin-dashboard-grid {
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 100px 20px;
 }
 
-/* --- THE MISSION CONTROL CARDS --- */
+/* --- THE MISSION CONTROL CARDS (IMAGE MATCHED) --- */
 .admin-panel {
     background: var(--glass-bg) !important;
     backdrop-filter: blur(15px) saturate(160%) !important;
     -webkit-backdrop-filter: blur(15px) saturate(160%);
     
+    /* THE GOLD PLATED EDGE */
     border-left: 5px solid var(--gold-solid) !important;
     border-top: 1px solid rgba(212, 175, 55, 0.15);
     border-right: 1px solid rgba(212, 175, 55, 0.15);
@@ -74,9 +109,15 @@ body {
     border-radius: 4px 20px 20px 4px;
     padding: 22px;
     margin-bottom: 18px;
-    text-align: left;
+    text-align: left; /* Matched to image feed */
     transition: 0.3s;
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.admin-panel {
+    background: rgba(255, 255, 255, 0.08) !important; /* Slightly lighter glass */
+    backdrop-filter: blur(15px) saturate(160%) !important;
+    /* ... rest of your border settings ... */
 }
 
 /* --- CARD INTERNALS --- */
@@ -91,12 +132,12 @@ body {
 }
 
 .form-hint { 
-    color: var(--velvet-blue); 
-    font-size: 1.4rem;        
-    font-weight: 800;        
+    color: var(--velvet-blue); /* Velvet Blue text */
+    font-size: 1.4rem;        /* Increased font size */
+    font-weight: 800;        /* Extra bold for clarity */
     opacity: 1; 
     margin: 0;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3); /* Adds depth to the blue */
 }
 
 /* --- MISSION BUTTONS --- */
@@ -130,43 +171,28 @@ body {
     backdrop-filter: blur(20px); width: 92%; max-width: 400px; text-align: center; 
 }
 
-/* --- GLASS FEED FIX --- */
-.glass-feed {
-    max-height: 400px;
-    overflow-y: auto;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    padding: 15px;
-}
-
 .sleek-input {
-    width: 100%; 
-    background: rgba(255,255,255,0.05);
-    border: 1px solid #333; 
-    color: white; 
-    padding: 12px;
-    border-radius: 10px; 
-    margin-top: 15px; 
-    outline: none;
+    width: 100%; background: rgba(255,255,255,0.05);
+    border: 1px solid #333; color: white; padding: 12px;
+    border-radius: 10px; margin-top: 15px; outline: none;
 }
 
-.cancel-link { 
-    margin-top: 15px; 
-    opacity: 0.4; 
-    cursor: pointer; 
-    font-size: 0.8rem; 
+.cancel-link { margin-top: 15px; opacity: 0.4; cursor: pointer; font-size: 0.8rem; }
+
+/* --- LIVE INDICATOR --- */
+.live-indicator {
+    position: absolute; top: 120px; 
+    font-weight: 600; letter-spacing: 3px; font-size: 0.75rem;
+    color: #FCF6BA; animation: glow 2s infinite;
 }
 
-/* --- LIVE RED ALERT STYLES --- */
-@keyframes flash-red { 
-    50% { 
-        opacity: 0.4; 
-        transform: scale(1.05); 
-    } 
+.live-indicator.red-alert {
+    color: #ff4444 !important;
+    text-shadow: 0 0 20px #ff0000;
+    font-weight: 900; animation: flash-red 0.8s infinite;
 }
 
-.red-alert {
-    color: #ff3b30 !important;
-    animation: flash-red 1s infinite;
-    font-weight: 900;
-}
+@keyframes glow { 50% { opacity: 0.5; } }
+@keyframes flash-red { 50% { opacity: 0.4; transform: scale(1.05); } }
+
+
