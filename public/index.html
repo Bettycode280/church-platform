@@ -6,28 +6,22 @@
     <title>DLCC | Official App</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
     
     <!-- Mobile Home Screen Icons -->
     <link rel="icon" type="image/jpeg" href="logo.jpg">
     <link rel="apple-touch-icon" href="logo.jpg">
     
+    <!-- Firebase SDK (Compat Version) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-</head>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Church Portal</title>
+
     <style>
         /* Base Reset & Premium Glass UI Theme */
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
@@ -37,7 +31,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
             padding: 20px;
         }
 
@@ -49,7 +43,9 @@
 
         .gold-text {
             color: #fbbf24;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
         }
 
         /* Glass UI Cards & Modals */
@@ -69,6 +65,32 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-in-out;
+        }
+
+        .nav-menu.open {
+            max-height: 700px;
+        }
+
+        .toggle-menu-btn {
+            background: rgba(251, 191, 36, 0.15);
+            border: 1px solid #fbbf24;
+            color: #fbbf24;
+            padding: 14px 20px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            text-align: center;
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-menu-btn:hover {
+            background: rgba(251, 191, 36, 0.25);
         }
 
         .nav-btn {
@@ -107,6 +129,10 @@
             align-items: center;
             z-index: 1000;
             padding: 20px;
+        }
+
+        .modal.open {
+            display: flex;
         }
 
         .modal .glass-card {
@@ -181,13 +207,14 @@
     <div class="container">
         <!-- Main Dashboard Header -->
         <div class="glass-card" style="text-align: center;">
-            <h1 class="gold-text" style="font-size: 24px;">Church Portal</h1>
-            <p style="color: #94a3b8; font-size: 14px;">Welcome to our digital sanctuary</p>
+            <h1 class="gold-text" style="font-size: 24px;">DLCC Portal</h1>
+            <p id="broadcast-tag" style="color: #94a3b8; font-size: 14px;">CONNECTING TO MISSION...</p>
         </div>
 
         <!-- Navigation Menu -->
         <div class="glass-card">
-            <div class="nav-menu">
+            <button class="toggle-menu-btn" onclick="toggleMenu()">☰ MENU OPTIONS</button>
+            <div id="side-menu" class="nav-menu">
                 <button class="nav-btn" onclick="openModal('live-modal')">📺 Watch Live</button>
                 <button class="nav-btn" onclick="openModal('giving-modal')">💝 Tithes & Giving</button>
                 <button class="nav-btn" onclick="openModal('prayer-modal')">🙏 Prayer Request</button>
@@ -204,11 +231,11 @@
     <div id="giving-modal" class="modal">
         <div class="glass-card">
             <h2 class="gold-text">Giving</h2>
-            <div style="margin: 15px 0; color: #fff;">
-                <p style="margin: 5px 0;"><strong>Bank Name:</strong> Dominf Bank</p>
-                <p style="margin: 5px 0;"><strong>Account Name:</strong> Church Account Ministry Account</p>
-                <p style="margin: 5px 0;"><strong>Account Number:</strong> 88577397</p>
-                <p style="margin: 5px 0;"><strong>Sort Code:</strong> 677736</p>
+            <div style="text-align: left; margin: 15px 0; color: #fff;">
+                <p style="margin: 5px 0;"><strong>Bank Name:</strong> Divine Life</p>
+                <p style="margin: 5px 0;"><strong>Account Name:</strong> Divine Life Christian Centre</p>
+                <p style="margin: 5px 0;"><strong>Account Number:</strong> 54471165</p>
+                <p style="margin: 5px 0;"><strong>Sort Code:</strong> 230580</p>
             </div>
             <button class="premium-gold-btn" onclick="closeModals()">RETURN</button>
         </div>
@@ -221,7 +248,7 @@
             <p class="form-hint">Request a Private Meeting</p>
             
             <input type="text" id="b_name" placeholder="Full Name" class="sleek-input">
-            <input type="email" id="b_email" placeholder="Email Address" class="sleek-input">
+            <input type="email" id="b_email" placeholder="Email Address (Optional)" class="sleek-input">
             <input type="tel" id="b_phone" placeholder="Phone Number" class="sleek-input">
             
             <select id="b_day" class="sleek-input">
@@ -230,15 +257,17 @@
                 <option value="Wednesday">Wednesday</option>
                 <option value="Thursday">Thursday</option>
                 <option value="Friday">Friday</option>
+                <option value="Saturday">Saturday</option>
+                <option value="Sunday">Sunday</option>
             </select>
             
             <input type="time" id="b_time" value="14:00" class="sleek-input">
             
             <select id="b_purpose" class="sleek-input">
                 <option value="" disabled selected>Select Purpose</option>
-                <option value="prayer">Prayer</option>
-                <option value="cancelling">Cancelling</option>
-                <option value="church matters">Church Matters</option>
+                <option value="Prayer">Prayer</option>
+                <option value="Counselling">Counselling</option>
+                <option value="Church Matters">Church Matters</option>
             </select>
 
             <button class="premium-gold-btn" onclick="submitBooking()">REQUEST MEETING</button>
@@ -246,54 +275,169 @@
         </div>
     </div>
 
+    <!-- Prayer Request Modal -->
+    <div id="prayer-modal" class="modal">
+        <div class="glass-card">
+            <h2 class="gold-text">Prayer Request</h2>
+            <input type="text" id="p_name" placeholder="Your Name" class="sleek-input">
+            <textarea id="p_msg" placeholder="Write your prayer request here..." class="sleek-input" rows="4" style="resize: none;"></textarea>
+            <button class="premium-gold-btn" onclick="submitPrayer()">SEND PRAYER</button>
+            <div class="cancel-link" onclick="closeModals()">Cancel</div>
+        </div>
+    </div>
+
+    <!-- Contact Us Modal -->
+    <div id="contact-modal" class="modal">
+        <div class="glass-card">
+            <h2 class="gold-text">Contact Us</h2>
+            <div style="text-align: left; margin: 15px 0; color: #fff; font-size: 14px; line-height: 1.6;">
+                <p style="margin: 6px 0;"><strong>Church Address:</strong> Divine Life Christian Centre, Main Sanctuary</p>
+                <p style="margin: 6px 0;"><strong>Phone Number:</strong> +44 20 0000 0000</p>
+                <p style="margin: 6px 0;"><strong>WhatsApp:</strong> +44 70 0000 0000</p>
+                <p style="margin: 6px 0;"><strong>Email:</strong> info@dlcc.org</p>
+                <p style="margin: 6px 0;"><strong>Facebook:</strong> facebook.com/dlcc</p>
+                <p style="margin: 6px 0;"><strong>YouTube:</strong> youtube.com/dlcc</p>
+            </div>
+            <button class="premium-gold-btn" onclick="closeModals()">CLOSE</button>
+        </div>
+    </div>
+
     <!-- Generic Modals for Remaining Navigation Items -->
     <div id="live-modal" class="modal"><div class="glass-card"><h2 class="gold-text">Watch Live</h2><button class="premium-gold-btn" onclick="closeModals()">Close</button></div></div>
-    <div id="prayer-modal" class="modal"><div class="glass-card"><h2 class="gold-text">Prayer Request</h2><button class="premium-gold-btn" onclick="closeModals()">Close</button></div></div>
     <div id="devotion-modal" class="modal"><div class="glass-card"><h2 class="gold-text">Daily Devotion</h2><button class="premium-gold-btn" onclick="closeModals()">Close</button></div></div>
     <div id="announcements-modal" class="modal"><div class="glass-card"><h2 class="gold-text">Announcements</h2><button class="premium-gold-btn" onclick="closeModals()">Close</button></div></div>
     <div id="about-modal" class="modal"><div class="glass-card"><h2 class="gold-text">About the Ministry</h2><button class="premium-gold-btn" onclick="closeModals()">Close</button></div></div>
-    <div id="contact-modal" class="modal"><div class="glass-card"><h2 class="gold-text">Contact Us</h2><button class="premium-gold-btn" onclick="closeModals()">Close</button></div></div>
 
     <audio id="alert-sound" src="alert.mp3" preload="auto"></audio>
 
     <script>
-        // Modal Control Helper Functions compatible with your project
-        function openModal(modalId) {
-            const modal = document.getElementById(modalId);
-            if (modal) modal.style.display = 'flex';
+        // Firebase Configuration (Replace with your actual Firebase web keys if needed)
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        if (!firebase.apps.length) { 
+            firebase.initializeApp(firebaseConfig); 
+        }
+        const db = firebase.firestore();
+
+        // Navigation Menu Drawer Toggle
+        function toggleMenu() { 
+            const nav = document.getElementById('side-menu');
+            if (nav) {
+                nav.classList.toggle('open'); 
+            }
+        }
+
+        function openModal(id) { 
+            const nav = document.getElementById('side-menu');
+            if (nav) nav.classList.remove('open');
+            
+            const modal = document.getElementById(id);
+            if (modal) modal.classList.add('open'); 
         }
 
         function closeModals() {
             const modals = document.querySelectorAll('.modal');
-            modals.forEach(m => m.style.display = 'none');
+            modals.forEach(m => m.classList.remove('open'));
         }
 
-        function submitBooking() {
-            // Placeholder for your existing Firebase/booking submission logic
-            alert("Booking request submitted successfully!");
-            closeModals();
+        // Live Sermon Broadcast (Red Alert Listener)
+        const broadcastTag = document.getElementById('broadcast-tag');
+        const alertSound = document.getElementById('alert-sound');
+
+        if (broadcastTag) {
+            db.collection("churchSettings").doc("live_topic").onSnapshot(doc => {
+                if (doc.exists && doc.data().title && doc.data().title.trim() !== "") { 
+                    const sermonTitle = doc.data().title.trim();
+                    broadcastTag.innerText = "🚨 LIVE NOW: " + sermonTitle.toUpperCase();
+                    broadcastTag.style.color = "#ef4444";
+                    
+                    if (alertSound) {
+                        alertSound.play().catch(e => console.log("Sound interaction block prevented auto-play."));
+                    }
+                } else {
+                    broadcastTag.innerText = "CONNECTING TO MISSION...";
+                    broadcastTag.style.color = "#94a3b8";
+                    
+                    if (alertSound) {
+                        alertSound.pause();
+                        alertSound.currentTime = 0;
+                    }
+                }
+            });
+        }
+
+        // Submit Prayer to Firestore
+        async function submitPrayer() {
+            const name = document.getElementById('p_name').value;
+            const text = document.getElementById('p_msg').value;
+            if(!name || !text) return alert("Please fill all fields.");
+            
+            try {
+                await db.collection("churchPrayers").add({ 
+                    type: "PRAYER", 
+                    name: name, 
+                    text: text, 
+                    time: firebase.firestore.FieldValue.serverTimestamp() 
+                });
+                alert("Prayer request sent to Pastor."); 
+                document.getElementById('p_name').value = "";
+                document.getElementById('p_msg').value = "";
+                closeModals();
+            } catch (error) {
+                console.error("Error sending prayer: ", error);
+                alert("Failed to send request.");
+            }
+        }
+
+        // Submit Appointment Booking to Dedicated 'appointments' Collection with Separated Fields & Optional Email
+        async function submitBooking() {
+            const name = document.getElementById('b_name').value;
+            const email = document.getElementById('b_email').value;
+            const phone = document.getElementById('b_phone').value;
+            const day = document.getElementById('b_day').value;
+            const time = document.getElementById('b_time').value;
+            const purpose = document.getElementById('b_purpose').value;
+            
+            if(!name || !phone || !purpose) return alert("Please fill all required appointment fields.");
+            
+            try {
+                await db.collection("appointments").add({
+                    type: "APPOINTMENT",
+                    name,
+                    phone,
+                    email,
+                    purpose,
+                    day,
+                    appointmentTime: time,
+                    status: "Pending",
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                alert("Meeting request sent successfully!"); 
+                
+                // Reset form fields
+                document.getElementById("b_name").value = "";
+                document.getElementById("b_email").value = "";
+                document.getElementById("b_phone").value = "";
+                document.getElementById("b_day").selectedIndex = 0;
+                document.getElementById("b_time").value = "14:00";
+                document.getElementById("b_purpose").selectedIndex = 0;
+
+                closeModals();
+            } catch (error) {
+                console.error("Error sending appointment: ", error);
+                alert("Failed to send booking request.");
+            }
         }
     </script>
 </body>
 </html>
-
-        <button class="premium-gold-btn" onclick="closeModals()" style="width:100%;">
-            RETURN
-        </button>
-    </div>
-</div>
-   <div id="giving-modal" class="modal">
-        <div class="glass-card">
-            <h2 class="gold-text">Giving</h2>
-            
-            <div style="text-align: left; margin: 15px 0; color: #fff;">
-                <p style="margin: 5px 0;"><strong>Bank Name:</strong> Divine Life</p>
-                <p style="margin: 5px 0;"><strong>Account Name:</strong>Divine Divine Life Christian Centre</p>
-                <p style="margin: 5px 0;"><strong>Account Number:</strong> 54471165</p>
-                <p style="margin: 5px 0;"><strong>Sort Code:</strong> 230580</p>
-            </div>
-            <button class="premium-gold-btn" onclick="closeModals()">RETURN</button>
-        </div>
 
     <audio id="alert-sound" src="alert.mp3" preload="auto"></audio>
 
