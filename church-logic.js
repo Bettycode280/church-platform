@@ -9,12 +9,12 @@ const firebaseConfig = {
     messagingSenderId: "369831733781",
     appId: "1:369831733781:web:a7402fd123de519d7e3c1c"
 };
+
 // Initialize Firebase
 if (!firebase.apps.length) { 
     firebase.initializeApp(firebaseConfig); 
 }
 const db = firebase.firestore();
-
 // ==========================================
 // 2. NAVIGATION & UI CONTROLS
 // ==========================================
@@ -26,26 +26,13 @@ function toggleMenu() {
         nav.classList.toggle('open'); 
     }
 }
-// Function to open any modal by its ID
-function openModal(modalId) {
-    const modal = document.getElementById(modalId);
-    if (modal) {
-        modal.classList.add('open');
-    } else {
-        console.error("Modal not found with ID: " + modalId);
-    }
-}
 
-// Function to close all active modals
-function closeModals() {
-    const modals = document.querySelectorAll('.modal');
-    modals.forEach(modal => {
-        modal.classList.remove('open');
-    });
-}
-
-function openLive() {
-    window.open("https://youtube.com/@DivineLifeChristianCentre/live", "_blank");
+function openModal(id) { 
+    const nav = document.getElementById('side-nav') || document.getElementById('side-menu');
+    if (nav) nav.classList.remove('open'); // Close menu first
+    
+    const modal = document.getElementById(id);
+    if (modal) modal.classList.add('open'); 
 }
 
 // ==========================================
@@ -128,158 +115,75 @@ async function updateSermon() {
     }
 }
 
-// Hypothesis 2: Add try...catch to submitPrayer() to handle network or permission errors safely
 async function submitPrayer() {
     const name = document.getElementById('p_name').value;
     const text = document.getElementById('p_msg').value;
     if(!name || !text) return alert("Fill all fields.");
     
-    try {
-        await db.collection("churchPrayers").add({
-            type: "PRAYER",
-            name,
-            text,
-            time: firebase.firestore.FieldValue.serverTimestamp()
-        });
-
-        alert("Sent to Pastor.");
-
-        document.getElementById("p_name").value = "";
-        document.getElementById("p_msg").value = "";
-
-        closeModals();
-
-    } catch (error) {
-        console.error(error);
-        alert("Unable to send prayer request.");
-    }
+    await db.collection("churchPrayers").add({ 
+        type: "PRAYER", 
+        name, 
+        text, 
+        time: firebase.firestore.FieldValue.serverTimestamp() 
+    });
+    alert("Sent to Pastor."); 
+    closeModals();
 }
 
-// Hypothesis 1: Add try...catch to submitBooking() and save with separated fields and optional email
 async function submitBooking() {
     const name = document.getElementById('b_name').value;
     const email = document.getElementById('b_email').value;
-    const phone = document.getElementById('b_phone').value;
+    const phone = document.getElementById('b_phonevnumber').value;
     const day = document.getElementById('b_day').value;
     const time = document.getElementById('b_time').value;
-    const purpose = document.getElementById('b_purpose').value;
+
+    if(!name) return alert("Name required.");
     
-    // Validates that required fields are filled (email is optional)
-    if(!name || !phone || !purpose) return alert("Please fill all required appointment fields.");
-    
-    try {
-        await db.collection("appointments").add({
-            type: "APPOINTMENT",
-            name: name,
-            phone: phone,
-            email: email,
-            purpose: purpose,
-            day: day,
-            appointmentTime: time,
-            status: "Pending",
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-
-        alert("Request Sent.");
-
-        // Clear out the form fields after successful submission
-        document.getElementById("b_name").value = "";
-        document.getElementById("b_email").value = "";
-        document.getElementById("b_phone").value = "";
-        document.getElementById("b_day").selectedIndex = 0;
-        document.getElementById("b_time").value = "14:00";
-        document.getElementById("b_purpose").selectedIndex = 0;
-
-        closeModals();
-
-    } catch (error) {
-        console.error(error);
-        alert("Unable to submit appointment.");
-    }
+    await db.collection("churchPrayers").add({ 
+        type: "APPOINTMENT", 
+        name, 
+        text: `${day} at ${time}`, 
+        time: firebase.firestore.FieldValue.serverTimestamp() 
+    });
+    alert("Request Sent."); 
+    closeModals();
 }
-
-// Hypothesis 3: Avoid nested snapshot listeners by managing separate cache states and a unified renderer
-let prayersCache = [];
-let appointmentsCache = [];
 
 function loadPrayers() {
     const list = document.getElementById('prayer-list');
     if (!list) return;
 
-    function renderCombinedFeed() {
+    db.collection("churchPrayers").orderBy("time", "desc").onSnapshot(snap => {
         list.innerHTML = "";
-        let items = [];
-
-        prayersCache.forEach(doc => {
-            items.push({ 
-                id: doc.id, 
-                collection: "churchPrayers", 
-                ...doc.data(), 
-                timeField: doc.data().time 
-            });
-        });
-
-        appointmentsCache.forEach(doc => {
+        snap.forEach(doc => {
             const data = doc.data();
-            items.push({ 
-                id: doc.id, 
-                collection: "appointments", 
-                type: "APPOINTMENT",
-                name: data.name,
-                email: data.email,
-                phone: data.phone,
-                text: `Purpose: ${data.purpose ? data.purpose.toUpperCase() : ''} | Day: ${data.day} at ${data.appointmentTime}`,
-                timeField: data.createdAt 
-            });
-        });
-
-        // Sort combined feeds chronologically descending
-        items.sort((a, b) => {
-            if (!a.timeField) return 1;
-            if (!b.timeField) return -1;
-            return b.timeField.toMillis() - a.timeField.toMillis();
-        });
-
-        items.forEach(data => {
+            const docId = doc.id; // Get the unique document ID for deletion
+            
+            // UPDATED: Added a flex container wrap and a premium delete button action layout
             list.innerHTML += `
-                <div class="request-card" id="${data.id}" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 6px;">
-                    <div style="flex-grow: 1; padding-right: 15px; word-break: break-word; overflow-wrap: break-word; white-space: normal;">
+                <div class="request-card" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 6px;">
+                    <div style="flex-grow: 1; padding-right: 15px;">
                         <small style="color:#D4AF37; font-weight:bold;">${data.type}</small>
-                        <p style="margin: 4px 0; word-break: break-word; overflow-wrap: break-word;"><strong>${data.name}</strong></p>
-                        ${data.email ? `<p style="margin: 2px 0; font-size: 13px; opacity: 0.8;">Email: ${data.email}</p>` : ''}
-                        ${data.phone ? `<p style="margin: 2px 0; font-size: 13px; opacity: 0.8;">Phone: ${data.phone}</p>` : ''}
-                        <p style="margin: 4px 0 0 0; opacity: 0.9; word-break: break-word; overflow-wrap: break-word; white-space: pre-wrap;">${data.text}</p>
+                        <p style="margin: 4px 0;"><strong>${data.name}</strong></p>
+                        <p style="margin: 0; opacity: 0.9;">${data.text}</p>
                     </div>
-                    <button class="delete-feed-btn" onclick="deleteFeedItem('${data.id}', '${data.collection}')" style="background: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; flex-shrink: 0;">Delete</button>
+                    <button class="delete-feed-btn" onclick="deleteFeedItem('${docId}')" style="background: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;">Delete</button>
                 </div>`;
         });
-    }
-
-    // Independent top-level snapshot listeners
-    db.collection("churchPrayers").orderBy("time", "desc").onSnapshot(prayerSnap => {
-        prayersCache = prayerSnap.docs;
-        renderCombinedFeed();
-    });
-
-    db.collection("appointments").orderBy("createdAt", "desc").onSnapshot(apptSnap => {
-        appointmentsCache = apptSnap.docs;
-        renderCombinedFeed();
     });
 }
 
-// Delete function handles correct collection routing dynamically
-async function deleteFeedItem(id, collectionName) {
-    try {
-        const targetCollection = collectionName ? collectionName : "churchPrayers";
-        console.log("Deleting document:", id, "from collection:", targetCollection);
-
-        await db.collection(targetCollection).doc(id).delete();
-
-        console.log("Document deleted successfully.");
-        alert("Deleted successfully!");
-
-    } catch (error) {
-        console.error("DELETE ERROR:", error);
-        alert("Delete failed:\n" + error.message);
+// NEW FUNCTION: Enables Pastor to wipe old items out of the churchPrayers data model feed
+function deleteFeedItem(docId) {
+    if (confirm("Remove this item from the Mission Control feed permanently?")) {
+        db.collection("churchPrayers").doc(docId).delete()
+        .then(() => {
+            console.log("Feed item successfully deleted.");
+        })
+        .catch((error) => {
+            console.error("Error removing document: ", error);
+            alert("Delete action failed. Check connection.");
+        });
     }
 }
+
