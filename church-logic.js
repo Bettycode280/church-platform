@@ -158,7 +158,6 @@ async function submitPrayer() {
     alert("Sent to Pastor."); 
     closeModals();
 }
-
 function loadPrayers() {
     const list = document.getElementById('prayer-list');
     if (!list) return;
@@ -169,17 +168,22 @@ function loadPrayers() {
             const data = doc.data();
             const docId = doc.id;
             
-            // Format contact details cleanly inside the admin view feed card if present
-            const contactDetails = (data.email || data.phone) ? 
-                `<p style="margin: 2px 0; font-size: 13px; opacity: 0.8;">📧 ${data.email || 'N/A'} | ☎️ ${data.phone || 'N/A'}</p>` : '';
+            // If it's an appointment, display email and phone details
+            let contactInfo = "";
+            if (data.type === "APPOINTMENT") {
+                contactInfo = `
+                    <p style="margin: 2px 0; font-size: 13px; color: #D4AF37;">📧 Email: ${data.email || 'N/A'}</p>
+                    <p style="margin: 2px 0; font-size: 13px; color: #D4AF37;">☎️ Phone: ${data.phone || 'N/A'}</p>
+                `;
+            }
 
             list.innerHTML += `
                 <div class="request-card" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 6px;">
                     <div style="flex-grow: 1; padding-right: 15px;">
                         <small style="color:#D4AF37; font-weight:bold;">${data.type}</small>
                         <p style="margin: 4px 0;"><strong>${data.name}</strong></p>
-                        ${contactDetails}
-                        <p style="margin: 4px 0 0 0; opacity: 0.9;">${data.text}</p>
+                        ${contactInfo}
+                        <p style="margin: 4px 0 0 0; opacity: 0.9;"><strong>Schedule:</strong> ${data.text}</p>
                     </div>
                     <button class="delete-feed-btn" onclick="deleteFeedItem('${docId}')" style="background: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;">Delete</button>
                 </div>`;
