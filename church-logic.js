@@ -160,17 +160,17 @@ async function submitBooking() {
     const time = document.getElementById('b_time').value;
     const purpose = document.getElementById('b_purpose').value;
     
-    // Email is optional; required fields are name, phone, and purpose
+    // Validates that required fields are filled (email is optional)
     if(!name || !phone || !purpose) return alert("Please fill all required appointment fields.");
     
     try {
         await db.collection("appointments").add({
             type: "APPOINTMENT",
-            name,
-            phone,
-            email,
-            purpose,
-            day,
+            name: name,
+            phone: phone,
+            email: email,
+            purpose: purpose,
+            day: day,
             appointmentTime: time,
             status: "Pending",
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -178,6 +178,7 @@ async function submitBooking() {
 
         alert("Request Sent.");
 
+        // Clear out the form fields after successful submission
         document.getElementById("b_name").value = "";
         document.getElementById("b_email").value = "";
         document.getElementById("b_phone").value = "";
