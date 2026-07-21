@@ -4,10 +4,10 @@
     --gold: linear-gradient(135deg, #BF953F, #FCF6BA, #B38728, #FBF5B7, #AA771D);
     --gold-solid: #D4AF37;
     
-    /* Add the blue for the specific panel text */
-    --velvet-blue: #0A1128; 
+    /* Panel accent color */
+    --velvet-blue: #3b82f6; /* Adjusted for high contrast readability on dark backgrounds */
     
-    --glass-bg: rgba(255, 255, 255, 0.04);
+    --glass-bg: rgba(255, 255, 255, 0.08);
 }
 
 /* --- RESET & BASE --- */
@@ -109,15 +109,9 @@ body {
     border-radius: 4px 20px 20px 4px;
     padding: 22px;
     margin-bottom: 18px;
-    text-align: left; /* Matched to image feed */
+    text-align: left;
     transition: 0.3s;
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-}
-
-.admin-panel {
-    background: rgba(255, 255, 255, 0.08) !important; /* Slightly lighter glass */
-    backdrop-filter: blur(15px) saturate(160%) !important;
-    /* ... rest of your border settings ... */
 }
 
 /* --- CARD INTERNALS --- */
@@ -132,12 +126,12 @@ body {
 }
 
 .form-hint { 
-    color: var(--velvet-blue); /* Velvet Blue text */
-    font-size: 1.4rem;        /* Increased font size */
-    font-weight: 800;        /* Extra bold for clarity */
-    opacity: 1; 
+    color: #ffffff; /* Changed to bright white/light tone for proper readability over dark panels */
+    font-size: 1.4rem;        
+    font-weight: 800;        
+    opacity: 0.95; 
     margin: 0;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.3); /* Adds depth to the blue */
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
 /* --- MISSION BUTTONS --- */
@@ -194,5 +188,3 @@ body {
 
 @keyframes glow { 50% { opacity: 0.5; } }
 @keyframes flash-red { 50% { opacity: 0.4; transform: scale(1.05); } }
-
-
