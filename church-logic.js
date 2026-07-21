@@ -135,14 +135,20 @@ async function submitPrayer() {
 
 async function submitBooking() {
     const name = document.getElementById('b_name').value;
+    const email = document.getElementById('b_email').value;
+    const phone = document.getElementById('b_phone').value;
     const day = document.getElementById('b_day').value;
     const time = document.getElementById('b_time').value;
-    if(!name) return alert("Name required.");
+    const purpose = document.getElementById('b_purpose').value;
+    
+    if(!name || !email || !phone || !purpose) return alert("Please fill all required appointment fields.");
     
     await db.collection("churchPrayers").add({ 
         type: "APPOINTMENT", 
-        name, 
-        text: `${day} at ${time}`, 
+        name: name,
+        email: email,
+        phone: phone,
+        text: `Purpose: ${purpose.toUpperCase()} | Day: ${day} at ${time}`, 
         time: firebase.firestore.FieldValue.serverTimestamp() 
     });
     alert("Request Sent."); 
@@ -164,7 +170,9 @@ function loadPrayers() {
                     <div style="flex-grow: 1; padding-right: 15px; word-break: break-word; overflow-wrap: break-word; white-space: normal;">
                         <small style="color:#D4AF37; font-weight:bold;">${data.type}</small>
                         <p style="margin: 4px 0; word-break: break-word; overflow-wrap: break-word;"><strong>${data.name}</strong></p>
-                        <p style="margin: 0; opacity: 0.9; word-break: break-word; overflow-wrap: break-word; white-space: pre-wrap;">${data.text}</p>
+                        ${data.email ? `<p style="margin: 2px 0; font-size: 13px; opacity: 0.8;">Email: ${data.email}</p>` : ''}
+                        ${data.phone ? `<p style="margin: 2px 0; font-size: 13px; opacity: 0.8;">Phone: ${data.phone}</p>` : ''}
+                        <p style="margin: 4px 0 0 0; opacity: 0.9; word-break: break-word; overflow-wrap: break-word; white-space: pre-wrap;">${data.text}</p>
                     </div>
                     <button class="delete-feed-btn" onclick="deleteFeedItem('${docId}', this)" style="background: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; flex-shrink: 0;">Delete</button>
                 </div>`;
