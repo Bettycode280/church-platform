@@ -143,21 +143,69 @@ async function updateSermon() {
         alert("Mission Update Failed. Check Connection.");
     }
 }
-
-async function submitPrayer() {
-    const name = document.getElementById('p_name').value;
-    const text = document.getElementById('p_msg').value;
-    if(!name || !text) return alert("Fill all fields.");
-    
-    await db.collection("churchPrayers").add({ 
-        type: "PRAYER", 
-        name, 
-        text, 
-        time: firebase.firestore.FieldValue.serverTimestamp() 
-    });
-    alert("Sent to Pastor."); 
-    closeModals();
+// Function to update appointment status (Accept / Reject)
+async function updateAppointmentStatus(docId, newStatus) {
+    try {
+        await db.collection("churchPrayers").doc(docId).update({
+            status: newStatus
+        });
+        console.log(`Appointment status updated to: ${newStatus}`);
+    } catch (error) {
+        console.error("Error updating status: ", error);
+        alert("Failed to update status.");
+    }
 }
+
+// Function to reschedule an appointment
+async function rescheduleAppointment(docId) {
+    const newDay = prompt("Enter new day (e.g., Tuesday):");
+    const newTime = prompt("Enter new time (e.g., 15:30):");
+    
+    if (!newDay || !newTime) return;
+
+    try {
+        await db.collection("churchPrayers").doc(docId).update({
+            text: `${newDay} at ${newTime}`,
+            status: "Rescheduled"
+        });
+        alert("Appointment rescheduled successfully.");
+    } catch (error) {
+        console.error("Error rescheduling: ", error);
+        alert("Failed to reschedule.");
+    }
+}
+
+async function submitBooking() {
+    const nameInput = document.getElementById('b_name');
+    const emailInput = document.getElementById('b_email');
+    const phoneInput = document.getElementById('b_phone');
+    const dayInput = document.getElementById('b_day');
+    const timeInput = document.getElementById('b_time');
+
+    if (!nameInput || !nameInput.value.trim()) {
+        alert("Name required.");
+        return;
+    }
+
+    try {
+        await db.collection("churchPrayers").add({ 
+            type: "APPOINTMENT", 
+            name: nameInput.value.trim(), 
+            email: emailInput ? emailInput.value.trim() : "",
+            phone: phoneInput ? phoneInput.value.trim() : "",
+            text: `${dayInput ? dayInput.value : "Monday"} at ${timeInput ? timeInput.value : "14:00"}`, 
+            status: "Pending", // Default status
+            time: firebase.firestore.FieldValue.serverTimestamp() 
+        });
+        
+        alert("Request Sent."); 
+        closeModals();
+    } catch (error) {
+        console.error("Error submitting booking: ", error);
+        alert("Failed to send request. Please try again.");
+    }
+}
+
 function loadPrayers() {
     const list = document.getElementById('prayer-list');
     if (!list) return;
@@ -168,33 +216,54 @@ function loadPrayers() {
             const data = doc.data();
             const docId = doc.id;
             
-            // Format details differently if it's an appointment vs a standard prayer request
             let detailsContent = "";
+            let actionButtons = "";
+
             if (data.type === "APPOINTMENT") {
+                const currentStatus = data.status || "Pending";
+                let statusColor = "#f39c12"; // Pending (Orange)
+                if (currentStatus === "Accepted") statusColor = "#2ecc71"; // Green
+                if (currentStatus === "Rejected") statusColor = "#e74c3c"; // Red
+                if (currentStatus === "Rescheduled") statusColor = "#3498db"; // Blue
+
                 detailsContent = `
                     <p style="margin: 4px 0;"><strong>Name:</strong> ${data.name}</p>
                     <p style="margin: 2px 0; font-size: 13px; color: #D4AF37;">📧 <strong>Email:</strong> ${data.email || 'N/A'}</p>
                     <p style="margin: 2px 0; font-size: 13px; color: #D4AF37;">☎️ <strong>Phone:</strong> ${data.phone || 'N/A'}</p>
-                    <p style="margin: 4px 0 0 0; opacity: 0.9;">📅 <strong>Requested Time & Date:</strong> ${data.text}</p>
+                    <p style="margin: 4px 0; opacity: 0.9;">📅 <strong>Requested:</strong> ${data.text}</p>
+                    <p style="margin: 4px 0 8px 0; font-size: 12px;">Status: <span style="color: ${statusColor}; font-weight: bold;">${currentStatus}</span></p>
+                `;
+
+                actionButtons = `
+                    <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                        <button onclick="updateAppointmentStatus('${docId}', 'Accepted')" style="background: #2ecc71; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 650;">Accept</button>
+                        <button onclick="updateAppointmentStatus('${docId}', 'Rejected')" style="background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 650;">Reject</button>
+                        <button onclick="rescheduleAppointment('${docId}')" style="background: #3498db; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 650;">Reschedule</button>
+                        <button onclick="deleteFeedItem('${docId}')" style="background: #555; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 650;">Delete</button>
+                    </div>
                 `;
             } else {
                 detailsContent = `
                     <p style="margin: 4px 0;"><strong>Name:</strong> ${data.name}</p>
-                    <p style="margin: 0; opacity: 0.9;">${data.text}</p>
+                    <p style="margin: 0 0 8px 0; opacity: 0.9;">${data.text}</p>
+                `;
+                actionButtons = `
+                    <button onclick="deleteFeedItem('${docId}')" style="background: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;">Delete</button>
                 `;
             }
 
             list.innerHTML += `
-                <div class="request-card" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 6px;">
-                    <div style="flex-grow: 1; padding-right: 15px;">
+                <div class="request-card" style="margin-bottom: 12px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 6px;">
+                    <div style="margin-bottom: 8px;">
                         <small style="color:#D4AF37; font-weight:bold;">${data.type}</small>
                         ${detailsContent}
                     </div>
-                    <button class="delete-feed-btn" onclick="deleteFeedItem('${docId}')" style="background: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;">Delete</button>
+                    ${actionButtons}
                 </div>`;
         });
     });
 }
+
 function deleteFeedItem(docId) {
     if (confirm("Remove this item from the Mission Control feed permanently?")) {
         db.collection("churchPrayers").doc(docId).delete()
