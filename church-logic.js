@@ -118,7 +118,6 @@ if (broadcastTag) {
         }
     });
 }
-
 // ==========================================
 // 5. DATA SUBMISSION & DASHBOARD
 // ==========================================
@@ -143,6 +142,36 @@ async function updateSermon() {
         alert("Mission Update Failed. Check Connection.");
     }
 }
+
+// Function to submit prayer requests from congregants
+async function submitPrayer() {
+    const nameInput = document.getElementById('p_name');
+    const msgInput = document.getElementById('p_msg');
+
+    if (!nameInput || !msgInput || !nameInput.value.trim() || !msgInput.value.trim()) {
+        alert("Please fill all fields.");
+        return;
+    }
+
+    try {
+        await db.collection("churchPrayers").add({ 
+            type: "PRAYER", 
+            name: nameInput.value.trim(), 
+            text: msgInput.value.trim(), 
+            time: firebase.firestore.FieldValue.serverTimestamp() 
+        });
+        
+        alert("Sent to Pastor."); 
+        closeModals();
+        
+        nameInput.value = "";
+        msgInput.value = "";
+    } catch (error) {
+        console.error("Error submitting prayer: ", error);
+        alert("Failed to send prayer request. Please check your connection.");
+    }
+}
+
 // Function to update appointment status (Accept / Reject)
 async function updateAppointmentStatus(docId, newStatus) {
     try {
