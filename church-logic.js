@@ -168,12 +168,19 @@ function loadPrayers() {
             const data = doc.data();
             const docId = doc.id;
             
-            // If it's an appointment, display email and phone details
-            let contactInfo = "";
+            // Format details differently if it's an appointment vs a standard prayer request
+            let detailsContent = "";
             if (data.type === "APPOINTMENT") {
-                contactInfo = `
-                    <p style="margin: 2px 0; font-size: 13px; color: #D4AF37;">📧 Email: ${data.email || 'N/A'}</p>
-                    <p style="margin: 2px 0; font-size: 13px; color: #D4AF37;">☎️ Phone: ${data.phone || 'N/A'}</p>
+                detailsContent = `
+                    <p style="margin: 4px 0;"><strong>Name:</strong> ${data.name}</p>
+                    <p style="margin: 2px 0; font-size: 13px; color: #D4AF37;">📧 <strong>Email:</strong> ${data.email || 'N/A'}</p>
+                    <p style="margin: 2px 0; font-size: 13px; color: #D4AF37;">☎️ <strong>Phone:</strong> ${data.phone || 'N/A'}</p>
+                    <p style="margin: 4px 0 0 0; opacity: 0.9;">📅 <strong>Requested Time & Date:</strong> ${data.text}</p>
+                `;
+            } else {
+                detailsContent = `
+                    <p style="margin: 4px 0;"><strong>Name:</strong> ${data.name}</p>
+                    <p style="margin: 0; opacity: 0.9;">${data.text}</p>
                 `;
             }
 
@@ -181,16 +188,13 @@ function loadPrayers() {
                 <div class="request-card" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 6px;">
                     <div style="flex-grow: 1; padding-right: 15px;">
                         <small style="color:#D4AF37; font-weight:bold;">${data.type}</small>
-                        <p style="margin: 4px 0;"><strong>${data.name}</strong></p>
-                        ${contactInfo}
-                        <p style="margin: 4px 0 0 0; opacity: 0.9;"><strong>Schedule:</strong> ${data.text}</p>
+                        ${detailsContent}
                     </div>
                     <button class="delete-feed-btn" onclick="deleteFeedItem('${docId}')" style="background: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;">Delete</button>
                 </div>`;
         });
     });
 }
-
 function deleteFeedItem(docId) {
     if (confirm("Remove this item from the Mission Control feed permanently?")) {
         db.collection("churchPrayers").doc(docId).delete()
