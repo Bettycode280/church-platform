@@ -14,7 +14,6 @@
     <!-- Firebase SDK (Compat Version) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-
     <style>
         /* Base Reset & Premium Glass UI Theme */
         * {
@@ -33,6 +32,7 @@
             align-items: center;
             justify-content: flex-start;
             padding: 20px;
+            overflow-y: auto;
         }
 
         .container {
@@ -224,6 +224,8 @@
                 <button class="nav-btn" onclick="openModal('about-modal')">ℹ️ About the Ministry</button>
                 <button class="nav-btn" onclick="openModal('contact-modal')">📞 Contact Us</button>
             </div>
+        </div>
+    </div>
 
     <!-- Giving Modal -->
     <div id="giving-modal" class="modal">
@@ -240,46 +242,40 @@
     </div>
 
     <!-- Appointment Booking Modal -->
-   <div id="booking-modal" class="modal">
-    <div class="glass-card">
-        <h2 class="gold-text">Appointment</h2>
-        <p class="form-hint">Request a Private Meeting</p>
-        
-        <!-- Must have id="b_name" -->
-        <input type="text" id="b_name" placeholder="Full Name" class="sleek-input">
-        
-        <!-- Must have id="b_email" -->
-        <input type="email" id="b_email" placeholder="Email Address (Optional)" class="sleek-input">
-        
-        <!-- Must have id="b_phone" -->
-        <input type="tel" id="b_phone" placeholder="Phone Number" class="sleek-input">
-        
-        <!-- Must have id="b_day" -->
-        <select id="b_day" class="sleek-input">
-            <option value="Monday">Monday</option>
-            <option value="Tuesday">Tuesday</option>
-            <option value="Wednesday">Wednesday</option>
-            <option value="Thursday">Thursday</option>
-            <option value="Friday">Friday</option>
-            <option value="Saturday">Saturday</option>
-            <option value="Sunday">Sunday</option>
-        </select>
-        
-        <!-- Must have id="b_time" -->
-        <input type="time" id="b_time" value="14:00" class="sleek-input">
-        
-        <!-- Must have id="b_purpose" -->
-        <select id="b_purpose" class="sleek-input">
-            <option value="" disabled selected>Select Purpose</option>
-            <option value="Prayer">Prayer</option>
-            <option value="Counselling">Counselling</option>
-            <option value="Church Matters">Church Matters</option>
-        </select>
+    <div id="booking-modal" class="modal">
+        <div class="glass-card">
+            <h2 class="gold-text">Appointment</h2>
+            <p class="form-hint">Request a Private Meeting</p>
+            
+            <input type="text" id="b_name" placeholder="Full Name" class="sleek-input">
+            <input type="email" id="b_email" placeholder="Email Address (Optional)" class="sleek-input">
+            <input type="tel" id="b_phone" placeholder="Phone Number" class="sleek-input">
+            
+            <select id="b_day" class="sleek-input">
+                <option value="" disabled selected>Select Day</option>
+                <option value="Monday">Monday</option>
+                <option value="Tuesday">Tuesday</option>
+                <option value="Wednesday">Wednesday</option>
+                <option value="Thursday">Thursday</option>
+                <option value="Friday">Friday</option>
+                <option value="Saturday">Saturday</option>
+                <option value="Sunday">Sunday</option>
+            </select>
+            
+            <input type="time" id="b_time" value="14:00" class="sleek-input">
+            
+            <select id="b_purpose" class="sleek-input">
+                <option value="" disabled selected>Select Purpose</option>
+                <option value="Prayer">Prayer</option>
+                <option value="Counselling">Counselling</option>
+                <option value="Church Matters">Church Matters</option>
+            </select>
 
-        <button class="premium-gold-btn" onclick="submitBooking()">REQUEST MEETING</button>
-        <div class="cancel-link" onclick="closeModals()">Back</div>
+            <button class="premium-gold-btn" onclick="submitBooking()">REQUEST MEETING</button>
+            <div class="cancel-link" onclick="closeModals()">Back</div>
+        </div>
     </div>
-</div>
+
     <!-- Prayer Request Modal -->
     <div id="prayer-modal" class="modal">
         <div class="glass-card">
@@ -315,16 +311,20 @@
 
     <audio id="alert-sound" src="alert.mp3" preload="auto"></audio>
 
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
     <script>
-        // Firebase Configuration (Replace with your actual Firebase web keys if needed)
+        // Firebase Configuration
         const firebaseConfig = {
-    apiKey: "AIzaSyDhLq4p_W0ArYVXYHmOZbsuyyvLqWde6js",
-    authDomain: "glorywheels-507df.firebaseapp.com",
-    projectId: "glorywheels-507df",
-    storageBucket: "glorywheels-507df.firebasestorage.app",
-    messagingSenderId: "369831733781",
-    appId: "1:369831733781:web:a7402fd123de519d7e3c1c"
-};
+            apiKey: "AIzaSyDhLq4p_W0ArYVXYHmOZbsuyyvLqWde6js",
+            authDomain: "glorywheels-507df.firebaseapp.com",
+            projectId: "glorywheels-507df",
+            storageBucket: "glorywheels-507df.firebasestorage.app",
+            messagingSenderId: "369831733781",
+            appId: "1:369831733781:web:a7402fd123de519d7e3c1c"
+        };
 
         if (!firebase.apps.length) { 
             firebase.initializeApp(firebaseConfig); 
@@ -441,22 +441,5 @@
             }
         }
     </script>
-</body>
-</html>
-
-    <audio id="alert-sound" src="alert.mp3" preload="auto"></audio>
-
-    <!-- Essential Firebase App Connection Credentials Config Block -->
-
-    <script src="church-logic.js"></script>
-    const firebaseConfig = {
-    apiKey: "AIzaSyDhLq4p_W0ArYVXYHmOZbsuyyvLqWde6js",
-    authDomain: "glorywheels-507df.firebaseapp.com",
-    projectId: "glorywheels-507df",
-    storageBucket: "glorywheels-507df.firebasestorage.app",
-    messagingSenderId: "369831733781",
-    appId: "1:369831733781:web:a7402fd123de519d7e3c1c"
-    </script>
-};
 </body>
 </html>
