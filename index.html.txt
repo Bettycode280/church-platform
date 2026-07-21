@@ -61,6 +61,8 @@
             <h2 class="gold-text">Appointment</h2>
             <p class="form-hint">Request a Private Meeting</p>
             <input type="text" id="b_name" placeholder="Full Name" class="sleek-input">
+            <input type="email" id="b_email" placeholder="Email Address" class="sleek-input">
+            <input type="tel" id="b_phone" placeholder="Phone Number" class="sleek-input">
             <select id="b_day" class="sleek-input">
                 <option value="Monday">Monday</option>
                 <option value="Tuesday">Tuesday</option>
@@ -83,7 +85,6 @@
     </div>
 
     <audio id="alert-sound" src="alert.mp3" preload="auto"></audio>
-
     <!-- Essential Firebase App Connection Credentials Config Block -->
 
     <script src="church-logic.js"></script>
