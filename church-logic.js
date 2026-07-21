@@ -133,7 +133,7 @@ async function submitPrayer() {
 async function submitBooking() {
     const name = document.getElementById('b_name').value;
     const email = document.getElementById('b_email').value;
-    const phone = document.getElementById('b_phonevnumber').value;
+    const phone = document.getElementById('b_phone').value;
     const day = document.getElementById('b_day').value;
     const time = document.getElementById('b_time').value;
 

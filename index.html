@@ -63,22 +63,24 @@
     </div>
 
     <div id="booking-modal" class="modal">
-        <div class="glass-card">
-            <h2 class="gold-text">Appointment</h2>
-            <p class="form-hint">Request a Private Meeting</p>
-            <input type="text" id="b_name" placeholder="Full Name" class="sleek-input">
-            <select id="b_day" class="sleek-input">
-                <option value="Monday">Monday</option>
-                <option value="Tuesday">Tuesday</option>
-                <option value="Wednesday">Wednesday</option>
-                <option value="Thursday">Thursday</option>
-                <option value="Friday">Friday</option>
-            </select>
-            <input type="time" id="b_time" value="14:00" class="sleek-input">
-            <button class="premium-gold-btn" onclick="submitBooking()">REQUEST MEETING</button>
-            <div class="cancel-link" onclick="closeModals(); toggleMenu();">Back</div>
-        </div>
+    <div class="glass-card">
+        <h2 class="gold-text">Appointment</h2>
+        <p class="form-hint">Request a Private Meeting</p>
+        <input type="text" id="b_name" placeholder="Full Name" class="sleek-input">
+        <input type="email" id="b_email" placeholder="Email" class="sleek-input">
+        <input type="tel" id="b_phone" placeholder="Phone" class="sleek-input">
+        <select id="b_day" class="sleek-input">
+            <option value="Monday">Monday</option>
+            <option value="Tuesday">Tuesday</option>
+            <option value="Wednesday">Wednesday</option>
+            <option value="Thursday">Thursday</option>
+            <option value="Friday">Friday</option>
+        </select>
+        <input type="time" id="b_time" value="14:00" class="sleek-input">
+        <button class="premium-gold-btn" onclick="submitBooking()">REQUEST MEETING</button>
+        <div class="cancel-link" onclick="closeModals(); toggleMenu();">Back</div>
     </div>
+</div>
 
     <div id="giving-modal" class="modal">
         <div class="glass-card">
