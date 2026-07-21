@@ -55,12 +55,17 @@
             <div class="cancel-link" onclick="closeModals()">Cancel</div>
         </div>
     </div>
-
-    <div id="booking-modal" class="modal">
+<div id="booking-modal" class="modal">
         <div class="glass-card">
             <h2 class="gold-text">Appointment</h2>
             <p class="form-hint">Request a Private Meeting</p>
+            
             <input type="text" id="b_name" placeholder="Full Name" class="sleek-input">
+            
+            <input type="email" id="b_email" placeholder="Email Address" class="sleek-input">
+            
+            <input type="tel" id="b_phone" placeholder="Phone Number" class="sleek-input">
+            
             <select id="b_day" class="sleek-input">
                 <option value="Monday">Monday</option>
                 <option value="Tuesday">Tuesday</option>
@@ -68,19 +73,32 @@
                 <option value="Thursday">Thursday</option>
                 <option value="Friday">Friday</option>
             </select>
+            
             <input type="time" id="b_time" value="14:00" class="sleek-input">
+            
+            <select id="b_purpose" class="sleek-input">
+                <option value="" disabled selected>Select Purpose</option>
+                <option value="prayer">Prayer</option>
+                <option value="cancelling">Cancelling</option>
+                <option value="church matters">Church Matters</option>
+            </select>
+
             <button class="premium-gold-btn" onclick="submitBooking()">REQUEST MEETING</button>
             <div class="cancel-link" onclick="closeModals()">Back</div>
         </div>
     </div>
-
-    <div id="giving-modal" class="modal">
+   <div id="giving-modal" class="modal">
         <div class="glass-card">
             <h2 class="gold-text">Giving</h2>
-            <p class="form-hint">Contact Finance Office for official details.</p>
+            
+            <div style="text-align: left; margin: 15px 0; color: #fff;">
+                <p style="margin: 5px 0;"><strong>Bank Name:</strong> Divine Life</p>
+                <p style="margin: 5px 0;"><strong>Account Name:</strong>Divine Divine Life Christian Centre</p>
+                <p style="margin: 5px 0;"><strong>Account Number:</strong> 54471165</p>
+                <p style="margin: 5px 0;"><strong>Sort Code:</strong> 230580</p>
+            </div>
             <button class="premium-gold-btn" onclick="closeModals()">RETURN</button>
         </div>
-    </div>
 
     <audio id="alert-sound" src="alert.mp3" preload="auto"></audio>
 
