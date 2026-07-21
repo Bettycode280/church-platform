@@ -172,18 +172,17 @@ function loadPrayers() {
     });
 }
 
-async function deleteFeedItem(id, buttonElement) {
+async function deleteFeedItem(id) {
     try {
+        console.log("Deleting document:", id);
+
         await db.collection("churchPrayers").doc(id).delete();
-        
-        const card = buttonElement ? buttonElement.closest('.request-card') : document.getElementById(id);
-        if (card) {
-            card.remove();
-        }
-        
+
+        console.log("Document deleted successfully.");
         alert("Deleted successfully!");
+
     } catch (error) {
-        console.error("Error removing document: ", error);
-        alert("Deleted successfully!"); 
+        console.error("DELETE ERROR:", error);
+        alert("Delete failed:\n" + error.message);
     }
 }
