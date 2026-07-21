@@ -15,24 +15,63 @@ if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig); 
 }
 const db = firebase.firestore();
+
 // ==========================================
 // 2. NAVIGATION & UI CONTROLS
 // ==========================================
 
 function toggleMenu() { 
-    // Checks both possible IDs from your screenshots
-    const nav = document.getElementById('side-nav') || document.getElementById('side-menu');
+    const nav = document.getElementById('side-nav') || document.getElementById('side-menu') || document.querySelector('.nav-overlay');
     if (nav) {
         nav.classList.toggle('open'); 
     }
 }
 
 function openModal(id) { 
-    const nav = document.getElementById('side-nav') || document.getElementById('side-menu');
+    const nav = document.getElementById('side-nav') || document.getElementById('side-menu') || document.querySelector('.nav-overlay');
     if (nav) nav.classList.remove('open'); // Close menu first
     
     const modal = document.getElementById(id);
     if (modal) modal.classList.add('open'); 
+}
+
+// Function to close all open modals
+function closeModals() {
+    const modals = document.querySelectorAll('.modal');
+    modals.forEach(modal => {
+        modal.classList.remove('open');
+    });
+}
+
+// Function to submit the booking data to Firestore (Includes Email & Phone)
+async function submitBooking() {
+    const nameInput = document.getElementById('b_name');
+    const emailInput = document.getElementById('b_email');
+    const phoneInput = document.getElementById('b_phone');
+    const dayInput = document.getElementById('b_day');
+    const timeInput = document.getElementById('b_time');
+
+    if (!nameInput || !nameInput.value.trim()) {
+        alert("Name required.");
+        return;
+    }
+
+    try {
+        await db.collection("churchPrayers").add({ 
+            type: "APPOINTMENT", 
+            name: nameInput.value.trim(), 
+            email: emailInput ? emailInput.value.trim() : "",
+            phone: phoneInput ? phoneInput.value.trim() : "",
+            text: `${dayInput ? dayInput.value : "Monday"} at ${timeInput ? timeInput.value : "14:00"}`, 
+            time: firebase.firestore.FieldValue.serverTimestamp() 
+        });
+        
+        alert("Request Sent."); 
+        closeModals();
+    } catch (error) {
+        console.error("Error submitting booking: ", error);
+        alert("Failed to send request. Please try again.");
+    }
 }
 
 // ==========================================
@@ -41,7 +80,6 @@ function openModal(id) {
 
 function checkPass() {
     const input = document.getElementById('pass-input').value;
-    // Your updated password
     if (input === "DLCC2026") {
         document.getElementById('login-overlay').style.display = 'none';
         document.getElementById('admin-ui').style.display = 'block';
@@ -63,20 +101,15 @@ if (broadcastTag) {
         if (doc.exists && doc.data().title && doc.data().title.trim() !== "") { 
             const sermonTitle = doc.data().title.trim();
             
-            // 1. Update text to uppercase
             broadcastTag.innerText = "🚨 LIVE NOW: " + sermonTitle.toUpperCase();
-            
-            // 2. Turn on RED and FLASHING styles
             broadcastTag.classList.add('red-alert');
             
-            // 3. Play the Sound
             if (alertSound) {
                 alertSound.play().catch(e => console.log("Sound blocked by browser until user clicks."));
             }
         } else {
-            // 4. RESET to Normal
             broadcastTag.innerText = "CONNECTING TO MISSION...";
-            broadcastTag.classList.remove('red-alert'); // Kills the blinking
+            broadcastTag.classList.remove('red-alert');
             
             if (alertSound) {
                 alertSound.pause();
@@ -92,8 +125,6 @@ if (broadcastTag) {
 
 async function updateSermon() {
     const topic = document.getElementById('sermon-input').value;
-    
-    // This allows an empty topic to be sent, which stops the Red Alert
     const titleToSend = topic ? topic : ""; 
 
     try {
@@ -103,11 +134,9 @@ async function updateSermon() {
         });
         
         if (titleToSend === "") {
-            // This confirms the "End Broadcast" worked
             alert("Broadcast Ended. All congregant screens reset.");
         } else {
-            // This confirms a new "Live" topic was sent
-            alert("Update Sent! All 1,500 phones updated.");
+            alert("Update Sent!");
         }
     } catch (error) {
         console.error("Error updating sermon: ", error);
@@ -130,25 +159,6 @@ async function submitPrayer() {
     closeModals();
 }
 
-async function submitBooking() {
-    const name = document.getElementById('b_name').value;
-    const email = document.getElementById('b_email').value;
-    const phone = document.getElementById('b_phone').value;
-    const day = document.getElementById('b_day').value;
-    const time = document.getElementById('b_time').value;
-
-    if(!name) return alert("Name required.");
-    
-    await db.collection("churchPrayers").add({ 
-        type: "APPOINTMENT", 
-        name, 
-        text: `${day} at ${time}`, 
-        time: firebase.firestore.FieldValue.serverTimestamp() 
-    });
-    alert("Request Sent."); 
-    closeModals();
-}
-
 function loadPrayers() {
     const list = document.getElementById('prayer-list');
     if (!list) return;
@@ -157,15 +167,19 @@ function loadPrayers() {
         list.innerHTML = "";
         snap.forEach(doc => {
             const data = doc.data();
-            const docId = doc.id; // Get the unique document ID for deletion
+            const docId = doc.id;
             
-            // UPDATED: Added a flex container wrap and a premium delete button action layout
+            // Format contact details cleanly inside the admin view feed card if present
+            const contactDetails = (data.email || data.phone) ? 
+                `<p style="margin: 2px 0; font-size: 13px; opacity: 0.8;">📧 ${data.email || 'N/A'} | ☎️ ${data.phone || 'N/A'}</p>` : '';
+
             list.innerHTML += `
                 <div class="request-card" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 6px;">
                     <div style="flex-grow: 1; padding-right: 15px;">
                         <small style="color:#D4AF37; font-weight:bold;">${data.type}</small>
                         <p style="margin: 4px 0;"><strong>${data.name}</strong></p>
-                        <p style="margin: 0; opacity: 0.9;">${data.text}</p>
+                        ${contactDetails}
+                        <p style="margin: 4px 0 0 0; opacity: 0.9;">${data.text}</p>
                     </div>
                     <button class="delete-feed-btn" onclick="deleteFeedItem('${docId}')" style="background: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;">Delete</button>
                 </div>`;
@@ -173,7 +187,6 @@ function loadPrayers() {
     });
 }
 
-// NEW FUNCTION: Enables Pastor to wipe old items out of the churchPrayers data model feed
 function deleteFeedItem(docId) {
     if (confirm("Remove this item from the Mission Control feed permanently?")) {
         db.collection("churchPrayers").doc(docId).delete()
@@ -186,4 +199,3 @@ function deleteFeedItem(docId) {
         });
     }
 }
-
