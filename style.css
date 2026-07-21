@@ -210,18 +210,22 @@ body {
 }
 
 .cancel-link { margin-top: 15px; opacity: 0.4; cursor: pointer; font-size: 0.8rem; }
-
 /* --- LIVE INDICATOR --- */
 .live-indicator {
     position: absolute; top: 120px; 
     font-weight: 600; letter-spacing: 3px; font-size: 0.75rem;
     color: #FCF6BA; animation: glow 2s infinite;
 }
-
 .live-indicator.red-alert {
     color: #ff4444 !important;
     text-shadow: 0 0 20px #ff0000;
-    font-weight: 900; animation: flash-red 0.8s infinite;
+    font-weight: 900; 
+    animation: flash-red 0.8s infinite;
 }
-@keyframes glow { 50% { opacity: 0.5; } }
-@keyframes flash-red { 50% { opacity: 0.4; transform: scale(1.05); } }
+@keyframes glow { 
+    50% { opacity: 0.5; } 
+}
+
+@keyframes flash-red { 
+    50% { opacity: 0.4; transform: scale(1.05); } 
+}

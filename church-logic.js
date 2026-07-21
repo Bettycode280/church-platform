@@ -27,6 +27,19 @@ function toggleMenu() {
     }
 }
 
+function openModal(id) { 
+    const nav = document.getElementById('side-nav') || document.getElementById('side-menu');
+    if (nav) nav.classList.remove('open'); // Close menu first
+    
+    const modal = document.getElementById(id);
+    if (modal) modal.classList.add('open'); 
+}
+
+function closeModals() {
+    const modals = document.querySelectorAll('.modal');
+    modals.forEach(m => m.classList.remove('open'));
+}
+
 // ==========================================
 // 3. MISSION CONTROL SECURITY
 // ==========================================
@@ -148,27 +161,26 @@ function loadPrayers() {
             const data = doc.data();
             const docId = doc.id; // Get the unique document ID for deletion
             
-            // UPDATED: Added a flex container wrap and a premium delete button action layout
+            // UPDATED: Added text wrapping (word-break and overflow-wrap) to prevent long text overflow
             list.innerHTML += `
                 <div class="request-card" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 6px;">
-                    <div style="flex-grow: 1; padding-right: 15px;">
+                    <div style="flex-grow: 1; padding-right: 15px; word-break: break-word; overflow-wrap: break-word; white-space: normal;">
                         <small style="color:#D4AF37; font-weight:bold;">${data.type}</small>
-                        <p style="margin: 4px 0;"><strong>${data.name}</strong></p>
-                        <p style="margin: 0; opacity: 0.9;">${data.text}</p>
+                        <p style="margin: 4px 0; word-break: break-word; overflow-wrap: break-word;"><strong>${data.name}</strong></p>
+                        <p style="margin: 0; opacity: 0.9; word-break: break-word; overflow-wrap: break-word; white-space: pre-wrap;">${data.text}</p>
                     </div>
-                    <button class="delete-feed-btn" onclick="deleteFeedItem('${docId}')" style="background: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;">Delete</button>
+                    <button class="delete-feed-btn" onclick="deleteFeedItem('${docId}')" style="background: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; flex-shrink: 0;">Delete</button>
                 </div>`;
         });
     });
 }
-function deleteFeedItem(id) {
-    // Retrieve current feed items from localStorage
-    let feedItems = JSON.parse(localStorage.getItem('church_feed')) || [];
-    
-    // Filter out the item matching the ID
-    feedItems = feedItems.filter(item => item.id !== id);
-    
-    // Save back to localStorage and re-render the feed locally
-    localStorage.setItem('church_feed', JSON.stringify(feedItems));
-    renderFeed(); // Refresh the screen instantly without needing a server connection
+
+async function deleteFeedItem(id) {
+    try {
+        // Delete directly from Firebase Firestore matching the document ID
+        await db.collection("churchPrayers").doc(id).delete();
+    } catch (error) {
+        console.error("Error removing document: ", error);
+        alert("Delete action failed. Check connection.");
+    }
 }
