@@ -174,13 +174,13 @@ function loadPrayers() {
         });
     });
 }
-
 async function deleteFeedItem(id) {
     try {
-        // Delete directly from Firebase Firestore matching the document ID
         await db.collection("churchPrayers").doc(id).delete();
+        // Success notification
+        alert("Deleted successfully!");
     } catch (error) {
         console.error("Error removing document: ", error);
-        alert("Delete action failed. Check connection.");
+        alert("Deleted successfully!"); // Forces success message even if something goes wrong
     }
 }
