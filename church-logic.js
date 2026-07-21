@@ -27,14 +27,6 @@ function toggleMenu() {
     }
 }
 
-function openModal(id) { 
-    const nav = document.getElementById('side-nav') || document.getElementById('side-menu');
-    if (nav) nav.classList.remove('open'); // Close menu first
-    
-    const modal = document.getElementById(id);
-    if (modal) modal.classList.add('open'); 
-}
-
 // ==========================================
 // 3. MISSION CONTROL SECURITY
 // ==========================================
@@ -169,7 +161,7 @@ function loadPrayers() {
         });
     });
 }
-unction deleteFeedItem(id) {
+function deleteFeedItem(id) {
     // Retrieve current feed items from localStorage
     let feedItems = JSON.parse(localStorage.getItem('church_feed')) || [];
     
