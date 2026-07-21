@@ -15,7 +15,6 @@ if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig); 
 }
 const db = firebase.firestore();
-
 // ==========================================
 // 2. NAVIGATION & UI CONTROLS
 // ==========================================
@@ -34,10 +33,6 @@ function openModal(id) {
     
     const modal = document.getElementById(id);
     if (modal) modal.classList.add('open'); 
-}
-
-function closeModals() { 
-    document.querySelectorAll('.modal').forEach(m => m.classList.remove('open')); 
 }
 
 // ==========================================
@@ -159,12 +154,32 @@ function loadPrayers() {
         list.innerHTML = "";
         snap.forEach(doc => {
             const data = doc.data();
+            const docId = doc.id; // Get the unique document ID for deletion
+            
+            // UPDATED: Added a flex container wrap and a premium delete button action layout
             list.innerHTML += `
-                <div class="request-card">
-                    <small style="color:#D4AF37; font-weight:bold;">${data.type}</small>
-                    <p><strong>${data.name}</strong></p>
-                    <p>${data.text}</p>
+                <div class="request-card" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 6px;">
+                    <div style="flex-grow: 1; padding-right: 15px;">
+                        <small style="color:#D4AF37; font-weight:bold;">${data.type}</small>
+                        <p style="margin: 4px 0;"><strong>${data.name}</strong></p>
+                        <p style="margin: 0; opacity: 0.9;">${data.text}</p>
+                    </div>
+                    <button class="delete-feed-btn" onclick="deleteFeedItem('${docId}')" style="background: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;">Delete</button>
                 </div>`;
         });
     });
+}
+
+// NEW FUNCTION: Enables Pastor to wipe old items out of the churchPrayers data model feed
+function deleteFeedItem(docId) {
+    if (confirm("Remove this item from the Mission Control feed permanently?")) {
+        db.collection("churchPrayers").doc(docId).delete()
+        .then(() => {
+            console.log("Feed item successfully deleted.");
+        })
+        .catch((error) => {
+            console.error("Error removing document: ", error);
+            alert("Delete action failed. Check connection.");
+        });
+    }
 }
