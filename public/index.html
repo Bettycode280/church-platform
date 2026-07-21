@@ -229,18 +229,18 @@
     </div>
 
     <!-- Giving Modal -->
-    <div id="giving-modal" class="modal">
-        <div class="glass-card">
-            <h2 class="gold-text">Giving</h2>
-            <div style="text-align: left; margin: 15px 0; color: #fff;">
-                <p style="margin: 5px 0;"><strong>Bank Name:</strong> Divine Life</p>
-                <p style="margin: 5px 0;"><strong>Account Name:</strong> Divine Life Christian Centre</p>
-                <p style="margin: 5px 0;"><strong>Account Number:</strong> 54471165</p>
-                <p style="margin: 5px 0;"><strong>Sort Code:</strong> 230580</p>
-            </div>
-            <button class="premium-gold-btn" onclick="closeModals()">RETURN</button>
+<div id="giving-modal" class="modal">
+    <div class="glass-card">
+        <h2 class="gold-text">Giving</h2>
+        <div style="text-align: left; margin: 15px 0; color: #fff;">
+            <p style="margin: 5px 0;"><strong>Bank Name:</strong> Dominf Bank</p>
+            <p style="margin: 5px 0;"><strong>Account Name:</strong> Church Account Ministry Account</p>
+            <p style="margin: 5px 0;"><strong>Account Number:</strong> 88577777</p>
+            <p style="margin: 5px 0;"><strong>Sort Code:</strong> 677700</p>
         </div>
+        <button class="premium-gold-btn" onclick="closeModals()">RETURN</button>
     </div>
+</div>
 
     <!-- Appointment Booking Modal -->
     <div id="booking-modal" class="modal">
@@ -288,22 +288,34 @@
         </div>
     </div>
 
-    <!-- Contact Us Modal -->
-    <div id="contact-modal" class="modal">
-        <div class="glass-card">
-            <h2 class="gold-text">Contact Us</h2>
-            <div style="text-align: left; margin: 15px 0; color: #fff; font-size: 14px; line-height: 1.6;">
-                <p style="margin: 6px 0;"><strong>Church Address:</strong> Divine Life Christian Centre, Main Sanctuary</p>
-                <p style="margin: 6px 0;"><strong>Phone Number:</strong> +44 20 0000 0000</p>
-                <p style="margin: 6px 0;"><strong>WhatsApp:</strong> +44 70 0000 0000</p>
-                <p style="margin: 6px 0;"><strong>Email:</strong> info@dlcc.org</p>
-                <p style="margin: 6px 0;"><strong>Facebook:</strong> facebook.com/dlcc</p>
-                <p style="margin: 6px 0;"><strong>YouTube:</strong> youtube.com/dlcc</p>
-            </div>
-            <button class="premium-gold-btn" onclick="closeModals()">CLOSE</button>
-        </div>
-    </div>
+    <!-- 1. INSIDE YOUR SIDE NAVIGATION MENU OVERLAY -->
+<div class="nav-overlay" id="side-menu">
+    <div class="admin-dashboard-grid">
+        <!-- Other buttons like Giving, Appointments, etc. -->
 
+        <!-- Contact Us Menu Button -->
+        <button class="admin-panel" onclick="openModal('contact-modal')">
+            <span class="gold-text">Contact Us</span>
+            <p class="form-hint">Get in touch with our team</p>
+        </button>
+    </div>
+</div>
+
+<!-- 2. DOWN AT THE BOTTOM OF THE PAGE (Right before </body>) -->
+<div id="contact-modal" class="modal">
+    <div class="glass-card">
+        <h2 class="gold-text">Contact Us</h2>
+        <div style="text-align: left; margin: 15px 0; color: #fff; font-size: 14px; line-height: 1.6;">
+            <p style="margin: 6px 0;"><strong>Church Address:</strong> Divine Life Christian Centre, Main Sanctuary</p>
+            <p style="margin: 6px 0;"><strong>Phone Number:</strong> +44 20 0000 0000</p>
+            <p style="margin: 6px 0;"><strong>WhatsApp:</strong> +44 70 0000 0000</p>
+            <p style="margin: 6px 0;"><strong>Email:</strong> info@dlcc.org</p>
+            <p style="margin: 6px 0;"><strong>Facebook:</strong> facebook.com/dlcc</p>
+            <p style="margin: 6px 0;"><strong>YouTube:</strong> youtube.com/dlcc</p>
+        </div>
+        <button class="premium-gold-btn" onclick="closeModals()">CLOSE</button>
+    </div>
+</div>
     <!-- Generic Modals for Remaining Navigation Items -->
     <div id="live-modal" class="modal"><div class="glass-card"><h2 class="gold-text">Watch Live</h2><button class="premium-gold-btn" onclick="closeModals()">Close</button></div></div>
     <div id="devotion-modal" class="modal"><div class="glass-card"><h2 class="gold-text">Daily Devotion</h2><button class="premium-gold-btn" onclick="closeModals()">Close</button></div></div>

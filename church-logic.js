@@ -26,18 +26,22 @@ function toggleMenu() {
         nav.classList.toggle('open'); 
     }
 }
-
-function openModal(id) { 
-    const nav = document.getElementById('side-nav') || document.getElementById('side-menu');
-    if (nav) nav.classList.remove('open'); // Close menu first
-    
-    const modal = document.getElementById(id);
-    if (modal) modal.classList.add('open'); 
+// Function to open any modal by its ID
+function openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.add('open');
+    } else {
+        console.error("Modal not found with ID: " + modalId);
+    }
 }
 
+// Function to close all active modals
 function closeModals() {
     const modals = document.querySelectorAll('.modal');
-    modals.forEach(m => m.classList.remove('open'));
+    modals.forEach(modal => {
+        modal.classList.remove('open');
+    });
 }
 
 function openLive() {
