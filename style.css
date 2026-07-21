@@ -118,7 +118,7 @@ body {
 
 /* Radiant Gold Hover State */
 .nav-content .menu-item:hover {
-    background: rgb(255, 255, 255);
+    background: rgb(66, 140, 224);
     border-color: #FFFFFF;
     box-shadow: 0 0 30px rgba(255, 255, 255, 0.6), inset 0 0 20px rgba(255, 255, 255, 0.3);
     transform: translateY(-2px);
