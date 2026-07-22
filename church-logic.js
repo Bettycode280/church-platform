@@ -575,13 +575,33 @@ function loadSavedSermons() {
               
               sermonCard.style.cssText = "background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; border: 1px solid rgba(212,175,55,0.2); text-align: left; margin-bottom: 8px;";
               
+              // Format the Firestore timestamp safely
+              let dateString = "";
+              if (data.createdAt && typeof data.createdAt.toDate === 'function') {
+                  dateString = data.createdAt.toDate().toLocaleDateString(undefined, {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                  });
+              } else {
+                  dateString = "Just now";
+              }
+
               const encodedTitle = encodeURIComponent(data.title || "Sermon");
               const encodedContent = encodeURIComponent(data.content || "");
 
               sermonCard.innerHTML = `
                   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                      <strong style="color: #d4af37; font-size: 0.95rem;">${data.title}</strong>
-                      <div style="display: flex; gap: 4px;">
+                      <div>
+                          <strong style="color: #d4af37; font-size: 0.95rem; display: block;">${data.title}</strong>
+                          <span style="font-size: 0.7rem; color: #aaa;">📅 ${dateString}</span>
+                      </div>
+                      <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                          <button onclick="shareToWhatsApp('${encodedTitle}', '${encodedContent}')" style="background: #25D366; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; font-size: 0.6rem; cursor: pointer;">WhatsApp</button>
+                          <button onclick="shareToFacebook('${encodedTitle}', '${encodedContent}')" style="background: #1877F2; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; font-size: 0.6rem; cursor: pointer;">Facebook</button>
+                          <button onclick="shareToYouTube()" style="background: #FF0000; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; font-size: 0.6rem; cursor: pointer;">YouTube</button>
                           <button onclick="downloadSermonFile('${encodedTitle}', '${encodedContent}')" style="background: #3498db; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; font-size: 0.6rem; cursor: pointer;">Download</button>
                           <button onclick="deleteSermon('${docId}')" style="background: #e74c3c; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; font-size: 0.6rem; cursor: pointer;">Delete</button>
                       </div>
@@ -592,6 +612,29 @@ function loadSavedSermons() {
               sermonsContainer.appendChild(sermonCard);
           });
       });
+}
+
+function shareToWhatsApp(encodedTitle, encodedContent) {
+    const title = decodeURIComponent(encodedTitle);
+    const content = decodeURIComponent(encodedContent);
+    const text = `*${title}*\n\n${content}`;
+    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
+}
+
+function shareToFacebook(encodedTitle, encodedContent) {
+    const title = decodeURIComponent(encodedTitle);
+    const content = decodeURIComponent(encodedContent);
+    navigator.clipboard.writeText(`${title}\n\n${content}`).then(() => {
+        alert("Sermon copied to clipboard! You can now paste it directly into Facebook.");
+        window.open('https://www.facebook.com/', '_blank');
+    }).catch(() => {
+        window.open('https://www.facebook.com/', '_blank');
+    });
+}
+
+function shareToYouTube() {
+    alert("Opening YouTube Studio so you can use these notes for your video description or community post.");
+    window.open('https://studio.youtube.com/', '_blank');
 }
 
 function downloadSermonFile(encodedTitle, encodedContent) {
