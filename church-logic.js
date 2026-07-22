@@ -515,7 +515,6 @@ function loadMemberDirectory() {
           });
       });
 }
-
 // ==========================================
 // SAVED MESSAGES & SERMONS MANAGEMENT
 // ==========================================
@@ -576,10 +575,16 @@ function loadSavedSermons() {
               
               sermonCard.style.cssText = "background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; border: 1px solid rgba(212,175,55,0.2); text-align: left; margin-bottom: 8px;";
               
+              const encodedTitle = encodeURIComponent(data.title || "Sermon");
+              const encodedContent = encodeURIComponent(data.content || "");
+
               sermonCard.innerHTML = `
                   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                       <strong style="color: #d4af37; font-size: 0.95rem;">${data.title}</strong>
-                      <button onclick="deleteSermon('${docId}')" style="background: #e74c3c; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; font-size: 0.6rem; cursor: pointer;">Delete</button>
+                      <div style="display: flex; gap: 4px;">
+                          <button onclick="downloadSermonFile('${encodedTitle}', '${encodedContent}')" style="background: #3498db; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; font-size: 0.6rem; cursor: pointer;">Download</button>
+                          <button onclick="deleteSermon('${docId}')" style="background: #e74c3c; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; font-size: 0.6rem; cursor: pointer;">Delete</button>
+                      </div>
                   </div>
                   <p style="color: #ddd; font-size: 0.8rem; white-space: pre-wrap; margin: 0; opacity: 0.9;">${data.content}</p>
               `;
@@ -587,6 +592,23 @@ function loadSavedSermons() {
               sermonsContainer.appendChild(sermonCard);
           });
       });
+}
+
+function downloadSermonFile(encodedTitle, encodedContent) {
+    const title = decodeURIComponent(encodedTitle);
+    const content = decodeURIComponent(encodedContent);
+    
+    const fileContent = `TITLE: ${title}\n\n${content}`;
+    const blob = new Blob([fileContent], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${title.replace(/[^a-zA-Z0-9]/g, '_')}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
 }
 
 function deleteSermon(docId) {
