@@ -575,7 +575,6 @@ function loadSavedSermons() {
               
               sermonCard.style.cssText = "background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; border: 1px solid rgba(212,175,55,0.2); text-align: left; margin-bottom: 8px;";
               
-              // Format the Firestore timestamp safely
               let dateString = "";
               if (data.createdAt && typeof data.createdAt.toDate === 'function') {
                   dateString = data.createdAt.toDate().toLocaleDateString(undefined, {
@@ -601,6 +600,7 @@ function loadSavedSermons() {
                       <div style="display: flex; gap: 4px; flex-wrap: wrap;">
                           <button onclick="shareToWhatsApp('${encodedTitle}', '${encodedContent}')" style="background: #25D366; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; font-size: 0.6rem; cursor: pointer;">WhatsApp</button>
                           <button onclick="shareToFacebook('${encodedTitle}', '${encodedContent}')" style="background: #1877F2; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; font-size: 0.6rem; cursor: pointer;">Facebook</button>
+                          <button onclick="shareToTikTok('${encodedTitle}', '${encodedContent}')" style="background: #000000; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; font-size: 0.6rem; cursor: pointer; border: 1px solid #333;">TikTok</button>
                           <button onclick="shareToYouTube()" style="background: #FF0000; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; font-size: 0.6rem; cursor: pointer;">YouTube</button>
                           <button onclick="downloadSermonFile('${encodedTitle}', '${encodedContent}')" style="background: #3498db; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; font-size: 0.6rem; cursor: pointer;">Download</button>
                           <button onclick="deleteSermon('${docId}')" style="background: #e74c3c; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; font-size: 0.6rem; cursor: pointer;">Delete</button>
@@ -629,6 +629,17 @@ function shareToFacebook(encodedTitle, encodedContent) {
         window.open('https://www.facebook.com/', '_blank');
     }).catch(() => {
         window.open('https://www.facebook.com/', '_blank');
+    });
+}
+
+function shareToTikTok(encodedTitle, encodedContent) {
+    const title = decodeURIComponent(encodedTitle);
+    const content = decodeURIComponent(encodedContent);
+    navigator.clipboard.writeText(`${title}\n\n${content}`).then(() => {
+        alert("Sermon copied to clipboard! You can now paste it directly into your TikTok caption or video script.");
+        window.open('https://www.tiktok.com/', '_blank');
+    }).catch(() => {
+        window.open('https://www.tiktok.com/', '_blank');
     });
 }
 
