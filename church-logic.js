@@ -24,6 +24,7 @@ function toggleMenu() {
     if (nav) {
         nav.classList.toggle('open'); 
     }
+
 }
 
 function openModal(id) { 

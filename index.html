@@ -113,29 +113,29 @@
     <audio id="alert-sound" src="alert.mp3" preload="auto"></audio>
 
     <script>
-        let selectedDayValue = "Monday";
-
-        function selectDay(day, buttonElement) {
+    function selectDay(day, buttonElement) {
+        // Ensure this matches your external script variable name if it exists there
+        if (typeof selectedDayValue !== 'undefined') {
             selectedDayValue = day;
-            document.getElementById('b_day').value = day;
-
-            const buttons = document.querySelectorAll('.day-btn');
-            buttons.forEach(btn => {
-                btn.style.background = "rgba(255,255,255,0.08)";
-                btn.style.borderColor = "rgba(212,175,55,0.3)";
-            });
-
-            buttonElement.style.background = "rgba(212, 175, 55, 0.25)";
-            buttonElement.style.borderColor = "#D4AF37";
         }
-    </script>
+        document.getElementById('b_day').value = day;
 
-    <!-- Connects your main script file so toggleMenu() functions properly -->
-    <script src="script.js"></script>
+        const buttons = document.querySelectorAll('.day-btn');
+        buttons.forEach(btn => {
+            btn.style.background = "rgba(255,255,255,0.08)";
+            btn.style.borderColor = "rgba(212,175,55,0.3)";
+        });
+
+        buttonElement.style.background = "rgba(212, 175, 55, 0.25)";
+        buttonElement.style.borderColor = "#D4AF37";
+    }
+</script>
+
+<script src="script.js"></script>
 </body>
 </html>
 
-        <!-- Essential Firebase App Connection Credentials Config Block -->
+                <!-- Essential Firebase App Connection Credentials Config Block -->
 
     <script src="church-logic.js"></script>
     const firebaseConfig = {
@@ -149,3 +149,4 @@
 };
 </body>
 </html>
+
