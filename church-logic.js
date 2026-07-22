@@ -203,7 +203,6 @@ async function rescheduleAppointment(docId) {
         alert("Failed to reschedule.");
     }
 }
-
 async function submitBooking() {
     const nameInput = document.getElementById('b_name');
     const emailInput = document.getElementById('b_email');
@@ -216,26 +215,70 @@ async function submitBooking() {
         return;
     }
 
+    const userName = nameInput.value.trim();
+
     try {
         await db.collection("churchPrayers").add({ 
             type: "APPOINTMENT", 
-            name: nameInput.value.trim(), 
+            name: userName, 
             email: emailInput ? emailInput.value.trim() : "",
             phone: phoneInput ? phoneInput.value.trim() : "",
             text: `${dayInput ? dayInput.value : "Monday"} at ${timeInput ? timeInput.value : "14:00"}`, 
-            status: "Pending", // Default status
+            status: "Pending", 
             time: firebase.firestore.FieldValue.serverTimestamp() 
         });
         
+        // Save name locally so the app remembers who you are
+        localStorage.setItem('church_user_name', userName);
+
         alert("Request Sent."); 
         closeModals();
-        // 👈 Place it right here:
-        watchMyAppointment(nameInput.value.trim());
+        
+        // Start watching status immediately
+        watchMyAppointment(userName);
+
     } catch (error) {
         console.error("Error submitting booking: ", error);
         alert("Failed to send request. Please try again.");
     }
 }
+
+// Function to listen for appointment status changes in real-time
+function watchMyAppointment(userName) {
+    if (!userName) return;
+
+    db.collection("churchPrayers")
+        .where("name", "==", userName)
+        .where("type", "==", "APPOINTMENT")
+        .onSnapshot((snapshot) => {
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                const statusElement = document.getElementById("my-appointment-status");
+                
+                if (statusElement) {
+                    let statusColor = "#f39c12"; // Pending (Orange)
+                    if (data.status === "Accepted") statusColor = "#2ecc71"; // Green
+                    if (data.status === "Rejected") statusColor = "#e74c3c"; // Red
+                    if (data.status === "Rescheduled") statusColor = "#3498db"; // Blue
+
+                    statusElement.innerHTML = `
+                        <div style="border: 1.5px solid ${statusColor}; background: rgba(212, 175, 55, 0.08); padding: 12px; border-radius: 8px; margin-top: 15px; color: #fff; text-align: left;">
+                            <p style="margin: 0 0 4px 0;"><strong>Requested Time:</strong> ${data.text}</p>
+                            <p style="margin: 0;"><strong>Status:</strong> <span style="color: ${statusColor}; font-weight: bold;">${data.status}</span></p>
+                        </div>
+                    `;
+                }
+            });
+        });
+}
+
+// Automatically check status on page load if user already booked before
+window.addEventListener('DOMContentLoaded', () => {
+    const savedName = localStorage.getItem('church_user_name');
+    if (savedName) {
+        watchMyAppointment(savedName);
+    }
+});
 // Function to listen for appointment status changes in real-time
 function watchMyAppointment(userName) {
     if (!userName) return;
