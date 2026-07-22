@@ -344,3 +344,56 @@ function deleteFeedItem(docId) {
         });
     }
 }
+// --- OTHER PREVIOUS FUNCTIONS IN church-logic.js ---
+
+function messageIndividualWhatsApp(phoneNumber, memberName) {
+    const customMessage = document.getElementById('wa_quick_message').value.trim();
+    const textToSend = customMessage ? customMessage : `Hello ${memberName}, God bless you! Checking in from the church.`;
+    const encodedMessage = encodeURIComponent(textToSend);
+    const cleanPhone = phoneNumber.replace(/[^0-9+]/g, '');
+    const url = `https://wa.me/${cleanPhone}?text=${encodedMessage}`;
+    window.open(url, '_blank');
+}
+
+
+// --- PASTE THE LIVE FEED CODE RIGHT HERE AT THE BOTTOM ---
+
+function loadAdminLiveFeed() {
+    if (typeof firebase === 'undefined') return;
+    
+    const db = firebase.firestore();
+    const prayerListContainer = document.getElementById('prayer-list');
+    
+    if (!prayerListContainer) return;
+
+    db.collection("prayers_or_messages")
+      .orderBy("timestamp", "desc")
+      .onSnapshot((snapshot) => {
+          prayerListContainer.innerHTML = "";
+          
+          if (snapshot.empty) {
+              prayerListContainer.innerHTML = '<p style="opacity: 0.3; margin-top: 20px;">Waiting for mission data...</p>';
+              return;
+          }
+
+          snapshot.forEach((doc) => {
+              const data = doc.data();
+              const itemCard = document.createElement('div');
+              itemCard.style.cssText = "background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); padding: 12px; border-radius: 8px; margin-bottom: 10px; text-align: left;";
+              
+              itemCard.innerHTML = `
+                  <strong style="color: var(--gold-solid); font-size: 0.85rem; display: block; margin-bottom: 4px;">${data.name || 'Anonymous Member'}</strong>
+                  <p style="color: #fff; font-size: 0.9rem; margin: 0;">${data.message || data.prayer || 'No message content'}</p>
+              `;
+              
+              prayerListContainer.appendChild(itemCard);
+          });
+      }, (error) => {
+          console.error("Error loading live feed: ", error);
+          prayerListContainer.innerHTML = '<p style="color: #ff4444; margin-top: 20px;">Error syncing live feed data.</p>';
+      });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    loadAdminLiveFeed();
+});

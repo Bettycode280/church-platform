@@ -43,34 +43,50 @@
         </div>
 
         <div class="admin-dashboard-grid">
+        <h2 class="gold-text" style="text-align: center; margin-bottom: 25px;">MISSION CONTROL</h2>
+
+        <!-- Member WhatsApp Directory Panel -->
+        <div class="admin-panel">
+            <h2 class="gold-text" style="font-size: 1.2rem;">Member WhatsApp Directory</h2>
+            <p class="form-hint" style="font-size: 0.8rem; color: #aaa; margin-bottom: 10px;">Click a member to message them directly on WhatsApp</p>
             
-            <div class="admin-panel">
-                <h2 class="gold-text" style="font-size: 1.2rem; margin-bottom: 15px;">🚨 LIVE BROADCAST</h2>
-                <p class="form-hint">Type the sermon topic to trigger the Red Alert on all phones.</p>
-                <input type="text" id="sermon-input" placeholder="Current Sermon Topic..." class="sleek-input">
-                <button class="premium-gold-btn" onclick="updateSermon()">GO LIVE NOW</button>
-                
-                <button class="premium-gold-btn" onclick="document.getElementById('sermon-input').value=''; updateSermon();" 
-                        style="margin-top: 10px; background: #333; color: white;">
-                    END BROADCAST (RESET)
-                </button>
+            <div style="margin-top: 10px;">
+                <input type="text" id="wa_quick_message" placeholder="Type message to send to selected member..." class="sleek-input" style="margin-bottom: 15px; width: 100%; padding: 10px; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff;">
             </div>
 
-            <div class="admin-panel">
-                <h2 class="gold-text" style="font-size: 1.2rem;">🕊️ LIVE FEED</h2>
-                <div class="scroll-area" id="prayer-list">
-                    <p style="opacity: 0.3; margin-top: 20px;">Waiting for mission data...</p>
+            <div id="member-directory-list" style="display: flex; flex-direction: column; gap: 10px; max-height: 250px; overflow-y: auto;">
+                <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(212,175,55,0.2);">
+                    <div style="color: #fff; text-align: left;">
+                        <strong style="display: block; font-size: 0.95rem;">Sister Sarah Jenkins</strong>
+                        <span style="font-size: 0.75rem; color: #aaa;">+1 555-0192</span>
+                    </div>
+                    <button class="premium-gold-btn" onclick="messageIndividualWhatsApp('+15550192', 'Sister Sarah Jenkins')" style="margin: 0; padding: 6px 12px; font-size: 0.65rem; background: #25D366; color: #fff; border: none; border-radius: 4px; cursor: pointer;">WhatsApp</button>
+                </div>
+
+                <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(212,175,55,0.2);">
+                    <div style="color: #fff; text-align: left;">
+                        <strong style="display: block; font-size: 0.95rem;">Brother David Smith</strong>
+                        <span style="font-size: 0.75rem; color: #aaa;">+1 555-8491</span>
+                    </div>
+                    <button class="premium-gold-btn" onclick="messageIndividualWhatsApp('+15558491', 'Brother David Smith')" style="margin: 0; padding: 6px 12px; font-size: 0.65rem; background: #25D366; color: #fff; border: none; border-radius: 4px; cursor: pointer;">WhatsApp</button>
                 </div>
             </div>
-
         </div>
 
-        <div style="text-align: center; margin-top: 40px; padding-bottom: 40px;">
-            <button onclick="location.reload()" style="background:none; border:none; color:rgba(255,255,255,0.3); cursor:pointer;">Logout & Lock</button>
+        <!-- Live Feed Panel -->
+        <div class="admin-panel" style="margin-top: 20px;">
+            <h2 class="gold-text" style="font-size: 1.2rem;">🕊️ LIVE FEED</h2>
+            <div class="scroll-area" id="prayer-list">
+                <p style="opacity: 0.3; margin-top: 20px;">Waiting for mission data...</p>
+            </div>
         </div>
+
     </div>
 
-    <!-- Note: Make sure your Firebase script links (from earlier) sit right here if they aren't already! -->
+    <div style="text-align: center; margin-top: 40px; padding-bottom: 40px;">
+        <button onclick="location.reload()" style="background:none; border:none; color:rgba(255,255,255,0.3); cursor:pointer;">Logout & Lock</button>
+    </div>
+
     <script src="church-logic.js"></script>
 </body>
 </html>
