@@ -229,10 +229,40 @@ async function submitBooking() {
         
         alert("Request Sent."); 
         closeModals();
+        // 👈 Place it right here:
+        watchMyAppointment(nameInput.value.trim());
     } catch (error) {
         console.error("Error submitting booking: ", error);
         alert("Failed to send request. Please try again.");
     }
+}
+// Function to listen for appointment status changes in real-time
+function watchMyAppointment(userName) {
+    if (!userName) return;
+
+    db.collection("churchPrayers")
+        .where("name", "==", userName)
+        .where("type", "==", "APPOINTMENT")
+        .onSnapshot((snapshot) => {
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                const statusElement = document.getElementById("my-appointment-status");
+                
+                if (statusElement) {
+                    let statusColor = "#D4AF37"; // Default gold
+                    if (data.status === "Accepted") statusColor = "#28a745"; // Green
+                    if (data.status === "Rejected") statusColor = "#dc3545"; // Red
+                    if (data.status === "Rescheduled") statusColor = "#ffc107"; // Yellow
+
+                    statusElement.innerHTML = `
+                        <div style="border: 1px solid ${statusColor}; padding: 12px; border-radius: 8px; margin-top: 10px;">
+                            <p><strong>Appointment Time:</strong> ${data.text}</p>
+                            <p><strong>Status:</strong> <span style="color: ${statusColor}; font-weight: bold;">${data.status}</span></p>
+                        </div>
+                    `;
+                }
+            });
+        });
 }
 
 function loadPrayers() {
