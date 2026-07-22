@@ -346,6 +346,7 @@ function deleteFeedItem(docId) {
 }
 // --- OTHER PREVIOUS FUNCTIONS IN church-logic.js ---
 
+// --- WHATSAPP INDIVIDUAL MESSAGING ---
 function messageIndividualWhatsApp(phoneNumber, memberName) {
     const customMessage = document.getElementById('wa_quick_message').value.trim();
     const textToSend = customMessage ? customMessage : `Hello ${memberName}, God bless you! Checking in from the church.`;
@@ -356,8 +357,75 @@ function messageIndividualWhatsApp(phoneNumber, memberName) {
 }
 
 
-// --- PASTE THE LIVE FEED CODE RIGHT HERE AT THE BOTTOM ---
+// --- SAVE NEW MEMBER TO FIREBASE ---
+function saveNewMember() {
+    const name = document.getElementById('new_member_name').value.trim();
+    const phone = document.getElementById('new_member_phone').value.trim();
 
+    if (!name || !phone) {
+        alert("Please enter both a name and a phone number.");
+        return;
+    }
+
+    if (typeof firebase === 'undefined') return;
+
+    const db = firebase.firestore();
+    db.collection("members").add({
+        name: name,
+        phone: phone,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    })
+    .then(() => {
+        alert(`${name} added successfully!`);
+        document.getElementById('new_member_name').value = '';
+        document.getElementById('new_member_phone').value = '';
+    })
+    .catch((error) => {
+        console.error("Error adding member: ", error);
+        alert("Failed to save member.");
+    });
+}
+
+
+// --- LOAD MEMBER DIRECTORY FROM FIREBASE ---
+function loadMemberDirectory() {
+    if (typeof firebase === 'undefined') return;
+
+    const db = firebase.firestore();
+    const directoryContainer = document.getElementById('member-directory-list');
+    
+    if (!directoryContainer) return;
+
+    db.collection("members")
+      .orderBy("name", "asc")
+      .onSnapshot((snapshot) => {
+          directoryContainer.innerHTML = "";
+
+          if (snapshot.empty) {
+              directoryContainer.innerHTML = '<p style="opacity: 0.3; text-align: center; padding: 10px;">No members saved yet.</p>';
+              return;
+          }
+
+          snapshot.forEach((doc) => {
+              const data = doc.data();
+              const memberCard = document.createElement('div');
+              memberCard.style.cssText = "background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(212,175,55,0.2);";
+              
+              memberCard.innerHTML = `
+                  <div style="color: #fff; text-align: left;">
+                      <strong style="display: block; font-size: 0.95rem;">${data.name}</strong>
+                      <span style="font-size: 0.75rem; color: #aaa;">${data.phone}</span>
+                  </div>
+                  <button class="premium-gold-btn" onclick="messageIndividualWhatsApp('${data.phone}', '${data.name}')" style="margin: 0; padding: 6px 12px; font-size: 0.65rem; background: #25D366; color: #fff; border: none; border-radius: 4px; cursor: pointer;">WhatsApp</button>
+              `;
+              
+              directoryContainer.appendChild(memberCard);
+          });
+      });
+}
+
+
+// --- LIVE FEED FUNCTION ---
 function loadAdminLiveFeed() {
     if (typeof firebase === 'undefined') return;
     
@@ -388,12 +456,12 @@ function loadAdminLiveFeed() {
               
               prayerListContainer.appendChild(itemCard);
           });
-      }, (error) => {
-          console.error("Error loading live feed: ", error);
-          prayerListContainer.innerHTML = '<p style="color: #ff4444; margin-top: 20px;">Error syncing live feed data.</p>';
       });
 }
 
+
+// --- AUTO-RUN LISTENERS WHEN ADMIN PAGE LOADS ---
 document.addEventListener("DOMContentLoaded", () => {
     loadAdminLiveFeed();
+    loadMemberDirectory();
 });
