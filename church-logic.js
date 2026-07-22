@@ -469,32 +469,54 @@ function loadMemberDirectory() {
       });
 }
 // ==========================================
-// SERMON NOTES MANAGEMENT
+// SAVED MESSAGES & SERMONS MANAGEMENT
 // ==========================================
-function saveSermonNotes() {
+function loadSavedSermons() {
+    if (typeof firebase === 'undefined') return;
+    const db = firebase.firestore();
+    const sermonsContainer = document.getElementById('saved-sermons-list');
+    
+    if (!sermonsContainer) return;
+
+    db.collection("sermons")
+      .orderBy("createdAt", "desc")
+      .onSnapshot((snapshot) => {
+          sermonsContainer.innerHTML = "";
+
+          if (snapshot.empty) {
+              sermonsContainer.innerHTML = '<p style="opacity: 0.3; text-align: center; padding: 10px;">No saved messages yet.</p>';
+              return;
+          }
+
+          snapshot.forEach((doc) => {
+              const data = doc.data();
+              const docId = doc.id;
+              const sermonCard = document.createElement('div');
+              
+              sermonCard.style.cssText = "background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; border: 1px solid rgba(212,175,55,0.2); text-align: left; margin-bottom: 8px;";
+              
+              sermonCard.innerHTML = `
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                      <strong style="color: #d4af37; font-size: 0.95rem;">${data.title}</strong>
+                      <button onclick="deleteSermon('${docId}')" style="background: #e74c3c; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; font-size: 0.6rem; cursor: pointer;">Delete</button>
+                  </div>
+                  <p style="color: #ddd; font-size: 0.8rem; white-space: pre-wrap; margin: 0; opacity: 0.9;">${data.content}</p>
+              `;
+              
+              sermonsContainer.appendChild(sermonCard);
+          });
+      });
+}
+
+function deleteSermon(docId) {
     if (typeof firebase === 'undefined') return;
     const db = firebase.firestore();
     
-    const title = document.getElementById('sermon_title').value.trim();
-    const content = document.getElementById('sermon_content').value.trim();
-    
-    if (!title && !content) {
-        alert("Please enter a title or some notes before saving.");
-        return;
+    if (confirm("Are you sure you want to delete these sermon notes?")) {
+        db.collection("sermons").doc(docId).delete()
+        .catch((error) => {
+            console.error("Error deleting sermon: ", error);
+            alert("Failed to delete message.");
+        });
     }
-    
-    db.collection("sermons").add({
-        title: title || "Untitled Message",
-        content: content,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    })
-    .then(() => {
-        alert("Sermon notes saved successfully!");
-        document.getElementById('sermon_title').value = '';
-        document.getElementById('sermon_content').value = '';
-    })
-    .catch((error) => {
-        console.error("Error saving notes: ", error);
-        alert("Failed to save sermon notes.");
-    });
 }

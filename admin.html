@@ -80,6 +80,15 @@
     
     <button class="premium-gold-btn" onclick="saveSermonNotes()" style="width: 100%; padding: 10px; background: #d4af37; color: #000; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">SAVE SERMON NOTES</button>
 </div>
+<!-- Saved Messages List -->
+<div class="admin-panel" style="margin-bottom: 20px;">
+    <h2 class="gold-text" style="font-size: 1.2rem;">📂 Saved Messages</h2>
+    <p class="form-hint" style="font-size: 0.8rem; color: #aaa; margin-bottom: 10px;">Review your previously saved sermons</p>
+    
+    <div id="saved-sermons-list" style="max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">
+        <p style="opacity: 0.3; text-align: center; padding: 10px;">Loading saved messages...</p>
+    </div>
+</div>
 
             <!-- 3. Live Feed Panel -->
             <div class="admin-panel" style="margin-top: 20px;">
