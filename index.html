@@ -65,7 +65,7 @@
     <div class="glass-card">
         <h2 class="gold-text">Appointment</h2>
         <p class="form-hint">Request a Private Meeting</p>
-        <!-- Added oninput to instantly trigger status check as you type your name -->
+        
         <input type="text" id="b_name" placeholder="Full Name" class="sleek-input" oninput="watchMyAppointment(this.value.trim())">
         <input type="email" id="b_email" placeholder="Email" class="sleek-input">
         <input type="tel" id="b_phone" placeholder="Phone" class="sleek-input">
@@ -81,7 +81,6 @@
             <button type="button" class="day-btn" onclick="selectDay('Saturday', this)" style="padding: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px; cursor: pointer; font-size: 13px;">Saturday</button>
             <button type="button" class="day-btn" onclick="selectDay('Sunday', this)" style="padding: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px; grid-column: span 2; cursor: pointer; font-size: 13px;">Sunday</button>
         </div>
-        <!-- Hidden input storing selected day -->
         <input type="hidden" id="b_day" value="Monday">
 
         <!-- Round Clock Picker Input -->
@@ -120,18 +119,19 @@
             selectedDayValue = day;
             document.getElementById('b_day').value = day;
 
-            // Clear highlight from all buttons
             const buttons = document.querySelectorAll('.day-btn');
             buttons.forEach(btn => {
                 btn.style.background = "rgba(255,255,255,0.08)";
                 btn.style.borderColor = "rgba(212,175,55,0.3)";
             });
 
-            // Highlight selected button in gold
             buttonElement.style.background = "rgba(212, 175, 55, 0.25)";
             buttonElement.style.borderColor = "#D4AF37";
         }
     </script>
+
+    <!-- Connects your main script file so toggleMenu() functions properly -->
+    <script src="script.js"></script>
 </body>
 </html>
 
