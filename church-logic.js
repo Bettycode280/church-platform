@@ -42,34 +42,21 @@ function closeModals() {
         modal.classList.remove('open');
     });
 }
-// ==========================================
 // 3. MISSION CONTROL SECURITY
 // ==========================================
 
 function checkPass() {
-    const input = document.getElementById('pass-input').value.trim();
+    const input = document.getElementById('pass-input').value;
     if (input === "DLCC2026") {
-        // Hide the login overlay
-        const overlay = document.getElementById('login-overlay');
-        if (overlay) {
-            overlay.style.display = 'none';
-        }
-        
-        // Target your admin UI container by its class name
-        const adminGrid = document.querySelector('.admin-dashboard-grid');
-        if (adminGrid) {
-            adminGrid.style.display = 'block';
-        }
-        
-        // Trigger your data loaders
-        if (typeof loadAdminLiveFeed === 'function') loadAdminLiveFeed();
-        if (typeof loadMemberDirectory === 'function') loadMemberDirectory();
-        
+        document.getElementById('login-overlay').style.display = 'none';
+        document.getElementById('admin-ui').style.display = 'block';
+        loadPrayers(); // Load the dashboard data
         console.log("Mission Control Unlocked.");
     } else { 
         alert("Unauthorized Key."); 
     }
 }
+
 // ==========================================
 // 4. LIVE SERMON BROADCAST (RED ALERT)
 // ==========================================
@@ -98,7 +85,6 @@ if (broadcastTag) {
         }
     });
 }
-
 // ==========================================
 // 5. DATA SUBMISSION & DASHBOARD
 // ==========================================
