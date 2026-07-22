@@ -69,15 +69,26 @@
         <input type="text" id="b_name" placeholder="Full Name" class="sleek-input" oninput="watchMyAppointment(this.value.trim())">
         <input type="email" id="b_email" placeholder="Email" class="sleek-input">
         <input type="tel" id="b_phone" placeholder="Phone" class="sleek-input">
-        <select id="b_day" class="sleek-input">
-            <option value="Monday">Monday</option>
-            <option value="Tuesday">Tuesday</option>
-            <option value="Wednesday">Wednesday</option>
-            <option value="Thursday">Thursday</option>
-            <option value="Friday">Friday</option>
-        </select>
-        <input type="time" id="b_time" value="14:00" class="sleek-input">
-        <button class="premium-gold-btn" onclick="submitBooking()">REQUEST MEETING</button>
+        
+        <!-- Clickable Grid Selection (Monday - Sunday) -->
+        <label style="color: #D4AF37; font-size: 11px; display: block; text-align: left; margin: 4px 0;">Select Day</label>
+        <div id="day-selector-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-bottom: 10px;">
+            <button type="button" class="day-btn" onclick="selectDay('Monday', this)" style="padding: 8px; background: rgba(212,175,55,0.25); border: 1px solid #D4AF37; color: #fff; border-radius: 6px; cursor: pointer; font-size: 13px;">Monday</button>
+            <button type="button" class="day-btn" onclick="selectDay('Tuesday', this)" style="padding: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px; cursor: pointer; font-size: 13px;">Tuesday</button>
+            <button type="button" class="day-btn" onclick="selectDay('Wednesday', this)" style="padding: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px; cursor: pointer; font-size: 13px;">Wednesday</button>
+            <button type="button" class="day-btn" onclick="selectDay('Thursday', this)" style="padding: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px; cursor: pointer; font-size: 13px;">Thursday</button>
+            <button type="button" class="day-btn" onclick="selectDay('Friday', this)" style="padding: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px; cursor: pointer; font-size: 13px;">Friday</button>
+            <button type="button" class="day-btn" onclick="selectDay('Saturday', this)" style="padding: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px; cursor: pointer; font-size: 13px;">Saturday</button>
+            <button type="button" class="day-btn" onclick="selectDay('Sunday', this)" style="padding: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px; grid-column: span 2; cursor: pointer; font-size: 13px;">Sunday</button>
+        </div>
+        <!-- Hidden input storing selected day -->
+        <input type="hidden" id="b_day" value="Monday">
+
+        <!-- Round Clock Picker Input -->
+        <label style="color: #D4AF37; font-size: 11px; display: block; text-align: left; margin: 4px 0;">Select Time</label>
+        <input type="time" id="b_time" value="14:00" class="sleek-input" style="cursor: pointer;">
+
+        <button class="premium-gold-btn" onclick="submitBooking()" style="margin-top: 10px;">REQUEST MEETING</button>
         <div class="cancel-link" onclick="closeModals(); toggleMenu();">Back</div>
 
         <!-- Container where the live appointment status will display -->
@@ -101,6 +112,26 @@
     </div>
 
     <audio id="alert-sound" src="alert.mp3" preload="auto"></audio>
+
+    <script>
+        let selectedDayValue = "Monday";
+
+        function selectDay(day, buttonElement) {
+            selectedDayValue = day;
+            document.getElementById('b_day').value = day;
+
+            // Clear highlight from all buttons
+            const buttons = document.querySelectorAll('.day-btn');
+            buttons.forEach(btn => {
+                btn.style.background = "rgba(255,255,255,0.08)";
+                btn.style.borderColor = "rgba(212,175,55,0.3)";
+            });
+
+            // Highlight selected button in gold
+            buttonElement.style.background = "rgba(212, 175, 55, 0.25)";
+            buttonElement.style.borderColor = "#D4AF37";
+        }
+    </script>
 </body>
 </html>
 

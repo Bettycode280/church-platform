@@ -91,6 +91,24 @@ if (broadcastTag) {
 // 5. DATA SUBMISSION & DASHBOARD
 // ==========================================
 
+let selectedDayValue = "Monday";
+
+function selectDay(day, buttonElement) {
+    selectedDayValue = day;
+    document.getElementById('b_day').value = day;
+
+    // Remove active highlight from all day buttons
+    const buttons = document.querySelectorAll('.day-btn');
+    buttons.forEach(btn => {
+        btn.style.background = "rgba(255,255,255,0.08)";
+        btn.style.borderColor = "rgba(212,175,55,0.3)";
+    });
+
+    // Highlight the clicked button in gold
+    buttonElement.style.background = "rgba(212, 175, 55, 0.25)";
+    buttonElement.style.borderColor = "#D4AF37";
+}
+
 async function updateSermon() {
     const topic = document.getElementById('sermon-input').value;
     const titleToSend = topic ? topic : ""; 
