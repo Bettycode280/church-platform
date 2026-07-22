@@ -42,37 +42,38 @@
             <p style="letter-spacing: 3px; opacity: 0.7;">DIVINE LIFE CHRISTIAN CENTRE</p>
         </div>
 
-        <div class="admin-dashboard-grid">
-        <h2 class="gold-text" style="text-align: center; margin-bottom: 25px;">MISSION CONTROL</h2>
+        <!-- Main Dashboard Grid (Hidden by default until login succeeds) -->
+<div class="admin-dashboard-grid" style="display: none;">
+    <h2 class="gold-text" style="text-align: center; margin-bottom: 25px;">MISSION CONTROL</h2>
 
-        <!-- 1. Add New Member Panel -->
-        <div class="admin-panel" style="margin-bottom: 20px;">
-            <h2 class="gold-text" style="font-size: 1.1rem;">Add New Member</h2>
-            <input type="text" id="new_member_name" placeholder="Member Name (e.g. Sister Grace)" class="sleek-input" style="margin-bottom: 10px; width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px;">
-            <input type="text" id="new_member_phone" placeholder="Phone Number (e.g. +1234567890)" class="sleek-input" style="margin-bottom: 10px; width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px;">
-            <button class="premium-gold-btn" onclick="saveNewMember()" style="width: 100%;">SAVE MEMBER</button>
-        </div>
-
-        <!-- 2. Member WhatsApp Directory Panel -->
-        <div class="admin-panel">
-            <h2 class="gold-text" style="font-size: 1.2rem;">Member WhatsApp Directory</h2>
-            <p class="form-hint" style="font-size: 0.8rem; color: #aaa; margin-bottom: 10px;">Click a member to message them directly on WhatsApp</p>
-            
-            <div style="margin-top: 10px;">
-                <input type="text" id="wa_quick_message" placeholder="Type message to send to selected member..." class="sleek-input" style="margin-bottom: 15px; width: 100%; padding: 10px; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff;">
-            </div>
-
-            <div id="member-directory-list" style="display: flex; flex-direction: column; gap: 10px; max-height: 250px; overflow-y: auto;">
-                <!-- Members populate here automatically from database -->
-            </div>
-        </div>
-
-        <!-- 3. Live Feed Panel -->
-        <div class="admin-panel" style="margin-top: 20px;">
-            <h2 class="gold-text" style="font-size: 1.2rem;">🕊️ LIVE FEED</h2>
-            <div class="scroll-area" id="prayer-list">
-                <p style="opacity: 0.3; margin-top: 20px;">Waiting for mission data...</p>
-            </div>
-        </div>
-
+    <!-- 1. Add New Member Panel -->
+    <div class="admin-panel" style="margin-bottom: 20px;">
+        <h2 class="gold-text" style="font-size: 1.1rem;">Add New Member</h2>
+        <input type="text" id="new_member_name" placeholder="Member Name (e.g. Sister Grace)" class="sleek-input" style="margin-bottom: 10px; width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px;">
+        <input type="text" id="new_member_phone" placeholder="Phone Number (e.g. +1234567890)" class="sleek-input" style="margin-bottom: 10px; width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px;">
+        <button class="premium-gold-btn" onclick="saveNewMember()" style="width: 100%;">SAVE MEMBER</button>
     </div>
+
+    <!-- 2. Member WhatsApp Directory Panel -->
+    <div class="admin-panel">
+        <h2 class="gold-text" style="font-size: 1.2rem;">Member WhatsApp Directory</h2>
+        <p class="form-hint" style="font-size: 0.8rem; color: #aaa; margin-bottom: 10px;">Click a member to message them directly on WhatsApp</p>
+        
+        <div style="margin-top: 10px;">
+            <input type="text" id="wa_quick_message" placeholder="Type message to send to selected member..." class="sleek-input" style="margin-bottom: 15px; width: 100%; padding: 10px; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff;">
+        </div>
+
+        <div id="member-directory-list" style="display: flex; flex-direction: column; gap: 10px; max-height: 250px; overflow-y: auto;">
+            <p style="opacity: 0.3; text-align: center; padding: 10px;">Loading members...</p>
+        </div>
+    </div>
+
+    <!-- 3. Live Feed Panel -->
+    <div class="admin-panel" style="margin-top: 20px;">
+        <h2 class="gold-text" style="font-size: 1.2rem;">🕊️ LIVE FEED</h2>
+        <div class="scroll-area" id="prayer-list">
+            <p style="opacity: 0.3; margin-top: 20px;">Waiting for mission data...</p>
+        </div>
+    </div>
+
+</div>
