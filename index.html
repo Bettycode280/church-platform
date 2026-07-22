@@ -78,6 +78,9 @@
         <input type="time" id="b_time" value="14:00" class="sleek-input">
         <button class="premium-gold-btn" onclick="submitBooking()">REQUEST MEETING</button>
         <div class="cancel-link" onclick="closeModals(); toggleMenu();">Back</div>
+
+        <!-- 👇 ADDED: Container where the live appointment status will display -->
+        <div id="my-appointment-status"></div>
     </div>
 </div>
 
@@ -97,6 +100,8 @@
     </div>
 
     <audio id="alert-sound" src="alert.mp3" preload="auto"></audio>
+</body>
+</html>
 
         <!-- Essential Firebase App Connection Credentials Config Block -->
 

@@ -9,7 +9,6 @@ const firebaseConfig = {
     messagingSenderId: "369831733781",
     appId: "1:369831733781:web:a7402fd123de519d7e3c1c"
 };
-
 // Initialize Firebase
 if (!firebase.apps.length) { 
     firebase.initializeApp(firebaseConfig); 
@@ -41,37 +40,6 @@ function closeModals() {
     modals.forEach(modal => {
         modal.classList.remove('open');
     });
-}
-
-// Function to submit the booking data to Firestore (Includes Email & Phone)
-async function submitBooking() {
-    const nameInput = document.getElementById('b_name');
-    const emailInput = document.getElementById('b_email');
-    const phoneInput = document.getElementById('b_phone');
-    const dayInput = document.getElementById('b_day');
-    const timeInput = document.getElementById('b_time');
-
-    if (!nameInput || !nameInput.value.trim()) {
-        alert("Name required.");
-        return;
-    }
-
-    try {
-        await db.collection("churchPrayers").add({ 
-            type: "APPOINTMENT", 
-            name: nameInput.value.trim(), 
-            email: emailInput ? emailInput.value.trim() : "",
-            phone: phoneInput ? phoneInput.value.trim() : "",
-            text: `${dayInput ? dayInput.value : "Monday"} at ${timeInput ? timeInput.value : "14:00"}`, 
-            time: firebase.firestore.FieldValue.serverTimestamp() 
-        });
-        
-        alert("Request Sent."); 
-        closeModals();
-    } catch (error) {
-        console.error("Error submitting booking: ", error);
-        alert("Failed to send request. Please try again.");
-    }
 }
 
 // ==========================================
@@ -118,6 +86,7 @@ if (broadcastTag) {
         }
     });
 }
+
 // ==========================================
 // 5. DATA SUBMISSION & DASHBOARD
 // ==========================================
@@ -172,37 +141,7 @@ async function submitPrayer() {
     }
 }
 
-// Function to update appointment status (Accept / Reject)
-async function updateAppointmentStatus(docId, newStatus) {
-    try {
-        await db.collection("churchPrayers").doc(docId).update({
-            status: newStatus
-        });
-        console.log(`Appointment status updated to: ${newStatus}`);
-    } catch (error) {
-        console.error("Error updating status: ", error);
-        alert("Failed to update status.");
-    }
-}
-
-// Function to reschedule an appointment
-async function rescheduleAppointment(docId) {
-    const newDay = prompt("Enter new day (e.g., Tuesday):");
-    const newTime = prompt("Enter new time (e.g., 15:30):");
-    
-    if (!newDay || !newTime) return;
-
-    try {
-        await db.collection("churchPrayers").doc(docId).update({
-            text: `${newDay} at ${newTime}`,
-            status: "Rescheduled"
-        });
-        alert("Appointment rescheduled successfully.");
-    } catch (error) {
-        console.error("Error rescheduling: ", error);
-        alert("Failed to reschedule.");
-    }
-}
+// Function to submit booking with real-time tracker initialization
 async function submitBooking() {
     const nameInput = document.getElementById('b_name');
     const emailInput = document.getElementById('b_email');
@@ -243,7 +182,7 @@ async function submitBooking() {
     }
 }
 
-// Function to listen for appointment status changes in real-time
+// Single, clean real-time status listener function
 function watchMyAppointment(userName) {
     if (!userName) return;
 
@@ -251,23 +190,27 @@ function watchMyAppointment(userName) {
         .where("name", "==", userName)
         .where("type", "==", "APPOINTMENT")
         .onSnapshot((snapshot) => {
+            const statusElement = document.getElementById("my-appointment-status");
+            if (!statusElement) return;
+
+            if (snapshot.empty) {
+                statusElement.innerHTML = `<p style="color: #aaa; font-size: 13px;">No active appointment found.</p>`;
+                return;
+            }
+
             snapshot.forEach((doc) => {
                 const data = doc.data();
-                const statusElement = document.getElementById("my-appointment-status");
-                
-                if (statusElement) {
-                    let statusColor = "#f39c12"; // Pending (Orange)
-                    if (data.status === "Accepted") statusColor = "#2ecc71"; // Green
-                    if (data.status === "Rejected") statusColor = "#e74c3c"; // Red
-                    if (data.status === "Rescheduled") statusColor = "#3498db"; // Blue
+                let statusColor = "#f39c12"; // Pending (Orange)
+                if (data.status === "Accepted") statusColor = "#2ecc71"; // Green
+                if (data.status === "Rejected") statusColor = "#e74c3c"; // Red
+                if (data.status === "Rescheduled") statusColor = "#3498db"; // Blue
 
-                    statusElement.innerHTML = `
-                        <div style="border: 1.5px solid ${statusColor}; background: rgba(212, 175, 55, 0.08); padding: 12px; border-radius: 8px; margin-top: 15px; color: #fff; text-align: left;">
-                            <p style="margin: 0 0 4px 0;"><strong>Requested Time:</strong> ${data.text}</p>
-                            <p style="margin: 0;"><strong>Status:</strong> <span style="color: ${statusColor}; font-weight: bold;">${data.status}</span></p>
-                        </div>
-                    `;
-                }
+                statusElement.innerHTML = `
+                    <div style="border: 1.5px solid ${statusColor}; background: rgba(212, 175, 55, 0.08); padding: 12px; border-radius: 8px; margin-top: 15px; color: #fff; text-align: left;">
+                        <p style="margin: 0 0 4px 0;"><strong>Requested Time:</strong> ${data.text}</p>
+                        <p style="margin: 0;"><strong>Status:</strong> <span style="color: ${statusColor}; font-weight: bold;">${data.status}</span></p>
+                    </div>
+                `;
             });
         });
 }
@@ -279,33 +222,37 @@ window.addEventListener('DOMContentLoaded', () => {
         watchMyAppointment(savedName);
     }
 });
-// Function to listen for appointment status changes in real-time
-function watchMyAppointment(userName) {
-    if (!userName) return;
 
-    db.collection("churchPrayers")
-        .where("name", "==", userName)
-        .where("type", "==", "APPOINTMENT")
-        .onSnapshot((snapshot) => {
-            snapshot.forEach((doc) => {
-                const data = doc.data();
-                const statusElement = document.getElementById("my-appointment-status");
-                
-                if (statusElement) {
-                    let statusColor = "#D4AF37"; // Default gold
-                    if (data.status === "Accepted") statusColor = "#28a745"; // Green
-                    if (data.status === "Rejected") statusColor = "#dc3545"; // Red
-                    if (data.status === "Rescheduled") statusColor = "#ffc107"; // Yellow
-
-                    statusElement.innerHTML = `
-                        <div style="border: 1px solid ${statusColor}; padding: 12px; border-radius: 8px; margin-top: 10px;">
-                            <p><strong>Appointment Time:</strong> ${data.text}</p>
-                            <p><strong>Status:</strong> <span style="color: ${statusColor}; font-weight: bold;">${data.status}</span></p>
-                        </div>
-                    `;
-                }
-            });
+// Function to update appointment status (Accept / Reject)
+async function updateAppointmentStatus(docId, newStatus) {
+    try {
+        await db.collection("churchPrayers").doc(docId).update({
+            status: newStatus
         });
+        console.log(`Appointment status updated to: ${newStatus}`);
+    } catch (error) {
+        console.error("Error updating status: ", error);
+        alert("Failed to update status.");
+    }
+}
+
+// Function to reschedule an appointment
+async function rescheduleAppointment(docId) {
+    const newDay = prompt("Enter new day (e.g., Tuesday):");
+    const newTime = prompt("Enter new time (e.g., 15:30):");
+    
+    if (!newDay || !newTime) return;
+
+    try {
+        await db.collection("churchPrayers").doc(docId).update({
+            text: `${newDay} at ${newTime}`,
+            status: "Rescheduled"
+        });
+        alert("Appointment rescheduled successfully.");
+    } catch (error) {
+        console.error("Error rescheduling: ", error);
+        alert("Failed to reschedule.");
+    }
 }
 
 function loadPrayers() {
