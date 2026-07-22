@@ -24,33 +24,43 @@ function toggleMenu() {
     if (nav) {
         nav.classList.toggle('open'); 
     }
-
 }
 
 function openModal(id) { 
     const nav = document.getElementById('side-menu');
-    if (nav) nav.classList.remove('open'); // Close menu first
+    if (nav) nav.classList.remove('open');
     
     const modal = document.getElementById(id);
     if (modal) modal.classList.add('open'); 
 }
 
-// Function to close all open modals
 function closeModals() {
     const modals = document.querySelectorAll('.modal');
     modals.forEach(modal => {
         modal.classList.remove('open');
     });
 }
+
+// ==========================================
 // 3. MISSION CONTROL SECURITY
 // ==========================================
 
 function checkPass() {
-    const input = document.getElementById('pass-input').value;
+    const inputField = document.getElementById('pass-input');
+    if (!inputField) return;
+
+    const input = inputField.value.trim();
     if (input === "DLCC2026") {
-        document.getElementById('login-overlay').style.display = 'none';
-        document.getElementById('admin-ui').style.display = 'block';
-        loadPrayers(); // Load the dashboard data
+        const overlay = document.getElementById('login-overlay');
+        if (overlay) overlay.style.display = 'none';
+
+        const adminUI = document.getElementById('admin-ui');
+        if (adminUI) adminUI.style.display = 'block';
+
+        // Load dashboard data immediately upon login
+        loadPrayers();
+        loadMemberDirectory();
+
         console.log("Mission Control Unlocked.");
     } else { 
         alert("Unauthorized Key."); 
@@ -63,7 +73,8 @@ function checkPass() {
 const broadcastTag = document.getElementById('broadcast-tag');
 const alertSound = document.getElementById('alert-sound');
 
-if (broadcastTag) {
+if (broadcastTag && typeof firebase !== 'undefined') {
+    const db = firebase.firestore();
     db.collection("churchSettings").doc("live_topic").onSnapshot(doc => {
         if (doc.exists && doc.data().title && doc.data().title.trim() !== "") { 
             const sermonTitle = doc.data().title.trim();
@@ -85,6 +96,7 @@ if (broadcastTag) {
         }
     });
 }
+
 // ==========================================
 // 5. DATA SUBMISSION & DASHBOARD
 // ==========================================
@@ -93,21 +105,22 @@ let selectedDayValue = "Monday";
 
 function selectDay(day, buttonElement) {
     selectedDayValue = day;
-    document.getElementById('b_day').value = day;
+    const dayInput = document.getElementById('b_day');
+    if (dayInput) dayInput.value = day;
 
-    // Remove active highlight from all day buttons
     const buttons = document.querySelectorAll('.day-btn');
     buttons.forEach(btn => {
         btn.style.background = "rgba(255,255,255,0.08)";
         btn.style.borderColor = "rgba(212,175,55,0.3)";
     });
 
-    // Highlight the clicked button in gold
     buttonElement.style.background = "rgba(212, 175, 55, 0.25)";
     buttonElement.style.borderColor = "#D4AF37";
 }
 
 async function updateSermon() {
+    if (typeof firebase === 'undefined') return;
+    const db = firebase.firestore();
     const topic = document.getElementById('sermon-input').value;
     const titleToSend = topic ? topic : ""; 
 
@@ -128,8 +141,9 @@ async function updateSermon() {
     }
 }
 
-// Function to submit prayer requests from congregants
 async function submitPrayer() {
+    if (typeof firebase === 'undefined') return;
+    const db = firebase.firestore();
     const nameInput = document.getElementById('p_name');
     const msgInput = document.getElementById('p_msg');
 
@@ -157,8 +171,9 @@ async function submitPrayer() {
     }
 }
 
-// Function to submit booking with real-time tracker initialization
 async function submitBooking() {
+    if (typeof firebase === 'undefined') return;
+    const db = firebase.firestore();
     const nameInput = document.getElementById('b_name');
     const emailInput = document.getElementById('b_email');
     const phoneInput = document.getElementById('b_phone');
@@ -183,13 +198,9 @@ async function submitBooking() {
             time: firebase.firestore.FieldValue.serverTimestamp() 
         });
         
-        // Save name locally so the app remembers who you are
         localStorage.setItem('church_user_name', userName);
-
         alert("Request Sent."); 
         closeModals();
-        
-        // Start watching status immediately
         watchMyAppointment(userName);
 
     } catch (error) {
@@ -198,9 +209,9 @@ async function submitBooking() {
     }
 }
 
-// Single, clean real-time status listener function
 function watchMyAppointment(userName) {
-    if (!userName) return;
+    if (!userName || typeof firebase === 'undefined') return;
+    const db = firebase.firestore();
 
     db.collection("churchPrayers")
         .where("name", "==", userName)
@@ -216,10 +227,10 @@ function watchMyAppointment(userName) {
 
             snapshot.forEach((doc) => {
                 const data = doc.data();
-                let statusColor = "#f39c12"; // Pending (Orange)
-                if (data.status === "Accepted") statusColor = "#2ecc71"; // Green
-                if (data.status === "Rejected") statusColor = "#e74c3c"; // Red
-                if (data.status === "Rescheduled") statusColor = "#3498db"; // Blue
+                let statusColor = "#f39c12"; 
+                if (data.status === "Accepted") statusColor = "#2ecc71"; 
+                if (data.status === "Rejected") statusColor = "#e74c3c"; 
+                if (data.status === "Rescheduled") statusColor = "#3498db"; 
 
                 statusElement.innerHTML = `
                     <div style="border: 1.5px solid ${statusColor}; background: rgba(212, 175, 55, 0.08); padding: 12px; border-radius: 8px; margin-top: 15px; color: #fff; text-align: left;">
@@ -231,7 +242,6 @@ function watchMyAppointment(userName) {
         });
 }
 
-// Automatically check status on page load if user already booked before
 window.addEventListener('DOMContentLoaded', () => {
     const savedName = localStorage.getItem('church_user_name');
     if (savedName) {
@@ -239,21 +249,22 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Function to update appointment status (Accept / Reject)
 async function updateAppointmentStatus(docId, newStatus) {
+    if (typeof firebase === 'undefined') return;
+    const db = firebase.firestore();
     try {
         await db.collection("churchPrayers").doc(docId).update({
             status: newStatus
         });
-        console.log(`Appointment status updated to: ${newStatus}`);
     } catch (error) {
         console.error("Error updating status: ", error);
         alert("Failed to update status.");
     }
 }
 
-// Function to reschedule an appointment
 async function rescheduleAppointment(docId) {
+    if (typeof firebase === 'undefined') return;
+    const db = firebase.firestore();
     const newDay = prompt("Enter new day (e.g., Tuesday):");
     const newTime = prompt("Enter new time (e.g., 15:30):");
     
@@ -272,11 +283,19 @@ async function rescheduleAppointment(docId) {
 }
 
 function loadPrayers() {
+    if (typeof firebase === 'undefined') return;
+    const db = firebase.firestore();
     const list = document.getElementById('prayer-list');
     if (!list) return;
 
     db.collection("churchPrayers").orderBy("time", "desc").onSnapshot(snap => {
         list.innerHTML = "";
+        
+        if (snap.empty) {
+            list.innerHTML = '<p style="opacity: 0.3; margin-top: 20px;">Waiting for mission data...</p>';
+            return;
+        }
+
         snap.forEach(doc => {
             const data = doc.data();
             const docId = doc.id;
@@ -286,10 +305,10 @@ function loadPrayers() {
 
             if (data.type === "APPOINTMENT") {
                 const currentStatus = data.status || "Pending";
-                let statusColor = "#f39c12"; // Pending (Orange)
-                if (currentStatus === "Accepted") statusColor = "#2ecc71"; // Green
-                if (currentStatus === "Rejected") statusColor = "#e74c3c"; // Red
-                if (currentStatus === "Rescheduled") statusColor = "#3498db"; // Blue
+                let statusColor = "#f39c12"; 
+                if (currentStatus === "Accepted") statusColor = "#2ecc71"; 
+                if (currentStatus === "Rejected") statusColor = "#e74c3c"; 
+                if (currentStatus === "Rescheduled") statusColor = "#3498db"; 
 
                 detailsContent = `
                     <p style="margin: 4px 0;"><strong>Name:</strong> ${data.name}</p>
@@ -330,22 +349,23 @@ function loadPrayers() {
 }
 
 function deleteFeedItem(docId) {
+    if (typeof firebase === 'undefined') return;
+    const db = firebase.firestore();
     if (confirm("Remove this item from the Mission Control feed permanently?")) {
-        db.collection("churchPrayers").doc(docId).delete()
-        .then(() => {
-            console.log("Feed item successfully deleted.");
-        })
-        .catch((error) => {
+        db.collection("churchPrayers").doc(docId).delete().catch((error) => {
             console.error("Error removing document: ", error);
             alert("Delete action failed. Check connection.");
         });
     }
 }
-// --- OTHER PREVIOUS FUNCTIONS IN church-logic.js ---
 
-// --- WHATSAPP INDIVIDUAL MESSAGING ---
+// ==========================================
+// 6. WHATSAPP & MEMBER DIRECTORY
+// ==========================================
+
 function messageIndividualWhatsApp(phoneNumber, memberName) {
-    const customMessage = document.getElementById('wa_quick_message').value.trim();
+    const quickMsgInput = document.getElementById('wa_quick_message');
+    const customMessage = quickMsgInput ? quickMsgInput.value.trim() : '';
     const textToSend = customMessage ? customMessage : `Hello ${memberName}, God bless you! Checking in from the church.`;
     const encodedMessage = encodeURIComponent(textToSend);
     const cleanPhone = phoneNumber.replace(/[^0-9+]/g, '');
@@ -353,20 +373,21 @@ function messageIndividualWhatsApp(phoneNumber, memberName) {
     window.open(url, '_blank');
 }
 
-
-// --- SAVE NEW MEMBER TO FIREBASE ---
 function saveNewMember() {
-    const name = document.getElementById('new_member_name').value.trim();
-    const phone = document.getElementById('new_member_phone').value.trim();
+    if (typeof firebase === 'undefined') return;
+    const db = firebase.firestore();
+    const nameInput = document.getElementById('new_member_name');
+    const phoneInput = document.getElementById('new_member_phone');
+
+    if (!nameInput || !phoneInput) return;
+    const name = nameInput.value.trim();
+    const phone = phoneInput.value.trim();
 
     if (!name || !phone) {
         alert("Please enter both a name and a phone number.");
         return;
     }
 
-    if (typeof firebase === 'undefined') return;
-
-    const db = firebase.firestore();
     db.collection("members").add({
         name: name,
         phone: phone,
@@ -374,8 +395,8 @@ function saveNewMember() {
     })
     .then(() => {
         alert(`${name} added successfully!`);
-        document.getElementById('new_member_name').value = '';
-        document.getElementById('new_member_phone').value = '';
+        nameInput.value = '';
+        phoneInput.value = '';
     })
     .catch((error) => {
         console.error("Error adding member: ", error);
@@ -383,11 +404,8 @@ function saveNewMember() {
     });
 }
 
-
-// --- LOAD MEMBER DIRECTORY FROM FIREBASE ---
 function loadMemberDirectory() {
     if (typeof firebase === 'undefined') return;
-
     const db = firebase.firestore();
     const directoryContainer = document.getElementById('member-directory-list');
     
@@ -420,45 +438,3 @@ function loadMemberDirectory() {
           });
       });
 }
-
-
-// --- LIVE FEED FUNCTION ---
-function loadAdminLiveFeed() {
-    if (typeof firebase === 'undefined') return;
-    
-    const db = firebase.firestore();
-    const prayerListContainer = document.getElementById('prayer-list');
-    
-    if (!prayerListContainer) return;
-
-    db.collection("prayers_or_messages")
-      .orderBy("timestamp", "desc")
-      .onSnapshot((snapshot) => {
-          prayerListContainer.innerHTML = "";
-          
-          if (snapshot.empty) {
-              prayerListContainer.innerHTML = '<p style="opacity: 0.3; margin-top: 20px;">Waiting for mission data...</p>';
-              return;
-          }
-
-          snapshot.forEach((doc) => {
-              const data = doc.data();
-              const itemCard = document.createElement('div');
-              itemCard.style.cssText = "background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); padding: 12px; border-radius: 8px; margin-bottom: 10px; text-align: left;";
-              
-              itemCard.innerHTML = `
-                  <strong style="color: var(--gold-solid); font-size: 0.85rem; display: block; margin-bottom: 4px;">${data.name || 'Anonymous Member'}</strong>
-                  <p style="color: #fff; font-size: 0.9rem; margin: 0;">${data.message || data.prayer || 'No message content'}</p>
-              `;
-              
-              prayerListContainer.appendChild(itemCard);
-          });
-      });
-}
-
-
-// --- AUTO-RUN LISTENERS WHEN ADMIN PAGE LOADS ---
-document.addEventListener("DOMContentLoaded", () => {
-    loadAdminLiveFeed();
-    loadMemberDirectory();
-});
