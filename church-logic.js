@@ -468,9 +468,90 @@ function loadMemberDirectory() {
           });
       });
 }
+function loadMemberDirectory() {
+    if (typeof firebase === 'undefined') return;
+    const db = firebase.firestore();
+    const directoryContainer = document.getElementById('member-directory-list');
+    
+    if (!directoryContainer) return;
+
+    directoryContainer.style.display = "flex";
+    directoryContainer.style.flexDirection = "column";
+    directoryContainer.style.maxHeight = "350px";
+    directoryContainer.style.overflowY = "auto";
+    directoryContainer.style.overflowX = "hidden";
+    directoryContainer.style.paddingRight = "5px";
+
+    db.collection("members")
+      .orderBy("name", "asc")
+      .onSnapshot((snapshot) => {
+          directoryContainer.innerHTML = "";
+
+          if (snapshot.empty) {
+              directoryContainer.innerHTML = '<p style="opacity: 0.3; text-align: center; padding: 10px;">No members saved yet.</p>';
+              return;
+          }
+
+          snapshot.forEach((doc) => {
+              const data = doc.data();
+              const docId = doc.id;
+              const memberCard = document.createElement('div');
+              
+              memberCard.style.cssText = "background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; display: flex; flex-direction: column; gap: 8px; border: 1px solid rgba(212,175,55,0.2); margin-bottom: 8px;";
+              
+              memberCard.innerHTML = `
+                  <div style="color: #fff; text-align: left;">
+                      <strong style="display: block; font-size: 0.95rem;">${data.name}</strong>
+                      <span style="font-size: 0.75rem; color: #aaa;">${data.phone}</span>
+                  </div>
+                  <div style="display: flex; gap: 6px; overflow-x: auto; white-space: nowrap; padding-bottom: 4px; scrollbar-width: thin;">
+                      <button class="premium-gold-btn" onclick="messageIndividualWhatsApp('${data.phone}', '${data.name}')" style="margin: 0; padding: 6px 12px; font-size: 0.65rem; background: #25D366; color: #fff; border: none; border-radius: 4px; cursor: pointer; flex-shrink: 0;">WhatsApp</button>
+                      <button onclick="window.location.href='tel:${data.phone}'" style="margin: 0; padding: 6px 12px; font-size: 0.65rem; background: #3498db; color: #fff; border: none; border-radius: 4px; cursor: pointer; flex-shrink: 0;">Call</button>
+                      <button onclick="deleteMember('${docId}', '${data.name}')" style="margin: 0; padding: 6px 12px; font-size: 0.65rem; background: #e74c3c; color: #fff; border: none; border-radius: 4px; cursor: pointer; flex-shrink: 0;">Delete</button>
+                  </div>
+              `;
+              
+              directoryContainer.appendChild(memberCard);
+          });
+      });
+}
+
 // ==========================================
 // SAVED MESSAGES & SERMONS MANAGEMENT
 // ==========================================
+function saveSermonNotes() {
+    if (typeof firebase === 'undefined') return;
+    const db = firebase.firestore();
+    
+    const titleInput = document.getElementById('sermon_title');
+    const contentInput = document.getElementById('sermon_content');
+    
+    if (!titleInput || !contentInput) return;
+    
+    const title = titleInput.value.trim();
+    const content = contentInput.value.trim();
+    
+    if (!title && !content) {
+        alert("Please enter a title or some notes before saving.");
+        return;
+    }
+    
+    db.collection("sermons").add({
+        title: title || "Untitled Message",
+        content: content,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    })
+    .then(() => {
+        alert("Sermon notes saved successfully!");
+        titleInput.value = '';
+        contentInput.value = '';
+    })
+    .catch((error) => {
+        console.error("Error saving notes: ", error);
+        alert("Failed to save sermon notes.");
+    });
+}
+
 function loadSavedSermons() {
     if (typeof firebase === 'undefined') return;
     const db = firebase.firestore();
