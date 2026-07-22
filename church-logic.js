@@ -358,7 +358,6 @@ function deleteFeedItem(docId) {
         });
     }
 }
-
 // ==========================================
 // 6. WHATSAPP & MEMBER DIRECTORY
 // ==========================================
@@ -404,6 +403,22 @@ function saveNewMember() {
     });
 }
 
+function deleteMember(docId, memberName) {
+    if (typeof firebase === 'undefined') return;
+    const db = firebase.firestore();
+    
+    if (confirm(`Are you sure you want to remove ${memberName} from the directory?`)) {
+        db.collection("members").doc(docId).delete()
+        .then(() => {
+            console.log("Member successfully deleted.");
+        })
+        .catch((error) => {
+            console.error("Error removing member: ", error);
+            alert("Failed to delete member. Check connection.");
+        });
+    }
+}
+
 function loadMemberDirectory() {
     if (typeof firebase === 'undefined') return;
     const db = firebase.firestore();
@@ -423,15 +438,19 @@ function loadMemberDirectory() {
 
           snapshot.forEach((doc) => {
               const data = doc.data();
+              const docId = doc.id;
               const memberCard = document.createElement('div');
-              memberCard.style.cssText = "background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(212,175,55,0.2);";
+              memberCard.style.cssText = "background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(212,175,55,0.2); margin-bottom: 8px;";
               
               memberCard.innerHTML = `
                   <div style="color: #fff; text-align: left;">
                       <strong style="display: block; font-size: 0.95rem;">${data.name}</strong>
                       <span style="font-size: 0.75rem; color: #aaa;">${data.phone}</span>
                   </div>
-                  <button class="premium-gold-btn" onclick="messageIndividualWhatsApp('${data.phone}', '${data.name}')" style="margin: 0; padding: 6px 12px; font-size: 0.65rem; background: #25D366; color: #fff; border: none; border-radius: 4px; cursor: pointer;">WhatsApp</button>
+                  <div style="display: flex; gap: 6px;">
+                      <button class="premium-gold-btn" onclick="messageIndividualWhatsApp('${data.phone}', '${data.name}')" style="margin: 0; padding: 6px 10px; font-size: 0.65rem; background: #25D366; color: #fff; border: none; border-radius: 4px; cursor: pointer;">WhatsApp</button>
+                      <button onclick="deleteMember('${docId}', '${data.name}')" style="margin: 0; padding: 6px 10px; font-size: 0.65rem; background: #e74c3c; color: #fff; border: none; border-radius: 4px; cursor: pointer;">Delete</button>
+                  </div>
               `;
               
               directoryContainer.appendChild(memberCard);
