@@ -65,7 +65,8 @@
     <div class="glass-card">
         <h2 class="gold-text">Appointment</h2>
         <p class="form-hint">Request a Private Meeting</p>
-        <input type="text" id="b_name" placeholder="Full Name" class="sleek-input">
+        <!-- Added oninput to instantly trigger status check as you type your name -->
+        <input type="text" id="b_name" placeholder="Full Name" class="sleek-input" oninput="watchMyAppointment(this.value.trim())">
         <input type="email" id="b_email" placeholder="Email" class="sleek-input">
         <input type="tel" id="b_phone" placeholder="Phone" class="sleek-input">
         <select id="b_day" class="sleek-input">
@@ -79,7 +80,7 @@
         <button class="premium-gold-btn" onclick="submitBooking()">REQUEST MEETING</button>
         <div class="cancel-link" onclick="closeModals(); toggleMenu();">Back</div>
 
-        <!-- 👇 ADDED: Container where the live appointment status will display -->
+        <!-- Container where the live appointment status will display -->
         <div id="my-appointment-status"></div>
     </div>
 </div>
