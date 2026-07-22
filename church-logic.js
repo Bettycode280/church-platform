@@ -426,11 +426,13 @@ function loadMemberDirectory() {
     
     if (!directoryContainer) return;
 
-    // Enforce strict scroll container behavior
+    // Set container to support side scrolling or vertical scrolling window
+    directoryContainer.style.display = "flex";
+    directoryContainer.style.flexDirection = "column";
     directoryContainer.style.maxHeight = "350px";
     directoryContainer.style.overflowY = "auto";
     directoryContainer.style.overflowX = "hidden";
-    directoryContainer.style.display = "block";
+    directoryContainer.style.paddingRight = "5px";
 
     db.collection("members")
       .orderBy("name", "asc")
@@ -446,17 +448,19 @@ function loadMemberDirectory() {
               const data = doc.data();
               const docId = doc.id;
               const memberCard = document.createElement('div');
-              memberCard.style.cssText = "background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(212,175,55,0.2); margin-bottom: 8px;";
+              
+              // Each card uses a side-scrolling inner container for actions if needed
+              memberCard.style.cssText = "background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; display: flex; flex-direction: column; gap: 8px; border: 1px solid rgba(212,175,55,0.2); margin-bottom: 8px;";
               
               memberCard.innerHTML = `
                   <div style="color: #fff; text-align: left;">
                       <strong style="display: block; font-size: 0.95rem;">${data.name}</strong>
                       <span style="font-size: 0.75rem; color: #aaa;">${data.phone}</span>
                   </div>
-                  <div style="display: flex; gap: 6px;">
-                      <button class="premium-gold-btn" onclick="messageIndividualWhatsApp('${data.phone}', '${data.name}')" style="margin: 0; padding: 6px 10px; font-size: 0.65rem; background: #25D366; color: #fff; border: none; border-radius: 4px; cursor: pointer;">WhatsApp</button>
-                      <button onclick="window.location.href='tel:${data.phone}'" style="margin: 0; padding: 6px 10px; font-size: 0.65rem; background: #3498db; color: #fff; border: none; border-radius: 4px; cursor: pointer;">Call</button>
-                      <button onclick="deleteMember('${docId}', '${data.name}')" style="margin: 0; padding: 6px 10px; font-size: 0.65rem; background: #e74c3c; color: #fff; border: none; border-radius: 4px; cursor: pointer;">Delete</button>
+                  <div style="display: flex; gap: 6px; overflow-x: auto; white-space: nowrap; padding-bottom: 4px; scrollbar-width: thin;">
+                      <button class="premium-gold-btn" onclick="messageIndividualWhatsApp('${data.phone}', '${data.name}')" style="margin: 0; padding: 6px 12px; font-size: 0.65rem; background: #25D366; color: #fff; border: none; border-radius: 4px; cursor: pointer; flex-shrink: 0;">WhatsApp</button>
+                      <button onclick="window.location.href='tel:${data.phone}'" style="margin: 0; padding: 6px 12px; font-size: 0.65rem; background: #3498db; color: #fff; border: none; border-radius: 4px; cursor: pointer; flex-shrink: 0;">Call</button>
+                      <button onclick="deleteMember('${docId}', '${data.name}')" style="margin: 0; padding: 6px 12px; font-size: 0.65rem; background: #e74c3c; color: #fff; border: none; border-radius: 4px; cursor: pointer; flex-shrink: 0;">Delete</button>
                   </div>
               `;
               
