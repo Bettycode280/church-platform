@@ -20,14 +20,14 @@ const db = firebase.firestore();
 // ==========================================
 
 function toggleMenu() { 
-    const nav = document.getElementById('side-nav') || document.getElementById('side-menu') || document.querySelector('.nav-overlay');
+    const nav = document.getElementById('side-menu');
     if (nav) {
         nav.classList.toggle('open'); 
     }
 }
 
 function openModal(id) { 
-    const nav = document.getElementById('side-nav') || document.getElementById('side-menu') || document.querySelector('.nav-overlay');
+    const nav = document.getElementById('side-menu');
     if (nav) nav.classList.remove('open'); // Close menu first
     
     const modal = document.getElementById(id);
@@ -41,7 +41,6 @@ function closeModals() {
         modal.classList.remove('open');
     });
 }
-
 // ==========================================
 // 3. MISSION CONTROL SECURITY
 // ==========================================
