@@ -449,6 +449,7 @@ function loadMemberDirectory() {
                   </div>
                   <div style="display: flex; gap: 6px;">
                       <button class="premium-gold-btn" onclick="messageIndividualWhatsApp('${data.phone}', '${data.name}')" style="margin: 0; padding: 6px 10px; font-size: 0.65rem; background: #25D366; color: #fff; border: none; border-radius: 4px; cursor: pointer;">WhatsApp</button>
+                      <button onclick="window.location.href='tel:${data.phone}'" style="margin: 0; padding: 6px 10px; font-size: 0.65rem; background: #3498db; color: #fff; border: none; border-radius: 4px; cursor: pointer;">Call</button>
                       <button onclick="deleteMember('${docId}', '${data.name}')" style="margin: 0; padding: 6px 10px; font-size: 0.65rem; background: #e74c3c; color: #fff; border: none; border-radius: 4px; cursor: pointer;">Delete</button>
                   </div>
               `;
