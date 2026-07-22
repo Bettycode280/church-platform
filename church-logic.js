@@ -48,11 +48,20 @@ function closeModals() {
 // ==========================================
 
 function checkPass() {
-    const input = document.getElementById('pass-input').value;
+    const input = document.getElementById('pass-input').value.trim();
     if (input === "DLCC2026") {
         document.getElementById('login-overlay').style.display = 'none';
-        document.getElementById('admin-ui').style.display = 'block';
-        loadPrayers(); // Load the dashboard data
+        
+        // Target your admin UI container
+        const adminUI = document.getElementById('admin-ui');
+        if (adminUI) {
+            adminUI.style.display = 'block';
+        }
+        
+        // Trigger your data loaders
+        if (typeof loadAdminLiveFeed === 'function') loadAdminLiveFeed();
+        if (typeof loadMemberDirectory === 'function') loadMemberDirectory();
+        
         console.log("Mission Control Unlocked.");
     } else { 
         alert("Unauthorized Key."); 
