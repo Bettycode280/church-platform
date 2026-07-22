@@ -425,6 +425,10 @@ function loadMemberDirectory() {
     const directoryContainer = document.getElementById('member-directory-list');
     
     if (!directoryContainer) return;
+    // Apply scrollable styles directly to the container so it doesn't get too long
+    directoryContainer.style.maxHeight = "350px";
+    directoryContainer.style.overflowY = "auto";
+    directoryContainer.style.paddingRight = "5px";
 
     db.collection("members")
       .orderBy("name", "asc")
