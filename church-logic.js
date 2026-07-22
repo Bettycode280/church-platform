@@ -42,7 +42,6 @@ function closeModals() {
         modal.classList.remove('open');
     });
 }
-
 // ==========================================
 // 3. MISSION CONTROL SECURITY
 // ==========================================
@@ -50,12 +49,16 @@ function closeModals() {
 function checkPass() {
     const input = document.getElementById('pass-input').value.trim();
     if (input === "DLCC2026") {
-        document.getElementById('login-overlay').style.display = 'none';
+        // Hide the login overlay
+        const overlay = document.getElementById('login-overlay');
+        if (overlay) {
+            overlay.style.display = 'none';
+        }
         
-        // Target your admin UI container
-        const adminUI = document.getElementById('admin-ui');
-        if (adminUI) {
-            adminUI.style.display = 'block';
+        // Target your admin UI container by its class name
+        const adminGrid = document.querySelector('.admin-dashboard-grid');
+        if (adminGrid) {
+            adminGrid.style.display = 'block';
         }
         
         // Trigger your data loaders
@@ -67,7 +70,6 @@ function checkPass() {
         alert("Unauthorized Key."); 
     }
 }
-
 // ==========================================
 // 4. LIVE SERMON BROADCAST (RED ALERT)
 // ==========================================
