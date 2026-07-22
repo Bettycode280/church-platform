@@ -468,3 +468,33 @@ function loadMemberDirectory() {
           });
       });
 }
+// ==========================================
+// SERMON NOTES MANAGEMENT
+// ==========================================
+function saveSermonNotes() {
+    if (typeof firebase === 'undefined') return;
+    const db = firebase.firestore();
+    
+    const title = document.getElementById('sermon_title').value.trim();
+    const content = document.getElementById('sermon_content').value.trim();
+    
+    if (!title && !content) {
+        alert("Please enter a title or some notes before saving.");
+        return;
+    }
+    
+    db.collection("sermons").add({
+        title: title || "Untitled Message",
+        content: content,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    })
+    .then(() => {
+        alert("Sermon notes saved successfully!");
+        document.getElementById('sermon_title').value = '';
+        document.getElementById('sermon_content').value = '';
+    })
+    .catch((error) => {
+        console.error("Error saving notes: ", error);
+        alert("Failed to save sermon notes.");
+    });
+}
