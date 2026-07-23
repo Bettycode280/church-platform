@@ -12,9 +12,8 @@
     <link rel="icon" type="image/jpeg" href="logo.jpg">
     <link rel="apple-touch-icon" href="logo.jpg">
     
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 </head>
 <body>
     <div class="main-bg"></div>
@@ -34,18 +33,17 @@
         <p class="church-name">CHRISTIAN CENTRE</p>
     </div>
 
-    <nav id="side-menu" class="nav-overlay">
-        <div class="close-nav" onclick="toggleMenu()" style="position:absolute; top:40px; right:30px; font-size:2.5rem; color:#D4AF37; cursor:pointer;">&times;</div>
-        
-        <div class="nav-content" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
-            <div class="menu-item" onclick="window.open('https://youtube.com/@DivineLifeChristianCentre/live')">📹 WATCH LIVE</div>
-            <div class="menu-item" onclick="toggleMenu(); openModal('giving-modal')">💰 TITHES & GIVING</div>
-            <div class="menu-item" onclick="toggleMenu(); openModal('prayer-modal')">🕊️ PRAYER REQUEST</div>
-            <div class="menu-item" onclick="toggleMenu(); openModal('booking-modal')">📅 APPOINTMENT</div>
-            <div class="menu-item" onclick="toggleMenu(); openModal('testimony-modal')">✨ TESTIMONY & PRAISE</div>
-            <div class="menu-item" onclick="toggleMenu()" style="margin-top:20px; opacity:0.5; font-size:0.8rem; border:none; background:transparent; cursor:pointer;">CLOSE MENU</div>
-        </div>
-    </nav>
+   <nav id="side-menu" class="nav-overlay">
+    <div class="close-nav" onclick="toggleMenu()" style="position:absolute; top:40px; right:30px; font-size:2.5rem; color:#D4AF37; cursor:pointer;">&times;</div>
+    
+    <div class="nav-content" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
+        <div class="menu-item" onclick="window.open('https://youtube.com/@DivineLifeChristianCentre/live')">📹 WATCH LIVE</div>
+        <div class="menu-item" onclick="openModal('giving-modal')">💰 TITHES & GIVING</div>
+        <div class="menu-item" onclick="openModal('prayer-modal')">🕊️ PRAYER REQUEST</div>
+        <div class="menu-item" onclick="openModal('booking-modal')">📅 APPOINTMENT</div>
+        <div class="menu-item" onclick="toggleMenu()" style="margin-top:20px; opacity:0.5; font-size:0.8rem; border:none; background:transparent;">CLOSE MENU</div>
+    </div>
+</nav>
 
     <!-- Pastor's Live Feed Container -->
     <div id="pastor-feed-container" class="glass-feed">
@@ -53,81 +51,41 @@
     </div>
 
     <div id="prayer-modal" class="modal">
-        <div class="glass-card">
-            <h2 class="gold-text">Prayer Line</h2>
-            <p class="form-hint">Direct to the Pastor's Screen</p>
-            <input type="text" id="p_name" placeholder="Your Name" class="sleek-input">
-            <textarea id="p_msg" placeholder="Type your prayer request..." rows="4" class="sleek-input"></textarea>
-            <button class="premium-gold-btn" onclick="submitPrayer()">SEND TO PASTOR</button>
-            <div class="cancel-link" onclick="closeModals()">Cancel</div>
-        </div>
+    <div class="glass-card">
+        <h2 class="gold-text">Prayer Line</h2>
+        <p class="form-hint">Direct to the Pastor's Screen</p>
+        <input type="text" id="p_name" placeholder="Your Name" class="sleek-input">
+        <textarea id="p_msg" placeholder="Type your prayer request..." rows="4" class="sleek-input"></textarea>
+        <button class="premium-gold-btn" onclick="submitPrayer()">SEND TO PASTOR</button>
+        <div class="cancel-link" onclick="closeModals()">Cancel</div>
     </div>
+</div>
 
     <div id="booking-modal" class="modal">
-        <div class="glass-card">
-            <h2 class="gold-text">Appointment</h2>
-            <p class="form-hint">Request a Private Meeting</p>
-            
-            <input type="text" id="b_name" placeholder="Full Name" class="sleek-input" oninput="watchMyAppointment(this.value.trim())">
-            <input type="email" id="b_email" placeholder="Email" class="sleek-input">
-            <input type="tel" id="b_phone" placeholder="Phone" class="sleek-input">
-            
-            <!-- Clickable Grid Selection (Monday - Sunday) -->
-            <label style="color: #D4AF37; font-size: 11px; display: block; text-align: left; margin: 4px 0;">Select Day</label>
-            <div id="day-selector-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-bottom: 10px;">
-                <button type="button" class="day-btn" onclick="selectDay('Monday', this)" style="padding: 8px; background: rgba(212,175,55,0.25); border: 1px solid #D4AF37; color: #fff; border-radius: 6px; cursor: pointer; font-size: 13px;">Monday</button>
-                <button type="button" class="day-btn" onclick="selectDay('Tuesday', this)" style="padding: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px; cursor: pointer; font-size: 13px;">Tuesday</button>
-                <button type="button" class="day-btn" onclick="selectDay('Wednesday', this)" style="padding: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px; cursor: pointer; font-size: 13px;">Wednesday</button>
-                <button type="button" class="day-btn" onclick="selectDay('Thursday', this)" style="padding: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px; cursor: pointer; font-size: 13px;">Thursday</button>
-                <button type="button" class="day-btn" onclick="selectDay('Friday', this)" style="padding: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px; cursor: pointer; font-size: 13px;">Friday</button>
-                <button type="button" class="day-btn" onclick="selectDay('Saturday', this)" style="padding: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px; cursor: pointer; font-size: 13px;">Saturday</button>
-                <button type="button" class="day-btn" onclick="selectDay('Sunday', this)" style="padding: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px; grid-column: span 2; cursor: pointer; font-size: 13px;">Sunday</button>
-            </div>
-            <input type="hidden" id="b_day" value="Monday">
+    <div class="glass-card">
+        <h2 class="gold-text">Appointment</h2>
+        <p class="form-hint">Request a Private Meeting</p>
+        <!-- Added oninput to instantly trigger status check as you type your name -->
+        <input type="text" id="b_name" placeholder="Full Name" class="sleek-input" oninput="watchMyAppointment(this.value.trim())">
+        <input type="email" id="b_email" placeholder="Email" class="sleek-input">
+        <input type="tel" id="b_phone" placeholder="Phone" class="sleek-input">
+        <select id="b_day" class="sleek-input">
+            <option value="Monday">Monday</option>
+            <option value="Tuesday">Tuesday</option>
+            <option value="Wednesday">Wednesday</option>
+            <option value="Thursday">Thursday</option>
+            <option value="Friday">Friday</option>
+        </select>
+        <input type="time" id="b_time" value="14:00" class="sleek-input">
+        <button class="premium-gold-btn" onclick="submitBooking()">REQUEST MEETING</button>
+        <div class="cancel-link" onclick="closeModals(); toggleMenu();">Back</div>
 
-            <!-- Round Clock Picker Input -->
-            <label style="color: #D4AF37; font-size: 11px; display: block; text-align: left; margin: 4px 0;">Select Time</label>
-            <input type="time" id="b_time" value="14:00" class="sleek-input" style="cursor: pointer;">
-
-            <button class="premium-gold-btn" onclick="submitBooking()" style="margin-top: 10px;">REQUEST MEETING</button>
-            <div class="cancel-link" onclick="closeModals(); toggleMenu();">Back</div>
-
-            <!-- Container where the live appointment status will display -->
-            <div id="my-appointment-status"></div>
-        </div>
+        <!-- Container where the live appointment status will display -->
+        <div id="my-appointment-status"></div>
     </div>
+</div>
 
-    <!-- Testimony Modal -->
-    <div id="testimony-modal" class="modal">
-        <div class="glass-card">
-            <h2 class="gold-text">Testimony & Praise</h2>
-            <p class="form-hint">Share What God Has Done</p>
-            
-            <!-- Testimony Type Selector -->
-            <label style="color: #D4AF37; font-size: 11px; display: block; text-align: left; margin: 4px 0;">Testimony Format</label>
-            <div id="testimony-type-selector" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 10px;">
-                <button type="button" class="testimony-type-btn" onclick="selectTestimonyType('Text', this)" style="padding: 8px 4px; background: rgba(212,175,55,0.25); border: 1px solid #D4AF37; color: #fff; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold;">📝 Text</button>
-                <button type="button" class="testimony-type-btn" onclick="selectTestimonyType('Audio', this)" style="padding: 8px 4px; background: rgba(255,255,255,0.08); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold;">🎙️ Audio</button>
-                <button type="button" class="testimony-type-btn" onclick="selectTestimonyType('Video', this)" style="padding: 8px 4px; background: rgba(255,255,255,0.08); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold;">📹 Video</button>
-            </div>
-            <input type="hidden" id="t_type" value="Text">
-
-            <input type="text" id="t_name" placeholder="Full Name" class="sleek-input">
-            <input type="tel" id="t_phone" placeholder="Phone Number" class="sleek-input">
-            <input type="email" id="t_email" placeholder="Email Address (Optional)" class="sleek-input">
-            
-            <!-- Dynamic Field Container -->
-            <div id="testimony-input-container">
-                <textarea id="t_msg" placeholder="Write your testimony or praise report here..." rows="4" class="sleek-input"></textarea>
-            </div>
-            
-            <button type="button" class="premium-gold-btn" onclick="submitTestimony()" style="margin-top: 10px;">SUBMIT TESTIMONY</button>
-            <div class="cancel-link" onclick="closeModals()">Cancel</div>
-        </div>
-    </div>
-
-    <!-- Giving Modal -->
-    <div id="giving-modal" class="modal">
+   <div id="giving-modal" class="modal">
         <div class="glass-card">
             <h2 class="gold-text">Giving</h2>
             
@@ -138,163 +96,26 @@
                 <p style="margin: 5px 0;"><strong>Sort Code:</strong> 677736</p>
             </div>
 
-            <button type="button" class="premium-gold-btn" onclick="closeModals()">RETURN</button>
+            <button class="premium-gold-btn" onclick="closeModals()">RETURN</button>
         </div>
     </div>
 
     <audio id="alert-sound" src="alert.mp3" preload="auto"></audio>
-
-    <!-- Firebase Configuration & Initialization -->
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyDhLq4p_W0ArYVXYHmOZbsuyyvLqWde6js",
-            authDomain: "glorywheels-507df.firebaseapp.com",
-            projectId: "glorywheels-507df",
-            storageBucket: "glorywheels-507df.firebasestorage.app",
-            messagingSenderId: "369831733781",
-            appId: "1:369831733781:web:a7402fd123de519d7e3c1c"
-        };
-        
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
-    </script>
-
-    <!-- Navigation & UI Controls -->
-    <script>
-        function toggleMenu() { 
-            const nav = document.getElementById('side-menu');
-            if (nav) {
-                nav.classList.toggle('open');
-            }
-        }
-
-        function openModal(id) { 
-            const nav = document.getElementById('side-menu');
-            if (nav) nav.classList.remove('open');
-            
-            const modal = document.getElementById(id);
-            if (modal) modal.classList.add('open'); 
-        }
-
-        function closeModals() {
-            const modals = document.querySelectorAll('.modal');
-            modals.forEach(modal => {
-                modal.classList.remove('open');
-            });
-        }
-
-        function selectDay(day, buttonElement) {
-            if (typeof selectedDayValue !== 'undefined') {
-                selectedDayValue = day;
-            }
-            const dayInput = document.getElementById('b_day');
-            if (dayInput) dayInput.value = day;
-
-            const buttons = document.querySelectorAll('.day-btn');
-            buttons.forEach(btn => {
-                btn.style.background = "rgba(255,255,255,0.08)";
-                btn.style.borderColor = "rgba(212,175,55,0.3)";
-            });
-
-            buttonElement.style.background = "rgba(212, 175, 55, 0.25)";
-            buttonElement.style.borderColor = "#D4AF37";
-        }
-
-        function selectTestimonyType(type, buttonElement) {
-            const typeInput = document.getElementById('t_type');
-            if (typeInput) typeInput.value = type;
-
-            const buttons = document.querySelectorAll('.testimony-type-btn');
-            buttons.forEach(btn => {
-                btn.style.background = "rgba(255,255,255,0.08)";
-                btn.style.borderColor = "rgba(212,175,55,0.3)";
-            });
-
-            buttonElement.style.background = "rgba(212, 175, 55, 0.25)";
-            buttonElement.style.borderColor = "#D4AF37";
-
-            const container = document.getElementById('testimony-input-container');
-            if (!container) return;
-
-            if (type === 'Text') {
-                container.innerHTML = `<textarea id="t_msg" placeholder="Write your testimony or praise report here..." rows="4" class="sleek-input"></textarea>`;
-            } else if (type === 'Audio') {
-                container.innerHTML = `
-                    <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 6px; border: 1px dashed rgba(212,175,55,0.4); text-align: center; margin-bottom: 5px;">
-                        <p style="font-size: 0.8rem; color: #ccc; margin-bottom: 8px;">Upload or select your audio testimony file:</p>
-                        <input type="file" id="t_file" accept="audio/*" class="sleek-input" style="font-size: 0.75rem; cursor: pointer;">
-                    </div>
-                `;
-            } else if (type === 'Video') {
-                container.innerHTML = `
-                    <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 6px; border: 1px dashed rgba(212,175,55,0.4); text-align: center; margin-bottom: 5px;">
-                        <p style="font-size: 0.8rem; color: #ccc; margin-bottom: 8px;">Upload or select your video testimony file:</p>
-                        <input type="file" id="t_file" accept="video/*" class="sleek-input" style="font-size: 0.75rem; cursor: pointer;">
-                    </div>
-                `;
-            }
-        }
-
-        function submitTestimony() {
-            const nameEl = document.getElementById('t_name');
-            const phoneEl = document.getElementById('t_phone');
-            const emailEl = document.getElementById('t_email');
-            const typeEl = document.getElementById('t_type');
-
-            const name = nameEl ? nameEl.value.trim() : '';
-            const phone = phoneEl ? phoneEl.value.trim() : '';
-            const email = emailEl ? emailEl.value.trim() : '';
-            const testimonyType = typeEl ? typeEl.value : 'Text';
-            
-            let testimonyContent = '';
-            if (testimonyType === 'Text') {
-                const msgEl = document.getElementById('t_msg');
-                testimonyContent = msgEl ? msgEl.value.trim() : '';
-            } else {
-                const fileInput = document.getElementById('t_file');
-                if (fileInput && fileInput.files.length > 0) {
-                    testimonyContent = `[Attached ${testimonyType} File: ${fileInput.files[0].name}]`;
-                } else {
-                    testimonyContent = `[${testimonyType} testimony submitted without attached media file]`;
-                }
-            }
-
-            if (!name || (testimonyType === 'Text' && !testimonyContent)) {
-                alert('Please provide your name and testimony details.');
-                return;
-            }
-
-            const now = new Date();
-            const dateStr = now.toISOString().split('T')[0];
-            const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-            firebase.database().ref('testimonies').push({
-                date: dateStr,
-                time: timeStr,
-                type: testimonyType,
-                name: name,
-                phone: phone || 'N/A',
-                email: email || 'N/A',
-                testimony: testimonyContent
-            }).then(() => {
-                alert('Praise God! Your testimony has been successfully submitted to the pastoral team.');
-                
-                if (nameEl) nameEl.value = '';
-                if (phoneEl) phoneEl.value = '';
-                if (emailEl) emailEl.value = '';
-                if (document.getElementById('t_msg')) document.getElementById('t_msg').value = '';
-                
-                closeModals();
-            }).catch((error) => {
-                alert('Error submitting testimony. Please check your network connection.');
-                console.error(error);
-            });
-        }
-    </script>
-
-    <!-- Additional Application Scripts -->
-    <script src="script.js"></script>
-    <script src="church-logic.js"></script>
 </body>
 </html>
+
+        <!-- Essential Firebase App Connection Credentials Config Block -->
+
+    <script src="church-logic.js"></script>
+    const firebaseConfig = {
+    apiKey: "AIzaSyDhLq4p_W0ArYVXYHmOZbsuyyvLqWde6js",
+    authDomain: "glorywheels-507df.firebaseapp.com",
+    projectId: "glorywheels-507df",
+    storageBucket: "glorywheels-507df.firebasestorage.app",
+    messagingSenderId: "369831733781",
+    appId: "1:369831733781:web:a7402fd123de519d7e3c1c"
+    </script>
+};
+</body>
+</html>
+
