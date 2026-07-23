@@ -14,7 +14,6 @@ if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig); 
 }
 const db = firebase.firestore();
-
 // ==========================================
 // 2. NAVIGATION & UI CONTROLS
 // ==========================================
@@ -57,7 +56,6 @@ function checkPass() {
         const adminUI = document.getElementById('admin-ui');
         if (adminUI) adminUI.style.display = 'block';
 
-        // Load dashboard data immediately upon login
         loadPrayers();
         loadMemberDirectory();
 
@@ -116,6 +114,41 @@ function selectDay(day, buttonElement) {
 
     buttonElement.style.background = "rgba(212, 175, 55, 0.25)";
     buttonElement.style.borderColor = "#D4AF37";
+}
+
+function selectTestimonyType(type, buttonElement) {
+    const typeInput = document.getElementById('t_type');
+    if (typeInput) typeInput.value = type;
+
+    const buttons = document.querySelectorAll('.testimony-type-btn');
+    buttons.forEach(btn => {
+        btn.style.background = "rgba(255,255,255,0.08)";
+        btn.style.borderColor = "rgba(212,175,55,0.3)";
+    });
+
+    buttonElement.style.background = "rgba(212, 175, 55, 0.25)";
+    buttonElement.style.borderColor = "#D4AF37";
+
+    const container = document.getElementById('testimony-input-container');
+    if (!container) return;
+
+    if (type === 'Text') {
+        container.innerHTML = `<textarea id="t_msg" placeholder="Write your testimony or praise report here..." rows="4" class="sleek-input"></textarea>`;
+    } else if (type === 'Audio') {
+        container.innerHTML = `
+            <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 6px; border: 1px dashed rgba(212,175,55,0.4); text-align: center; margin-bottom: 5px;">
+                <p style="font-size: 0.8rem; color: #ccc; margin-bottom: 8px;">Select your audio testimony file:</p>
+                <input type="file" id="t_file" accept="audio/*" class="sleek-input" style="font-size: 0.75rem; cursor: pointer;">
+            </div>
+        `;
+    } else if (type === 'Video') {
+        container.innerHTML = `
+            <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 6px; border: 1px dashed rgba(212,175,55,0.4); text-align: center; margin-bottom: 5px;">
+                <p style="font-size: 0.8rem; color: #ccc; margin-bottom: 8px;">Select your video testimony file:</p>
+                <input type="file" id="t_file" accept="video/*" class="sleek-input" style="font-size: 0.75rem; cursor: pointer;">
+            </div>
+        `;
+    }
 }
 
 async function updateSermon() {
@@ -206,6 +239,63 @@ async function submitBooking() {
     } catch (error) {
         console.error("Error submitting booking: ", error);
         alert("Failed to send request. Please try again.");
+    }
+}
+
+async function submitTestimony() {
+    if (typeof firebase === 'undefined') return;
+    const db = firebase.firestore();
+    
+    const nameInput = document.getElementById('t_name');
+    const phoneInput = document.getElementById('t_phone');
+    const emailInput = document.getElementById('t_email');
+    const typeInput = document.getElementById('t_type');
+
+    if (!nameInput || !nameInput.value.trim()) {
+        alert("Please provide your name.");
+        return;
+    }
+
+    const testimonyType = typeInput ? typeInput.value : "Text";
+    let testimonyContent = '';
+
+    if (testimonyType === 'Text') {
+        const msgEl = document.getElementById('t_msg');
+        testimonyContent = msgEl ? msgEl.value.trim() : '';
+        if (!testimonyContent) {
+            alert("Please write your testimony.");
+            return;
+        }
+    } else {
+        const fileInput = document.getElementById('t_file');
+        if (fileInput && fileInput.files.length > 0) {
+            testimonyContent = `[Attached ${testimonyType} File: ${fileInput.files[0].name}]`;
+        } else {
+            testimonyContent = `[${testimonyType} testimony submitted]`;
+        }
+    }
+
+    try {
+        await db.collection("churchPrayers").add({
+            type: "TESTIMONY",
+            name: nameInput.value.trim(),
+            phone: phoneInput ? phoneInput.value.trim() : "N/A",
+            email: emailInput ? emailInput.value.trim() : "N/A",
+            text: `[${testimonyType}] ${testimonyContent}`,
+            time: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        alert("Praise God! Your testimony has been successfully submitted.");
+        closeModals();
+
+        nameInput.value = "";
+        if (phoneInput) phoneInput.value = "";
+        if (emailInput) emailInput.value = "";
+        if (document.getElementById('t_msg')) document.getElementById('t_msg').value = "";
+
+    } catch (error) {
+        console.error("Error submitting testimony: ", error);
+        alert("Failed to submit testimony. Please check your connection.");
     }
 }
 
@@ -357,7 +447,9 @@ function deleteFeedItem(docId) {
             alert("Delete action failed. Check connection.");
         });
     }
-}// ==========================================
+}
+
+// ==========================================
 // 6. WHATSAPP & MEMBER DIRECTORY
 // ==========================================
 
