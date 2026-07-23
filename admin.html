@@ -305,7 +305,7 @@
             });
         }
 
-       // --- Real-Time Live Testimony Functions (Firestore) ---
+      // --- Real-Time Live Testimony Functions (Firestore + Storage) ---
         function initLiveTestimonyListener() {
             const historyList = document.getElementById('testimony-history-list');
             if (!historyList) return;
@@ -327,7 +327,6 @@
                     const div = document.createElement('div');
                     div.style.cssText = "background: rgba(255,255,255,0.05); padding: 10px 12px; border-radius: 6px; border-left: 3px solid #27ae60; font-size: 0.8rem; color: #fff; margin-bottom: 6px;";
                     
-                    // Added audio and video player HTML generation
                     let audioHtml = record.audioUrl ? `<div style="margin-top:6px;"><audio controls style="width:100%; height:32px;"><source src="${record.audioUrl}" type="audio/mpeg">Your browser does not support audio playback.</audio></div>` : '';
                     let videoHtml = record.videoUrl ? `<div style="margin-top:6px;"><video controls style="width:100%; max-height:160px; border-radius:4px;"><source src="${record.videoUrl}" type="video/mp4">Your browser does not support video playback.</video></div>` : '';
                     let textHtml = record.testimony ? `<p style="background: rgba(0,0,0,0.15); padding: 8px; border-radius: 4px; margin: 4px 0 0 0; color: #ddd; font-style: italic; font-size: 0.8rem;">"${record.testimony}"</p>` : '';
@@ -353,11 +352,13 @@
         function logTestimonyRecord() {
             const nameInput = document.getElementById('input-testifier-name').value.trim();
             const phoneInput = document.getElementById('input-testifier-phone').value.trim();
-            const emailInput = document.getElementById('input-testifier-email').value.trim();
+            const emailInput = document.getElementById('input-testifier-email') ? document.getElementById('input-testifier-email').value.trim() : '';
             const textInput = document.getElementById('input-testimony-text').value.trim();
+            const audioFile = document.getElementById('input-testimony-audio') ? document.getElementById('input-testimony-audio').files[0] : null;
+            const videoFile = document.getElementById('input-testimony-video') ? document.getElementById('input-testimony-video').files[0] : null;
 
-            if (!nameInput || !textInput) {
-                alert('Please enter the member name and testimony details.');
+            if (!nameInput && !textInput && !audioFile && !videoFile) {
+                alert('Please provide at least a name and testimony content (text, audio, or video).');
                 return;
             }
 
@@ -365,24 +366,58 @@
             const dateStr = now.toISOString().split('T')[0];
             const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-            firebase.firestore().collection("testimonies").add({
-                name: nameInput,
-                phone: phoneInput || 'N/A',
-                email: emailInput || 'N/A',
-                testimony: textInput,
-                date: dateStr,
-                time: timeStr,
-                type: 'Admin Log',
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => {
-                document.getElementById('input-testifier-name').value = '';
-                document.getElementById('input-testifier-phone').value = '';
-                document.getElementById('input-testifier-email').value = '';
-                document.getElementById('input-testimony-text').value = '';
-            }).catch((error) => {
-                console.error("Error adding testimony: ", error);
-                alert("Failed to submit testimony.");
-            });
+            const db = firebase.firestore();
+            const storage = firebase.storage();
+
+            const saveToFirestore = (audioUrl, videoUrl) => {
+                db.collection("testimonies").add({
+                    name: nameInput || 'Anonymous',
+                    phone: phoneInput || 'N/A',
+                    email: emailInput || 'N/A',
+                    testimony: textInput || '',
+                    audioUrl: audioUrl || '',
+                    videoUrl: videoUrl || '',
+                    date: dateStr,
+                    time: timeStr,
+                    type: 'Admin / Multimedia',
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                }).then(() => {
+                    document.getElementById('input-testifier-name').value = '';
+                    document.getElementById('input-testifier-phone').value = '';
+                    if(document.getElementById('input-testifier-email')) document.getElementById('input-testifier-email').value = '';
+                    document.getElementById('input-testimony-text').value = '';
+                    if(document.getElementById('input-testimony-audio')) document.getElementById('input-testimony-audio').value = '';
+                    if(document.getElementById('input-testimony-video')) document.getElementById('input-testimony-video').value = '';
+                    alert('Multimedia testimony successfully submitted and loaded into feed!');
+                }).catch((error) => {
+                    console.error("Error adding testimony: ", error);
+                    alert("Failed to submit testimony.");
+                });
+            };
+
+            let uploadedAudioUrl = '';
+            let uploadedVideoUrl = '';
+
+            const processUploads = async () => {
+                try {
+                    if (audioFile) {
+                        const audioRef = storage.ref().child(`testimonies/audio/${Date.now()}_${audioFile.name}`);
+                        const snapshot = await audioRef.put(audioFile);
+                        uploadedAudioUrl = await snapshot.ref.getDownloadURL();
+                    }
+                    if (videoFile) {
+                        const videoRef = storage.ref().child(`testimonies/video/${Date.now()}_${videoFile.name}`);
+                        const snapshot = await videoRef.put(videoFile);
+                        uploadedVideoUrl = await snapshot.ref.getDownloadURL();
+                    }
+                    saveToFirestore(uploadedAudioUrl, uploadedVideoUrl);
+                } catch (error) {
+                    console.error("Media upload error: ", error);
+                    alert("Error uploading media files to storage.");
+                }
+            };
+
+            processUploads();
         }
 
         function deleteTestimonyRecord(docId) {
