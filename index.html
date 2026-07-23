@@ -12,8 +12,9 @@
     <link rel="icon" type="image/jpeg" href="logo.jpg">
     <link rel="apple-touch-icon" href="logo.jpg">
     
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 </head>
 <body>
     <div class="main-bg"></div>
@@ -143,20 +144,15 @@
 
     <audio id="alert-sound" src="alert.mp3" preload="auto"></audio>
 
-    <!-- 1. REQUIRED: Load Firebase Database SDK -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-
-    <!-- 2. Firebase Configuration & Initialization -->
+    <!-- Firebase Configuration & Initialization -->
     <script>
-                const firebaseConfig = {
-    apiKey: "AIzaSyDhLq4p_W0ArYVXYHmOZbsuyyvLqWde6js",
-    authDomain: "glorywheels-507df.firebaseapp.com",
-    projectId: "glorywheels-507df",
-    storageBucket: "glorywheels-507df.firebasestorage.app",
-    messagingSenderId: "369831733781",
-    appId: "1:369831733781:web:a7402fd123de519d7e3c1c"
-
+        const firebaseConfig = {
+            apiKey: "AIzaSyDhLq4p_W0ArYVXYHmOZbsuyyvLqWde6js",
+            authDomain: "glorywheels-507df.firebaseapp.com",
+            projectId: "glorywheels-507df",
+            storageBucket: "glorywheels-507df.firebasestorage.app",
+            messagingSenderId: "369831733781",
+            appId: "1:369831733781:web:a7402fd123de519d7e3c1c"
         };
         
         if (!firebase.apps.length) {
@@ -164,12 +160,12 @@
         }
     </script>
 
-    <!-- 3. Navigation & UI Controls (Using classList.toggle/add/remove to match CSS) -->
+    <!-- Navigation & UI Controls -->
     <script>
         function toggleMenu() { 
             const nav = document.getElementById('side-menu');
             if (nav) {
-                nav.classList.toggle('open'); 
+                nav.classList.toggle('open');
             }
         }
 
@@ -192,7 +188,8 @@
             if (typeof selectedDayValue !== 'undefined') {
                 selectedDayValue = day;
             }
-            document.getElementById('b_day').value = day;
+            const dayInput = document.getElementById('b_day');
+            if (dayInput) dayInput.value = day;
 
             const buttons = document.querySelectorAll('.day-btn');
             buttons.forEach(btn => {
@@ -205,7 +202,8 @@
         }
 
         function selectTestimonyType(type, buttonElement) {
-            document.getElementById('t_type').value = type;
+            const typeInput = document.getElementById('t_type');
+            if (typeInput) typeInput.value = type;
 
             const buttons = document.querySelectorAll('.testimony-type-btn');
             buttons.forEach(btn => {
@@ -217,6 +215,8 @@
             buttonElement.style.borderColor = "#D4AF37";
 
             const container = document.getElementById('testimony-input-container');
+            if (!container) return;
+
             if (type === 'Text') {
                 container.innerHTML = `<textarea id="t_msg" placeholder="Write your testimony or praise report here..." rows="4" class="sleek-input"></textarea>`;
             } else if (type === 'Audio') {
@@ -237,10 +237,15 @@
         }
 
         function submitTestimony() {
-            const name = document.getElementById('t_name').value.trim();
-            const phone = document.getElementById('t_phone').value.trim();
-            const email = document.getElementById('t_email').value.trim();
-            const testimonyType = document.getElementById('t_type').value;
+            const nameEl = document.getElementById('t_name');
+            const phoneEl = document.getElementById('t_phone');
+            const emailEl = document.getElementById('t_email');
+            const typeEl = document.getElementById('t_type');
+
+            const name = nameEl ? nameEl.value.trim() : '';
+            const phone = phoneEl ? phoneEl.value.trim() : '';
+            const email = emailEl ? emailEl.value.trim() : '';
+            const testimonyType = typeEl ? typeEl.value : 'Text';
             
             let testimonyContent = '';
             if (testimonyType === 'Text') {
@@ -264,7 +269,6 @@
             const dateStr = now.toISOString().split('T')[0];
             const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-            // Save directly to Firebase Realtime Database
             firebase.database().ref('testimonies').push({
                 date: dateStr,
                 time: timeStr,
@@ -276,9 +280,9 @@
             }).then(() => {
                 alert('Praise God! Your testimony has been successfully submitted to the pastoral team.');
                 
-                document.getElementById('t_name').value = '';
-                document.getElementById('t_phone').value = '';
-                document.getElementById('t_email').value = '';
+                if (nameEl) nameEl.value = '';
+                if (phoneEl) phoneEl.value = '';
+                if (emailEl) emailEl.value = '';
                 if (document.getElementById('t_msg')) document.getElementById('t_msg').value = '';
                 
                 closeModals();
@@ -289,6 +293,7 @@
         }
     </script>
 
+    <!-- Additional Application Scripts -->
     <script src="script.js"></script>
     <script src="church-logic.js"></script>
 </body>
