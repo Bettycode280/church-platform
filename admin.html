@@ -163,6 +163,47 @@
         </div>
 
     </div>
+
+    <!-- Attendance Logging Script -->
+    <script>
+        function logServiceAttendance() {
+            const inputElement = document.getElementById('input-sunday-count');
+            const attendanceValue = parseInt(inputElement.value);
+
+            // Validate that the user typed a valid number
+            if (isNaN(attendanceValue) || attendanceValue < 0) {
+                alert('Please enter a valid attendance number.');
+                return;
+            }
+
+            // Update the Sunday Attendance display element
+            const attendanceDisplay = document.getElementById('stat-sunday-attendance');
+            if (attendanceDisplay) {
+                attendanceDisplay.textContent = attendanceValue;
+            }
+
+            // Save it to localStorage so it persists when you refresh the page
+            localStorage.setItem('sunday_attendance', attendanceValue);
+
+            // Clear the input field after successful logging
+            inputElement.value = '';
+
+            // Optional confirmation
+            console.log('Sunday attendance logged successfully:', attendanceValue);
+        }
+
+        // Load saved attendance automatically when the admin dashboard loads
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedAttendance = localStorage.getItem('sunday_attendance');
+            if (savedAttendance) {
+                const attendanceDisplay = document.getElementById('stat-sunday-attendance');
+                if (attendanceDisplay) {
+                    attendanceDisplay.textContent = savedAttendance;
+                }
+            }
+        });
+    </script>
+
     <script src="church-logic.js"></script>
 </body>
 </html>
