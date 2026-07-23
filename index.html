@@ -141,9 +141,21 @@
 
     <audio id="alert-sound" src="alert.mp3" preload="auto"></audio>
 
-
-    <!-- Frontend UI & Submission Script (Addresses Hypothesis: ensures submitPrayer connects cleanly to Firestore matching Mission Control) -->
+    <!-- Firebase Initialization & Core Logic Script -->
     <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDhLq4p_W0ArYVXYHmOZbsuyyvLqWde6js",
+            authDomain: "glorywheels-507df.firebaseapp.com",
+            projectId: "glorywheels-507df",
+            storageBucket: "glorywheels-507df.firebasestorage.app",
+            messagingSenderId: "369831733781",
+            appId: "1:369831733781:web:a7402fd123de519d7e3c1c"
+        };
+        
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+
         function toggleMenu() { 
             const nav = document.getElementById('side-menu');
             if (nav) {
@@ -242,25 +254,81 @@
                 alert("Failed to send prayer request. Please check your connection.");
             }
         }
-    </script>
-     <!-- Firebase Initialization -->
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyDhLq4p_W0ArYVXYHmOZbsuyyvLqWde6js",
-            authDomain: "glorywheels-507df.firebaseapp.com",
-            projectId: "glorywheels-507df",
-            storageBucket: "glorywheels-507df.firebasestorage.app",
-            messagingSenderId: "369831733781",
-            appId: "1:369831733781:web:a7402fd123de519d7e3c1c"
-        };
-        
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
+
+        async function submitBooking() {
+            const nameInput = document.getElementById('b_name');
+            const emailInput = document.getElementById('b_email');
+            const phoneInput = document.getElementById('b_phone');
+            const dayInput = document.getElementById('b_day');
+            const timeInput = document.getElementById('b_time');
+
+            if (!nameInput || !nameInput.value.trim()) {
+                alert("Please enter your full name for the appointment.");
+                return;
+            }
+
+            try {
+                const db = firebase.firestore();
+                await db.collection("churchBookings").add({
+                    type: "APPOINTMENT",
+                    name: nameInput.value.trim(),
+                    email: emailInput ? emailInput.value.trim() : '',
+                    phone: phoneInput ? phoneInput.value.trim() : '',
+                    day: dayInput ? dayInput.value : 'Monday',
+                    time: timeInput ? timeInput.value : '14:00',
+                    timeCreated: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                alert("Appointment Request Sent.");
+                closeModals();
+                nameInput.value = "";
+                if(emailInput) emailInput.value = "";
+                if(phoneInput) phoneInput.value = "";
+            } catch (error) {
+                console.error("Error submitting booking: ", error);
+                alert("Failed to submit appointment request.");
+            }
+        }
+
+        async function submitTestimony() {
+            const typeInput = document.getElementById('t_type');
+            const nameInput = document.getElementById('t_name');
+            const phoneInput = document.getElementById('t_phone');
+            const emailInput = document.getElementById('t_email');
+            const msgInput = document.getElementById('t_msg');
+
+            if (!nameInput || !nameInput.value.trim()) {
+                alert("Please enter your full name.");
+                return;
+            }
+
+            try {
+                const db = firebase.firestore();
+                await db.collection("testimonies").add({
+                    type: typeInput ? typeInput.value : 'Text',
+                    name: nameInput.value.trim(),
+                    phone: phoneInput ? phoneInput.value.trim() : '',
+                    email: emailInput ? emailInput.value.trim() : '',
+                    testimony: msgInput ? msgInput.value.trim() : 'Media submission',
+                    date: new Date().toISOString().split('T')[0],
+                    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                alert("Testimony Submitted Successfully.");
+                closeModals();
+                nameInput.value = "";
+                if(phoneInput) phoneInput.value = "";
+                if(emailInput) emailInput.value = "";
+                if(msgInput) msgInput.value = "";
+            } catch (error) {
+                console.error("Error submitting testimony: ", error);
+                alert("Failed to submit testimony.");
+            }
         }
     </script>
 
-    <!-- Additional Logic Scripts -->
-    <script src="script.js"></script>
+    <!-- Additional External Logic Script -->
     <script src="church-logic.js"></script>
 </body>
 </html>
