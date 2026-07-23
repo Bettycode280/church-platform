@@ -157,26 +157,10 @@
         </div>
 
         <!-- 8. Attendance & Growth Analytics Panel -->
-        <div class="admin-panel" style="margin-top: 20px; margin-bottom: 20px;">
+        <div class="admin-panel" style="margin-top: 20px; margin-bottom: 20px; max-height: 400px; overflow-y: auto; padding-right: 5px;">
             <button class="premium-gold-btn" style="width: 100%; margin-bottom: 5px; font-size: 1.1rem; text-align: center; color: #000000; background: linear-gradient(135deg, #d4af37 0%, #aa7c11 100%); padding: 12px; border-radius: 6px; font-weight: bold; border: none; cursor: default;">Attendance & Growth Analytics</button>
             <p class="form-hint" style="font-size: 0.8rem; color: #aaa; margin-bottom: 10px;">Monitor weekly service attendance, first-time visitors, and historical records over time.</p>
             
-            <!-- Latest Overview Stats Counters -->
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 15px;">
-                <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 6px; border: 1px solid rgba(212,175,55,0.3); text-align: center;">
-                    <span style="font-size: 0.75rem; color: #aaa; display: block;">Latest Attendance</span>
-                    <strong style="font-size: 1.2rem; color: #d4af37;" id="stat-sunday-attendance">0</strong>
-                </div>
-                <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 6px; border: 1px solid rgba(212,175,55,0.3); text-align: center;">
-                    <span style="font-size: 0.75rem; color: #aaa; display: block;">Latest Visitors</span>
-                    <strong style="font-size: 1.2rem; color: #27ae60;" id="stat-first-timers">0</strong>
-                </div>
-                <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 6px; border: 1px solid rgba(212,175,55,0.3); text-align: center;">
-                    <span style="font-size: 0.75rem; color: #aaa; display: block;">Latest Total Members</span>
-                    <strong style="font-size: 1.2rem; color: #3498db;" id="stat-total-members">0</strong>
-                </div>
-            </div>
-
             <!-- Data Recording Inputs Form Box -->
             <div style="background: rgba(255,255,255,0.02); padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 15px;">
                 <div style="margin-bottom: 10px;">
@@ -268,15 +252,8 @@
 
             if (history.length === 0) {
                 historyList.innerHTML = '<p style="opacity: 0.3; text-align: center; padding: 10px; font-size: 0.8rem;">No entries recorded yet.</p>';
-                document.getElementById('stat-sunday-attendance').textContent = '0';
-                document.getElementById('stat-first-timers').textContent = '0';
-                document.getElementById('stat-total-members').textContent = '0';
                 return;
             }
-
-            document.getElementById('stat-sunday-attendance').textContent = history[0].attendance;
-            document.getElementById('stat-first-timers').textContent = history[0].visitors;
-            document.getElementById('stat-total-members').textContent = history[0].members;
 
             history.forEach((record, index) => {
                 const div = document.createElement('div');
