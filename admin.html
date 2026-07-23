@@ -163,47 +163,44 @@
         </div>
 
     </div>
+<!-- 8. Attendance & Growth Analytics Panel -->
+<div class="admin-panel" style="margin-bottom: 20px;">
+    <button class="premium-gold-btn" style="width: 100%; margin-bottom: 5px; font-size: 1.1rem; text-align: center; color: #000000; background: linear-gradient(135deg, #d4af37 0%, #aa7c11 100%); padding: 12px; border-radius: 6px; font-weight: bold; border: none; cursor: default;">Attendance & Growth Analytics</button>
+    <p class="form-hint" style="font-size: 0.8rem; color: #aaa; margin-bottom: 10px;">Monitor weekly service attendance, first-time visitors, and historical records over time.</p>
+    
+    <!-- Latest Overview Stats Counters -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 15px;">
+        <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 6px; border: 1px solid rgba(212,175,55,0.3); text-align: center;">
+            <span style="font-size: 0.75rem; color: #aaa; display: block;">Latest Attendance</span>
+            <strong style="font-size: 1.2rem; color: #d4af37;" id="stat-sunday-attendance">0</strong>
+        </div>
+        <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 6px; border: 1px solid rgba(212,175,55,0.3); text-align: center;">
+            <span style="font-size: 0.75rem; color: #aaa; display: block;">Latest Visitors</span>
+            <strong style="font-size: 1.2rem; color: #27ae60;" id="stat-first-timers">0</strong>
+        </div>
+        <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 6px; border: 1px solid rgba(212,175,55,0.3); text-align: center;">
+            <span style="font-size: 0.75rem; color: #aaa; display: block;">Latest Total Members</span>
+            <strong style="font-size: 1.2rem; color: #3498db;" id="stat-total-members">0</strong>
+        </div>
+    </div>
 
-    <!-- Attendance Logging Script -->
-    <script>
-        function logServiceAttendance() {
-            const inputElement = document.getElementById('input-sunday-count');
-            const attendanceValue = parseInt(inputElement.value);
+    <!-- Data Recording Inputs Form Box -->
+    <div style="background: rgba(255,255,255,0.02); padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 15px;">
+        <div style="margin-bottom: 10px;">
+            <label style="font-size: 0.8rem; color: #ccc; display: block; margin-bottom: 4px;">Select Service Date:</label>
+            <input type="date" id="input-analytics-date" class="sleek-input" style="width: 100%; padding: 10px; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; font-size: 0.85rem;">
+        </div>
+        <div style="display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap;">
+            <input type="number" id="input-sunday-count" placeholder="Attendance" class="sleek-input" style="flex: 1; min-width: 80px; padding: 10px; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; font-size: 0.85rem;">
+            <input type="number" id="input-visitors-count" placeholder="Visitors" class="sleek-input" style="flex: 1; min-width: 80px; padding: 10px; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; font-size: 0.85rem;">
+            <input type="number" id="input-members-count" placeholder="Total Members" class="sleek-input" style="flex: 1; min-width: 80px; padding: 10px; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; font-size: 0.85rem;">
+        </div>
+        <button onclick="logAnalyticsRecord()" style="width: 100%; padding: 10px; background: #d4af37; color: #000; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.9rem;">💾 Save Log to History</button>
+    </div>
 
-            // Validate that the user typed a valid number
-            if (isNaN(attendanceValue) || attendanceValue < 0) {
-                alert('Please enter a valid attendance number.');
-                return;
-            }
-
-            // Update the Sunday Attendance display element
-            const attendanceDisplay = document.getElementById('stat-sunday-attendance');
-            if (attendanceDisplay) {
-                attendanceDisplay.textContent = attendanceValue;
-            }
-
-            // Save it to localStorage so it persists when you refresh the page
-            localStorage.setItem('sunday_attendance', attendanceValue);
-
-            // Clear the input field after successful logging
-            inputElement.value = '';
-
-            // Optional confirmation
-            console.log('Sunday attendance logged successfully:', attendanceValue);
-        }
-
-        // Load saved attendance automatically when the admin dashboard loads
-        window.addEventListener('DOMContentLoaded', () => {
-            const savedAttendance = localStorage.getItem('sunday_attendance');
-            if (savedAttendance) {
-                const attendanceDisplay = document.getElementById('stat-sunday-attendance');
-                if (attendanceDisplay) {
-                    attendanceDisplay.textContent = savedAttendance;
-                }
-            }
-        });
-    </script>
-
-    <script src="church-logic.js"></script>
-</body>
-</html>
+    <!-- Calendar Records Logs View Area -->
+    <h3 style="font-size: 0.9rem; color: #d4af37; margin-bottom: 8px; font-weight: bold;">📜 Historical Log Entries</h3>
+    <div id="analytics-history-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 220px; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px;">
+        <p style="opacity: 0.3; text-align: center; padding: 10px; font-size: 0.8rem;">No entries recorded yet.</p>
+    </div>
+</div>
