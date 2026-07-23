@@ -34,16 +34,16 @@
     </div>
 
    HTML
-<nav id="side-menu" class="nav-overlay">
+<nav id="side-menu" class="nav-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 999; background: rgba(0,0,0,0.85);">
     <div class="close-nav" onclick="toggleMenu()" style="position:absolute; top:40px; right:30px; font-size:2.5rem; color:#D4AF37; cursor:pointer;">&times;</div>
     
     <div class="nav-content" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
         <div class="menu-item" onclick="window.open('https://youtube.com/@DivineLifeChristianCentre/live')">📹 WATCH LIVE</div>
-        <div class="menu-item" onclick="openModal('giving-modal')">💰 TITHES & GIVING</div>
-        <div class="menu-item" onclick="openModal('prayer-modal')">🕊️ PRAYER REQUEST</div>
-        <div class="menu-item" onclick="openModal('booking-modal')">📅 APPOINTMENT</div>
-        <div class="menu-item" onclick="openModal('testimony-modal')">✨ TESTIMONY & PRAISE</div>
-        <div class="menu-item" onclick="toggleMenu()" style="margin-top:20px; opacity:0.5; font-size:0.8rem; border:none; background:transparent;">CLOSE MENU</div>
+        <div class="menu-item" onclick="toggleMenu(); openModal('giving-modal')">💰 TITHES & GIVING</div>
+        <div class="menu-item" onclick="toggleMenu(); openModal('prayer-modal')">🕊️ PRAYER REQUEST</div>
+        <div class="menu-item" onclick="toggleMenu(); openModal('booking-modal')">📅 APPOINTMENT</div>
+        <div class="menu-item" onclick="toggleMenu(); openModal('testimony-modal')">✨ TESTIMONY & PRAISE</div>
+        <div class="menu-item" onclick="toggleMenu()" style="margin-top:20px; opacity:0.5; font-size:0.8rem; border:none; background:transparent; cursor:pointer;">CLOSE MENU</div>
     </div>
 </nav>
 
