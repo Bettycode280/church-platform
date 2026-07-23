@@ -207,6 +207,21 @@
             firebase.initializeApp(firebaseConfig);
         }
 
+        // --- Security Login Check Function ---
+        function checkPass() {
+            const passInput = document.getElementById('pass-input').value.trim();
+            // Replace 'DLCC2026' with your preferred mission control password code
+            const validCode = 'DLCC2026'; 
+
+            if (passInput === validCode) {
+                document.getElementById('login-overlay').style.display = 'none';
+                document.getElementById('admin-ui').style.display = 'block';
+            } else {
+                alert('Incorrect Mission Code. Please try again.');
+                document.getElementById('pass-input').value = '';
+            }
+        }
+
         // --- Analytics Functions ---
         function getAnalyticsHistory() {
             const data = localStorage.getItem('church_analytics_history');
@@ -328,7 +343,6 @@
             });
         }
 
-        // Optional local-fallback input handler or Firestore submitter if used by admin form
         function logTestimonyRecord() {
             const nameInput = document.getElementById('input-testifier-name').value.trim();
             const phoneInput = document.getElementById('input-testifier-phone').value.trim();
@@ -375,7 +389,7 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             renderAnalyticsHistory();
-            initLiveTestimonyListener(); // Active real-time sync for incoming congregant testimonies
+            initLiveTestimonyListener();
             
             const dateControl = document.getElementById('input-analytics-date');
             if (dateControl) {
