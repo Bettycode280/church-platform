@@ -148,59 +148,59 @@
         <button onclick="window.open('https://www.youtube.com/@PastorJerryEze', '_blank')" style="flex: 1; min-width: 110px; padding: 10px; background: #e67e22; color: #fff; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.8rem;">⚡ Pastor Jerry Eze</button>
     </div>
 </div>
-            <!-- 7. Live Feed Panel -->
-            <div class="admin-panel" style="margin-top: 20px;">
-                <h2 class="gold-text" style="font-size: 1.2rem;">🕊️ LIVE FEED</h2>
-                <div class="scroll-area" id="prayer-list" style="max-height: 250px; overflow-y: auto;">
-                    <p style="opacity: 0.3; margin-top: 20px;">Waiting for mission data...</p>
+<!-- 7. Live Feed Panel -->
+        <div class="admin-panel" style="margin-top: 20px;">
+            <h2 class="gold-text" style="font-size: 1.2rem;">🕊️ LIVE FEED</h2>
+            <div class="scroll-area" id="prayer-list" style="max-height: 250px; overflow-y: auto;">
+                <p style="opacity: 0.3; margin-top: 20px;">Waiting for mission data...</p>
+            </div>
+        </div>
+
+        <!-- 8. Attendance & Growth Analytics Panel (Placed correctly INSIDE the main wrapper) -->
+        <div class="admin-panel" style="margin-top: 20px; margin-bottom: 20px;">
+            <button class="premium-gold-btn" style="width: 100%; margin-bottom: 5px; font-size: 1.1rem; text-align: center; color: #000000; background: linear-gradient(135deg, #d4af37 0%, #aa7c11 100%); padding: 12px; border-radius: 6px; font-weight: bold; border: none; cursor: default;">Attendance & Growth Analytics</button>
+            <p class="form-hint" style="font-size: 0.8rem; color: #aaa; margin-bottom: 10px;">Monitor weekly service attendance, first-time visitors, and historical records over time.</p>
+            
+            <!-- Latest Overview Stats Counters -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 15px;">
+                <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 6px; border: 1px solid rgba(212,175,55,0.3); text-align: center;">
+                    <span style="font-size: 0.75rem; color: #aaa; display: block;">Latest Attendance</span>
+                    <strong style="font-size: 1.2rem; color: #d4af37;" id="stat-sunday-attendance">0</strong>
+                </div>
+                <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 6px; border: 1px solid rgba(212,175,55,0.3); text-align: center;">
+                    <span style="font-size: 0.75rem; color: #aaa; display: block;">Latest Visitors</span>
+                    <strong style="font-size: 1.2rem; color: #27ae60;" id="stat-first-timers">0</strong>
+                </div>
+                <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 6px; border: 1px solid rgba(212,175,55,0.3); text-align: center;">
+                    <span style="font-size: 0.75rem; color: #aaa; display: block;">Latest Total Members</span>
+                    <strong style="font-size: 1.2rem; color: #3498db;" id="stat-total-members">0</strong>
                 </div>
             </div>
 
+            <!-- Data Recording Inputs Form Box -->
+            <div style="background: rgba(255,255,255,0.02); padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 15px;">
+                <div style="margin-bottom: 10px;">
+                    <label style="font-size: 0.8rem; color: #ccc; display: block; margin-bottom: 4px;">Select Service Date:</label>
+                    <input type="date" id="input-analytics-date" class="sleek-input" style="width: 100%; padding: 10px; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; font-size: 0.85rem;">
+                </div>
+                <div style="display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap;">
+                    <input type="number" id="input-sunday-count" placeholder="Attendance" class="sleek-input" style="flex: 1; min-width: 80px; padding: 10px; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; font-size: 0.85rem;">
+                    <input type="number" id="input-visitors-count" placeholder="Visitors" class="sleek-input" style="flex: 1; min-width: 80px; padding: 10px; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; font-size: 0.85rem;">
+                    <input type="number" id="input-members-count" placeholder="Total Members" class="sleek-input" style="flex: 1; min-width: 80px; padding: 10px; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; font-size: 0.85rem;">
+                </div>
+                <button onclick="logAnalyticsRecord()" style="width: 100%; padding: 10px; background: #d4af37; color: #000; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.9rem;">💾 Save Log to History</button>
+            </div>
+
+            <!-- Calendar Records Logs View Area -->
+            <h3 style="font-size: 0.9rem; color: #d4af37; margin-bottom: 8px; font-weight: bold;">📜 Historical Log Entries</h3>
+            <div id="analytics-history-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 220px; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px;">
+                <p style="opacity: 0.3; text-align: center; padding: 10px; font-size: 0.8rem;">No entries recorded yet.</p>
+            </div>
         </div>
 
+        <!-- Logout Button at the bottom inside container -->
         <div style="text-align: center; margin-top: 40px; padding-bottom: 40px;">
             <button onclick="location.reload()" style="background:none; border:none; color:rgba(255,255,255,0.3); cursor:pointer;">Logout & Lock</button>
         </div>
 
     </div>
-<!-- 8. Attendance & Growth Analytics Panel -->
-<div class="admin-panel" style="margin-bottom: 20px;">
-    <button class="premium-gold-btn" style="width: 100%; margin-bottom: 5px; font-size: 1.1rem; text-align: center; color: #000000; background: linear-gradient(135deg, #d4af37 0%, #aa7c11 100%); padding: 12px; border-radius: 6px; font-weight: bold; border: none; cursor: default;">Attendance & Growth Analytics</button>
-    <p class="form-hint" style="font-size: 0.8rem; color: #aaa; margin-bottom: 10px;">Monitor weekly service attendance, first-time visitors, and historical records over time.</p>
-    
-    <!-- Latest Overview Stats Counters -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 15px;">
-        <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 6px; border: 1px solid rgba(212,175,55,0.3); text-align: center;">
-            <span style="font-size: 0.75rem; color: #aaa; display: block;">Latest Attendance</span>
-            <strong style="font-size: 1.2rem; color: #d4af37;" id="stat-sunday-attendance">0</strong>
-        </div>
-        <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 6px; border: 1px solid rgba(212,175,55,0.3); text-align: center;">
-            <span style="font-size: 0.75rem; color: #aaa; display: block;">Latest Visitors</span>
-            <strong style="font-size: 1.2rem; color: #27ae60;" id="stat-first-timers">0</strong>
-        </div>
-        <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 6px; border: 1px solid rgba(212,175,55,0.3); text-align: center;">
-            <span style="font-size: 0.75rem; color: #aaa; display: block;">Latest Total Members</span>
-            <strong style="font-size: 1.2rem; color: #3498db;" id="stat-total-members">0</strong>
-        </div>
-    </div>
-
-    <!-- Data Recording Inputs Form Box -->
-    <div style="background: rgba(255,255,255,0.02); padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 15px;">
-        <div style="margin-bottom: 10px;">
-            <label style="font-size: 0.8rem; color: #ccc; display: block; margin-bottom: 4px;">Select Service Date:</label>
-            <input type="date" id="input-analytics-date" class="sleek-input" style="width: 100%; padding: 10px; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; font-size: 0.85rem;">
-        </div>
-        <div style="display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap;">
-            <input type="number" id="input-sunday-count" placeholder="Attendance" class="sleek-input" style="flex: 1; min-width: 80px; padding: 10px; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; font-size: 0.85rem;">
-            <input type="number" id="input-visitors-count" placeholder="Visitors" class="sleek-input" style="flex: 1; min-width: 80px; padding: 10px; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; font-size: 0.85rem;">
-            <input type="number" id="input-members-count" placeholder="Total Members" class="sleek-input" style="flex: 1; min-width: 80px; padding: 10px; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; font-size: 0.85rem;">
-        </div>
-        <button onclick="logAnalyticsRecord()" style="width: 100%; padding: 10px; background: #d4af37; color: #000; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.9rem;">💾 Save Log to History</button>
-    </div>
-
-    <!-- Calendar Records Logs View Area -->
-    <h3 style="font-size: 0.9rem; color: #d4af37; margin-bottom: 8px; font-weight: bold;">📜 Historical Log Entries</h3>
-    <div id="analytics-history-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 220px; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px;">
-        <p style="opacity: 0.3; text-align: center; padding: 10px; font-size: 0.8rem;">No entries recorded yet.</p>
-    </div>
-</div>
