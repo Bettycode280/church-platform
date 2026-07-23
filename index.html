@@ -33,7 +33,8 @@
         <p class="church-name">CHRISTIAN CENTRE</p>
     </div>
 
-   <nav id="side-menu" class="nav-overlay">
+   HTML
+<nav id="side-menu" class="nav-overlay">
     <div class="close-nav" onclick="toggleMenu()" style="position:absolute; top:40px; right:30px; font-size:2.5rem; color:#D4AF37; cursor:pointer;">&times;</div>
     
     <div class="nav-content" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
@@ -41,6 +42,7 @@
         <div class="menu-item" onclick="openModal('giving-modal')">💰 TITHES & GIVING</div>
         <div class="menu-item" onclick="openModal('prayer-modal')">🕊️ PRAYER REQUEST</div>
         <div class="menu-item" onclick="openModal('booking-modal')">📅 APPOINTMENT</div>
+        <div class="menu-item" onclick="openModal('testimony-modal')">✨ TESTIMONY & PRAISE</div>
         <div class="menu-item" onclick="toggleMenu()" style="margin-top:20px; opacity:0.5; font-size:0.8rem; border:none; background:transparent;">CLOSE MENU</div>
     </div>
 </nav>
@@ -95,6 +97,21 @@
     </div>
 </div>
 
+    <div id="testimony-modal" class="modal">
+    <div class="glass-card">
+        <h2 class="gold-text">Testimony & Praise</h2>
+        <p class="form-hint">Share What God Has Done</p>
+        
+        <input type="text" id="t_name" placeholder="Full Name" class="sleek-input">
+        <input type="tel" id="t_phone" placeholder="Phone Number" class="sleek-input">
+        <input type="email" id="t_email" placeholder="Email Address (Optional)" class="sleek-input">
+        <textarea id="t_msg" placeholder="Write your testimony or praise report here..." rows="4" class="sleek-input"></textarea>
+        
+        <button class="premium-gold-btn" onclick="submitTestimony()">SUBMIT TESTIMONY</button>
+        <div class="cancel-link" onclick="closeModals()">Cancel</div>
+    </div>
+</div>
+
    <div id="giving-modal" class="modal">
         <div class="glass-card">
             <h2 class="gold-text">Giving</h2>
@@ -114,7 +131,6 @@
 
     <script>
     function selectDay(day, buttonElement) {
-        // Ensure this matches your external script variable name if it exists there
         if (typeof selectedDayValue !== 'undefined') {
             selectedDayValue = day;
         }
@@ -129,11 +145,49 @@
         buttonElement.style.background = "rgba(212, 175, 55, 0.25)";
         buttonElement.style.borderColor = "#D4AF37";
     }
+
+    function submitTestimony() {
+        const name = document.getElementById('t_name').value.trim();
+        const phone = document.getElementById('t_phone').value.trim();
+        const email = document.getElementById('t_email').value.trim();
+        const testimony = document.getElementById('t_msg').value.trim();
+
+        if (!name || !testimony) {
+            alert('Please provide your name and testimony details.');
+            return;
+        }
+
+        const now = new Date();
+        const dateStr = now.toISOString().split('T')[0];
+        const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        const data = localStorage.getItem('church_testimony_history');
+        const history = data ? JSON.parse(data) : [];
+
+        history.push({
+            date: dateStr,
+            time: timeStr,
+            name: name,
+            phone: phone || 'N/A',
+            email: email || 'N/A',
+            testimony: testimony
+        });
+
+        history.sort((a, b) => new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time));
+        localStorage.setItem('church_testimony_history', JSON.stringify(history));
+
+        alert('Praise God! Your testimony has been successfully submitted.');
+        
+        document.getElementById('t_name').value = '';
+        document.getElementById('t_phone').value = '';
+        document.getElementById('t_email').value = '';
+        document.getElementById('t_msg').value = '';
+        
+        closeModals();
+    }
 </script>
 
 <script src="script.js"></script>
-</body>
-</html>
 
                 <!-- Essential Firebase App Connection Credentials Config Block -->
 
