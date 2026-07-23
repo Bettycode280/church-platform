@@ -141,21 +141,6 @@
 
     <audio id="alert-sound" src="alert.mp3" preload="auto"></audio>
 
-    <!-- Firebase Initialization -->
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyDhLq4p_W0ArYVXYHmOZbsuyyvLqWde6js",
-            authDomain: "glorywheels-507df.firebaseapp.com",
-            projectId: "glorywheels-507df",
-            storageBucket: "glorywheels-507df.firebasestorage.app",
-            messagingSenderId: "369831733781",
-            appId: "1:369831733781:web:a7402fd123de519d7e3c1c"
-        };
-        
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
-    </script>
 
     <!-- Frontend UI & Submission Script (Addresses Hypothesis: ensures submitPrayer connects cleanly to Firestore matching Mission Control) -->
     <script>
@@ -256,6 +241,21 @@
                 console.error("Error submitting prayer: ", error);
                 alert("Failed to send prayer request. Please check your connection.");
             }
+        }
+    </script>
+     <!-- Firebase Initialization -->
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDhLq4p_W0ArYVXYHmOZbsuyyvLqWde6js",
+            authDomain: "glorywheels-507df.firebaseapp.com",
+            projectId: "glorywheels-507df",
+            storageBucket: "glorywheels-507df.firebasestorage.app",
+            messagingSenderId: "369831733781",
+            appId: "1:369831733781:web:a7402fd123de519d7e3c1c"
+        };
+        
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
         }
     </script>
 
