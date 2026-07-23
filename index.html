@@ -97,7 +97,8 @@
     </div>
 </div>
 
-   <div id="testimony-modal" class="modal">
+  <!-- Testimony Modal -->
+<div id="testimony-modal" class="modal">
     <div class="glass-card">
         <h2 class="gold-text">Testimony & Praise</h2>
         <p class="form-hint">Share What God Has Done</p>
@@ -120,12 +121,12 @@
             <textarea id="t_msg" placeholder="Write your testimony or praise report here..." rows="4" class="sleek-input"></textarea>
         </div>
         
-        <!-- onclick is correctly included here -->
         <button type="button" class="premium-gold-btn" onclick="submitTestimony()" style="margin-top: 10px;">SUBMIT TESTIMONY</button>
         <div class="cancel-link" onclick="closeModals()">Cancel</div>
     </div>
 </div>
 
+<!-- Giving Modal -->
 <div id="giving-modal" class="modal">
     <div class="glass-card">
         <h2 class="gold-text">Giving</h2>
@@ -143,7 +144,7 @@
 
 <audio id="alert-sound" src="alert.mp3" preload="auto"></audio>
 
-<!-- 1. REQUIRED: Load Firebase SDK FIRST before any scripts use it -->
+<!-- 1. REQUIRED: Load Firebase SDK FIRST -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
@@ -156,15 +157,30 @@
     storageBucket: "glorywheels-507df.firebasestorage.app",
     messagingSenderId: "369831733781",
     appId: "1:369831733781:web:a7402fd123de519d7e3c1c"
-};
+
+    };
     
     if (!firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
     }
 </script>
 
-<!-- 3. App Logic & Functions -->
+<!-- 3. App Logic, Testimony Handling, & Navigation Control -->
 <script>
+    function openModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.style.display = 'flex';
+        }
+    }
+
+    function closeModals() {
+        const modals = document.querySelectorAll('.modal');
+        modals.forEach(modal => {
+            modal.style.display = 'none';
+        });
+    }
+
     function selectDay(day, buttonElement) {
         if (typeof selectedDayValue !== 'undefined') {
             selectedDayValue = day;
