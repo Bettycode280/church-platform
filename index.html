@@ -120,29 +120,51 @@
             <textarea id="t_msg" placeholder="Write your testimony or praise report here..." rows="4" class="sleek-input"></textarea>
         </div>
         
-        <button class="premium-gold-btn" onclick="submitTestimony()" style="margin-top: 10px;">SUBMIT TESTIMONY</button>
+        <!-- onclick is correctly included here -->
+        <button type="button" class="premium-gold-btn" onclick="submitTestimony()" style="margin-top: 10px;">SUBMIT TESTIMONY</button>
         <div class="cancel-link" onclick="closeModals()">Cancel</div>
     </div>
 </div>
 
-   <div id="giving-modal" class="modal">
-        <div class="glass-card">
-            <h2 class="gold-text">Giving</h2>
-            
-            <div style="text-align: left; margin: 15px 0; color: #fff;">
-                <p style="margin: 5px 0;"><strong>Bank Name:</strong> Dominf Bank</p>
-                <p style="margin: 5px 0;"><strong>Account Name:</strong> Church Account Ministry Account</p>
-                <p style="margin: 5px 0;"><strong>Account Number:</strong> 88577397</p>
-                <p style="margin: 5px 0;"><strong>Sort Code:</strong> 677736</p>
-            </div>
-
-            <button class="premium-gold-btn" onclick="closeModals()">RETURN</button>
+<div id="giving-modal" class="modal">
+    <div class="glass-card">
+        <h2 class="gold-text">Giving</h2>
+        
+        <div style="text-align: left; margin: 15px 0; color: #fff;">
+            <p style="margin: 5px 0;"><strong>Bank Name:</strong> Dominf Bank</p>
+            <p style="margin: 5px 0;"><strong>Account Name:</strong> Church Account Ministry Account</p>
+            <p style="margin: 5px 0;"><strong>Account Number:</strong> 88577397</p>
+            <p style="margin: 5px 0;"><strong>Sort Code:</strong> 677736</p>
         </div>
+
+        <button type="button" class="premium-gold-btn" onclick="closeModals()">RETURN</button>
     </div>
+</div>
 
-    <audio id="alert-sound" src="alert.mp3" preload="auto"></audio>
+<audio id="alert-sound" src="alert.mp3" preload="auto"></audio>
 
-    <script>
+<!-- 1. REQUIRED: Load Firebase SDK FIRST before any scripts use it -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+<!-- 2. Firebase Configuration & Initialization -->
+<script>
+        const firebaseConfig = {
+    apiKey: "AIzaSyDhLq4p_W0ArYVXYHmOZbsuyyvLqWde6js",
+    authDomain: "glorywheels-507df.firebaseapp.com",
+    projectId: "glorywheels-507df",
+    storageBucket: "glorywheels-507df.firebasestorage.app",
+    messagingSenderId: "369831733781",
+    appId: "1:369831733781:web:a7402fd123de519d7e3c1c"
+};
+    
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+</script>
+
+<!-- 3. App Logic & Functions -->
+<script>
     function selectDay(day, buttonElement) {
         if (typeof selectedDayValue !== 'undefined') {
             selectedDayValue = day;
@@ -246,29 +268,5 @@
 
 <script src="script.js"></script>
 <script src="church-logic.js"></script>
-
-<!-- REQUIRED: Firebase SDK CDN Scripts MUST be before firebase initialization -->
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-
-
-                <!-- Essential Firebase App Connection Credentials Config Block -->
-
-    <script src="church-logic.js"></script>
-    const firebaseConfig = {
-    apiKey: "AIzaSyDhLq4p_W0ArYVXYHmOZbsuyyvLqWde6js",
-    authDomain: "glorywheels-507df.firebaseapp.com",
-    projectId: "glorywheels-507df",
-    storageBucket: "glorywheels-507df.firebasestorage.app",
-    messagingSenderId: "369831733781",
-    appId: "1:369831733781:web:a7402fd123de519d7e3c1c"
-};
-// Initialize Firebase if not already initialized
-    if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-    }
-</script>
 </body>
 </html>
-
-
