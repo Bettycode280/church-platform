@@ -276,24 +276,126 @@
             });
         }
 
-        // --- Testimony Functions ---
-        function getTestimonyHistory() {
-            const data = localStorage.getItem('church_testimony_history');
-            return data ? JSON.parse(data) : [];
+        // --- Real-Time Live Testimony Functions (Firestore + Storage) ---
+        function initLiveTestimonyListener() {
+            const historyList = document.getElementById('testimony-history-list');
+            if (!historyList) return;
+
+            const db = firebase.firestore();
+
+            db.collection("testimonies").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
+                historyList.innerHTML = '';
+
+                if (snapshot.empty) {
+                    historyList.innerHTML = '<p style="opacity: 0.3; text-align: center; padding: 10px; font-size: 0.8rem;">No testimonies recorded yet.</p>';
+                    return;
+                }
+
+                snapshot.forEach((doc) => {
+                    const record = doc.data();
+                    const id = doc.id;
+
+                    const div = document.createElement('div');
+                    div.style.cssText = "background: rgba(255,255,255,0.05); padding: 10px 12px; border-radius: 6px; border-left: 3px solid #27ae60; font-size: 0.8rem; color: #fff; margin-bottom: 6px;";
+                    
+                    let textHtml = record.testimony ? `<p style="background: rgba(0,0,0,0.15); padding: 8px; border-radius: 4px; margin: 4px 0 0 0; color: #ddd; font-style: italic; font-size: 0.8rem;">"${record.testimony}"</p>` : '';
+                    
+                    // Fallback check: supports audioUrl, audio, or general audio type records
+                    const audioSource = record.audioUrl || record.audio || (record.type === 'Audio' ? record.fileUrl : '');
+                    let audioControls = '';
+                    if (audioSource) {
+                        audioControls = `
+                            <div style="margin-top: 6px; padding: 8px; background: rgba(212,175,55,0.12); border-radius: 4px; display: flex; align-items: center; justify-content: space-between;">
+                                <span style="color: #d4af37; font-weight: bold; font-size: 0.75rem;">🎵 Audio Testimony</span>
+                                <div>
+                                    <audio id="audio-elem-${id}" src="${audioSource}" preload="none"></audio>
+                                    <button type="button" onclick="toggleAudioPlayback('${id}')" id="audio-btn-${id}" style="padding: 5px 12px; background: #27ae60; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.75rem;">▶ Listen Audio</button>
+                                </div>
+                            </div>`;
+                    }
+
+                    const videoSource = record.videoUrl || record.video || '';
+                    let videoControls = '';
+                    if (videoSource) {
+                        videoControls = `
+                            <div style="margin-top: 6px; padding: 8px; background: rgba(212,175,55,0.12); border-radius: 4px;">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+                                    <span style="color: #d4af37; font-weight: bold; font-size: 0.75rem;">🎬 Video Testimony</span>
+                                    <button type="button" onclick="toggleVideoPlayback('${id}')" id="video-btn-${id}" style="padding: 5px 12px; background: #3498db; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.75rem;">▶ Watch Video</button>
+                                </div>
+                                <div id="video-container-${id}" style="display: none; margin-top: 6px;">
+                                    <video id="video-elem-${id}" src="${videoSource}" controls style="width: 100%; max-height: 160px; border-radius: 4px;"></video>
+                                </div>
+                            </div>`;
+                    }
+
+                    div.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px;">
+                            <div>
+                                <strong style="color: #27ae60; font-size: 0.9rem;">${record.name}</strong>
+                                <span style="opacity: 0.5; margin-left: 8px; font-size: 0.75rem;">📅 ${record.date || ''} at ${record.time || ''}</span>
+                            </div>
+                            <button type="button" onclick="deleteTestimonyRecord('${id}')" style="background: none; border: none; color: #ff4d4d; cursor: pointer; font-size: 0.9rem; font-weight: bold; padding: 0 4px;" onmouseover="this.style.opacity=0.7" onmouseout="this.style.opacity=1">✕</button>
+                        </div>
+                        <div style="opacity: 0.85; margin-bottom: 4px; font-size: 0.78rem;">📞 Phone: ${record.phone || 'N/A'} | ✉️ Email: ${record.email || 'N/A'}</div>
+                        ${textHtml}
+                        ${audioControls}
+                        ${videoControls}
+                    `;
+                    historyList.appendChild(div);
+                });
+            });
         }
 
-        function saveTestimonyHistory(history) {
-            localStorage.setItem('church_testimony_history', JSON.stringify(history));
+        function toggleAudioPlayback(id) {
+            const audioElem = document.getElementById(`audio-elem-${id}`);
+            const audioBtn = document.getElementById(`audio-btn-${id}`);
+            if (!audioElem || !audioBtn) return;
+
+            if (audioElem.paused) {
+                audioElem.play().catch(e => console.error("Audio playback error:", e));
+                audioBtn.innerText = "⏸ Pause Audio";
+                audioBtn.style.background = "#e67e22";
+            } else {
+                audioElem.pause();
+                audioBtn.innerText = "▶ Listen Audio";
+                audioBtn.style.background = "#27ae60";
+            }
+
+            audioElem.onended = function() {
+                audioBtn.innerText = "▶ Listen Audio";
+                audioBtn.style.background = "#27ae60";
+            };
         }
 
+        function toggleVideoPlayback(id) {
+            const videoContainer = document.getElementById(`video-container-${id}`);
+            const videoElem = document.getElementById(`video-elem-${id}`);
+            const videoBtn = document.getElementById(`video-btn-${id}`);
+            if (!videoContainer || !videoElem || !videoBtn) return;
+
+            if (videoContainer.style.display === "none" || !videoContainer.style.display) {
+                videoContainer.style.display = "block";
+                videoElem.play().catch(e => console.error("Video playback error:", e));
+                videoBtn.innerText = "✖ Close Video";
+                videoBtn.style.background = "#e74c3c";
+            } else {
+                videoElem.pause();
+                videoContainer.style.display = "none";
+                videoBtn.innerText = "▶ Watch Video";
+                videoBtn.style.background = "#3498db";
+            }
+        }
         function logTestimonyRecord() {
             const nameInput = document.getElementById('input-testifier-name').value.trim();
             const phoneInput = document.getElementById('input-testifier-phone').value.trim();
-            const emailInput = document.getElementById('input-testifier-email').value.trim();
+            const emailInput = document.getElementById('input-testifier-email') ? document.getElementById('input-testifier-email').value.trim() : '';
             const textInput = document.getElementById('input-testimony-text').value.trim();
+            const audioFile = document.getElementById('input-testimony-audio') ? document.getElementById('input-testimony-audio').files[0] : null;
+            const videoFile = document.getElementById('input-testimony-video') ? document.getElementById('input-testimony-video').files[0] : null;
 
-            if (!nameInput || !textInput) {
-                alert('Please enter the member name and testimony details.');
+            if (!nameInput && !textInput && !audioFile && !videoFile) {
+                alert('Please provide at least a name and testimony content (text, audio, or video).');
                 return;
             }
 
@@ -301,72 +403,73 @@
             const dateStr = now.toISOString().split('T')[0];
             const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-            const history = getTestimonyHistory();
-            
-            history.push({
-                date: dateStr,
-                time: timeStr,
-                name: nameInput,
-                phone: phoneInput || 'N/A',
-                email: emailInput || 'N/A',
-                testimony: textInput
-            });
+            const db = firebase.firestore();
+            const storage = firebase.storage();
 
-            history.sort((a, b) => new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time));
+            const saveToFirestore = (audioUrl, videoUrl) => {
+                db.collection("testimonies").add({
+                    name: nameInput || 'Anonymous',
+                    phone: phoneInput || 'N/A',
+                    email: emailInput || 'N/A',
+                    testimony: textInput || '',
+                    audioUrl: audioUrl || '',
+                    videoUrl: videoUrl || '',
+                    date: dateStr,
+                    time: timeStr,
+                    type: 'Admin / Multimedia',
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                }).then(() => {
+                    document.getElementById('input-testifier-name').value = '';
+                    document.getElementById('input-testifier-phone').value = '';
+                    if(document.getElementById('input-testifier-email')) document.getElementById('input-testifier-email').value = '';
+                    document.getElementById('input-testimony-text').value = '';
+                    if(document.getElementById('input-testimony-audio')) document.getElementById('input-testimony-audio').value = '';
+                    if(document.getElementById('input-testimony-video')) document.getElementById('input-testimony-video').value = '';
+                    alert('Multimedia testimony successfully submitted and loaded into feed!');
+                }).catch((error) => {
+                    console.error("Error adding testimony: ", error);
+                    alert("Failed to submit testimony.");
+                });
+            };
 
-            saveTestimonyHistory(history);
-            renderTestimonyHistory();
+            let uploadedAudioUrl = '';
+            let uploadedVideoUrl = '';
 
-            document.getElementById('input-testifier-name').value = '';
-            document.getElementById('input-testifier-phone').value = '';
-            document.getElementById('input-testifier-email').value = '';
-            document.getElementById('input-testimony-text').value = '';
+            const processUploads = async () => {
+                try {
+                    if (audioFile) {
+                        const audioRef = storage.ref().child(`testimonies/audio/${Date.now()}_${audioFile.name}`);
+                        const snapshot = await audioRef.put(audioFile);
+                        uploadedAudioUrl = await snapshot.ref.getDownloadURL();
+                    }
+                    if (videoFile) {
+                        const videoRef = storage.ref().child(`testimonies/video/${Date.now()}_${videoFile.name}`);
+                        const snapshot = await videoRef.put(videoFile);
+                        uploadedVideoUrl = await snapshot.ref.getDownloadURL();
+                    }
+                    saveToFirestore(uploadedAudioUrl, uploadedVideoUrl);
+                } catch (error) {
+                    console.error("Media upload error: ", error);
+                    alert("Error uploading media files to storage.");
+                }
+            };
+
+            processUploads();
         }
 
-        function deleteTestimonyRecord(index) {
+        function deleteTestimonyRecord(docId) {
             if (confirm('Are you sure you want to delete this testimony record?')) {
-                const history = getTestimonyHistory();
-                history.splice(index, 1);
-                saveTestimonyHistory(history);
-                renderTestimonyHistory();
+                firebase.firestore().collection("testimonies").doc(docId).delete().catch((error) => {
+                    alert('Failed to delete testimony.');
+                    console.error(error);
+                });
             }
         }
-
-        function renderTestimonyHistory() {
-            const historyList = document.getElementById('testimony-history-list');
-            if (!historyList) return;
-
-            const history = getTestimonyHistory();
-            historyList.innerHTML = '';
-
-            if (history.length === 0) {
-                historyList.innerHTML = '<p style="opacity: 0.3; text-align: center; padding: 10px; font-size: 0.8rem;">No testimonies recorded yet.</p>';
-                return;
-            }
-
-            history.forEach((record, index) => {
-                const div = document.createElement('div');
-                div.style.cssText = "background: rgba(255,255,255,0.05); padding: 10px 12px; border-radius: 6px; border-left: 3px solid #27ae60; font-size: 0.8rem; color: #fff; margin-bottom: 4px;";
-                
-                div.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px;">
-                        <div>
-                            <strong style="color: #27ae60; font-size: 0.9rem;">${record.name}</strong>
-                            <span style="opacity: 0.5; margin-left: 8px; font-size: 0.75rem;">📅 ${record.date} at ${record.time}</span>
-                        </div>
-                        <button onclick="deleteTestimonyRecord(${index})" style="background: none; border: none; color: #ff4d4d; cursor: pointer; font-size: 0.9rem; font-weight: bold; padding: 0 4px;" onmouseover="this.style.opacity=0.7" onmouseout="this.style.opacity=1">✕</button>
-                    </div>
-                    <div style="opacity: 0.85; margin-bottom: 6px; font-size: 0.78rem;">📞 Phone: ${record.phone} | ✉️ Email: ${record.email}</div>
-                    <p style="background: rgba(0,0,0,0.15); padding: 8px; border-radius: 4px; margin: 0; color: #ddd; font-style: italic; font-size: 0.8rem;">"${record.testimony}"</p>
-                `;
-                historyList.appendChild(div);
-            });
-        }
-        
 
         window.addEventListener('DOMContentLoaded', () => {
             renderAnalyticsHistory();
-            renderTestimonyHistory();
+            initLiveTestimonyListener();
+            
             const dateControl = document.getElementById('input-analytics-date');
             if (dateControl) {
                 dateControl.value = new Date().toISOString().split('T')[0];
@@ -377,3 +480,4 @@
     <script src="church-logic.js"></script>
 </body>
 </html>
+
