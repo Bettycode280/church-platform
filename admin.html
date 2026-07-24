@@ -300,7 +300,7 @@
                     
                     let textHtml = record.testimony ? `<p style="background: rgba(0,0,0,0.15); padding: 8px; border-radius: 4px; margin: 4px 0 0 0; color: #ddd; font-style: italic; font-size: 0.8rem;">"${record.testimony}"</p>` : '';
                     
-                    // Fallback check: supports audioUrl, audio, or general audio type records
+                    // Maps database audio source (supports audioUrl, audio, or fileUrl)
                     const audioSource = record.audioUrl || record.audio || (record.type === 'Audio' ? record.fileUrl : '');
                     let audioControls = '';
                     if (audioSource) {
@@ -314,7 +314,8 @@
                             </div>`;
                     }
 
-                    const videoSource = record.videoUrl || record.video || '';
+                    // Maps database video source (supports videoUrl or video)
+                    const videoSource = record.videoUrl || record.video || (record.type === 'Video' ? record.fileUrl : '');
                     let videoControls = '';
                     if (videoSource) {
                         videoControls = `
@@ -347,6 +348,7 @@
             });
         }
 
+        // Dedicated Playback Handlers for Pastor in Mission Control
         function toggleAudioPlayback(id) {
             const audioElem = document.getElementById(`audio-elem-${id}`);
             const audioBtn = document.getElementById(`audio-btn-${id}`);
@@ -386,6 +388,7 @@
                 videoBtn.style.background = "#3498db";
             }
         }
+        
         function logTestimonyRecord() {
             const nameInput = document.getElementById('input-testifier-name').value.trim();
             const phoneInput = document.getElementById('input-testifier-phone').value.trim();
