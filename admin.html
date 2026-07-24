@@ -275,6 +275,7 @@
                 historyList.appendChild(div);
             });
         }
+* **Hypothesis 1 (Guaranteed Fallback UI Rendering):** This addresses the issue by forcing the audio/video player controls to render if the record type indicates media, preventing missing URL fields from hiding the playback buttons.
 
         // --- Real-Time Live Testimony Functions (Firestore + Storage) ---
         function initLiveTestimonyListener() {
@@ -300,32 +301,32 @@
                     
                     let textHtml = record.testimony ? `<p style="background: rgba(0,0,0,0.15); padding: 8px; border-radius: 4px; margin: 4px 0 0 0; color: #ddd; font-style: italic; font-size: 0.8rem;">"${record.testimony}"</p>` : '';
                     
-                    // Maps database audio source (supports audioUrl, audio, or fileUrl)
-                    const audioSource = record.audioUrl || record.audio || (record.type === 'Audio' ? record.fileUrl : '');
+                    // Resolve audio source or provide fallback check for records marked as Audio
+                    const audioSource = record.audioUrl || record.audio || record.fileUrl || (record.type === 'Audio' ? '#' : '');
                     let audioControls = '';
-                    if (audioSource) {
+                    if (audioSource || record.type === 'Audio') {
                         audioControls = `
                             <div style="margin-top: 6px; padding: 8px; background: rgba(212,175,55,0.12); border-radius: 4px; display: flex; align-items: center; justify-content: space-between;">
                                 <span style="color: #d4af37; font-weight: bold; font-size: 0.75rem;">🎵 Audio Testimony</span>
                                 <div>
-                                    <audio id="audio-elem-${id}" src="${audioSource}" preload="none"></audio>
-                                    <button type="button" onclick="toggleAudioPlayback('${id}')" id="audio-btn-${id}" style="padding: 5px 12px; background: #27ae60; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.75rem;">▶ Listen Audio</button>
+                                    <audio id="audio-elem-${id}" src="${audioSource !== '#' ? audioSource : ''}" preload="none"></audio>
+                                    <button type="button" onclick="toggleAudioPlayback('${id}', '${audioSource}')" id="audio-btn-${id}" style="padding: 5px 12px; background: #27ae60; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.75rem;">▶ Listen Audio</button>
                                 </div>
                             </div>`;
                     }
 
-                    // Maps database video source (supports videoUrl or video)
-                    const videoSource = record.videoUrl || record.video || (record.type === 'Video' ? record.fileUrl : '');
+                    // Resolve video source or provide fallback check for records marked as Video
+                    const videoSource = record.videoUrl || record.video || record.fileUrl || (record.type === 'Video' ? '#' : '');
                     let videoControls = '';
-                    if (videoSource) {
+                    if (videoSource || record.type === 'Video') {
                         videoControls = `
                             <div style="margin-top: 6px; padding: 8px; background: rgba(212,175,55,0.12); border-radius: 4px;">
                                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
                                     <span style="color: #d4af37; font-weight: bold; font-size: 0.75rem;">🎬 Video Testimony</span>
-                                    <button type="button" onclick="toggleVideoPlayback('${id}')" id="video-btn-${id}" style="padding: 5px 12px; background: #3498db; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.75rem;">▶ Watch Video</button>
+                                    <button type="button" onclick="toggleVideoPlayback('${id}', '${videoSource}')" id="video-btn-${id}" style="padding: 5px 12px; background: #3498db; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.75rem;">▶ Watch Video</button>
                                 </div>
                                 <div id="video-container-${id}" style="display: none; margin-top: 6px;">
-                                    <video id="video-elem-${id}" src="${videoSource}" controls style="width: 100%; max-height: 160px; border-radius: 4px;"></video>
+                                    <video id="video-elem-${id}" src="${videoSource !== '#' ? videoSource : ''}" controls style="width: 100%; max-height: 160px; border-radius: 4px;"></video>
                                 </div>
                             </div>`;
                     }
@@ -348,14 +349,22 @@
             });
         }
 
-        // Dedicated Playback Handlers for Pastor in Mission Control
-        function toggleAudioPlayback(id) {
+        // Dedicated Playback Handlers for Pastor in Mission Control with safety fallback
+        function toggleAudioPlayback(id, sourceUrl) {
             const audioElem = document.getElementById(`audio-elem-${id}`);
             const audioBtn = document.getElementById(`audio-btn-${id}`);
             if (!audioElem || !audioBtn) return;
 
+            if (!audioElem.src || audioElem.src === window.location.href || sourceUrl === '#') {
+                alert("Audio file source URL is missing for this record.");
+                return;
+            }
+
             if (audioElem.paused) {
-                audioElem.play().catch(e => console.error("Audio playback error:", e));
+                audioElem.play().catch(e => {
+                    console.error("Audio playback error:", e);
+                    alert("Unable to play audio file.");
+                });
                 audioBtn.innerText = "⏸ Pause Audio";
                 audioBtn.style.background = "#e67e22";
             } else {
@@ -370,15 +379,23 @@
             };
         }
 
-        function toggleVideoPlayback(id) {
+        function toggleVideoPlayback(id, sourceUrl) {
             const videoContainer = document.getElementById(`video-container-${id}`);
             const videoElem = document.getElementById(`video-elem-${id}`);
             const videoBtn = document.getElementById(`video-btn-${id}`);
             if (!videoContainer || !videoElem || !videoBtn) return;
 
+            if (!videoElem.src || videoElem.src === window.location.href || sourceUrl === '#') {
+                alert("Video file source URL is missing for this record.");
+                return;
+            }
+
             if (videoContainer.style.display === "none" || !videoContainer.style.display) {
                 videoContainer.style.display = "block";
-                videoElem.play().catch(e => console.error("Video playback error:", e));
+                videoElem.play().catch(e => {
+                    console.error("Video playback error:", e);
+                    alert("Unable to play video file.");
+                });
                 videoBtn.innerText = "✖ Close Video";
                 videoBtn.style.background = "#e74c3c";
             } else {
