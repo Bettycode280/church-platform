@@ -304,8 +304,7 @@
                 historyList.appendChild(div);
             });
         }
-
-      // --- Real-Time Live Testimony Functions (Firestore + Storage) ---
+// --- Real-Time Live Testimony Functions (Firestore + Storage) ---
         function initLiveTestimonyListener() {
             const historyList = document.getElementById('testimony-history-list');
             if (!historyList) return;
@@ -329,22 +328,23 @@
                     
                     let textHtml = record.testimony ? `<p style="background: rgba(0,0,0,0.15); padding: 8px; border-radius: 4px; margin: 4px 0 0 0; color: #ddd; font-style: italic; font-size: 0.8rem;">"${record.testimony}"</p>` : '';
                     
-                    // Functional Audio Control with Play Button
+                    // Fallback check: supports audioUrl, audio, or general audio type records
+                    const audioSource = record.audioUrl || record.audio || (record.type === 'Audio' ? record.fileUrl : '');
                     let audioControls = '';
-                    if (record.audioUrl && record.audioUrl.trim() !== '') {
+                    if (audioSource) {
                         audioControls = `
                             <div style="margin-top: 6px; padding: 8px; background: rgba(212,175,55,0.12); border-radius: 4px; display: flex; align-items: center; justify-content: space-between;">
                                 <span style="color: #d4af37; font-weight: bold; font-size: 0.75rem;">🎵 Audio Testimony</span>
                                 <div>
-                                    <audio id="audio-elem-${id}" src="${record.audioUrl}" preload="none"></audio>
+                                    <audio id="audio-elem-${id}" src="${audioSource}" preload="none"></audio>
                                     <button type="button" onclick="toggleAudioPlayback('${id}')" id="audio-btn-${id}" style="padding: 5px 12px; background: #27ae60; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.75rem;">▶ Listen Audio</button>
                                 </div>
                             </div>`;
                     }
 
-                    // Functional Video Control with Watch Button and Hidden Container
+                    const videoSource = record.videoUrl || record.video || '';
                     let videoControls = '';
-                    if (record.videoUrl && record.videoUrl.trim() !== '') {
+                    if (videoSource) {
                         videoControls = `
                             <div style="margin-top: 6px; padding: 8px; background: rgba(212,175,55,0.12); border-radius: 4px;">
                                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
@@ -352,7 +352,7 @@
                                     <button type="button" onclick="toggleVideoPlayback('${id}')" id="video-btn-${id}" style="padding: 5px 12px; background: #3498db; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.75rem;">▶ Watch Video</button>
                                 </div>
                                 <div id="video-container-${id}" style="display: none; margin-top: 6px;">
-                                    <video id="video-elem-${id}" src="${record.videoUrl}" controls style="width: 100%; max-height: 160px; border-radius: 4px;"></video>
+                                    <video id="video-elem-${id}" src="${videoSource}" controls style="width: 100%; max-height: 160px; border-radius: 4px;"></video>
                                 </div>
                             </div>`;
                     }
@@ -375,7 +375,6 @@
             });
         }
 
-        // Dedicated Playback Handlers for Audio and Video
         function toggleAudioPlayback(id) {
             const audioElem = document.getElementById(`audio-elem-${id}`);
             const audioBtn = document.getElementById(`audio-btn-${id}`);
