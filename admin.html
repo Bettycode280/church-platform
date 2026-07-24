@@ -329,26 +329,33 @@
                     
                     let textHtml = record.testimony ? `<p style="background: rgba(0,0,0,0.15); padding: 8px; border-radius: 4px; margin: 4px 0 0 0; color: #ddd; font-style: italic; font-size: 0.8rem;">"${record.testimony}"</p>` : '';
                     
-                    // Explicit Action Buttons for Audio and Video Playback
-                    let audioControls = record.audioUrl ? `
-                        <div style="margin-top: 6px; padding: 6px; background: rgba(212,175,55,0.08); border-radius: 4px; display: flex; align-items: center; justify-content: space-between;">
-                            <span style="color: #d4af37; font-weight: bold; font-size: 0.75rem;">🎵 Audio Testimony</span>
-                            <div>
-                                <audio id="audio-elem-${id}" src="${record.audioUrl}" preload="none"></audio>
-                                <button onclick="toggleAudioPlayback('${id}')" id="audio-btn-${id}" style="padding: 4px 10px; background: #27ae60; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.75rem;">▶ Listen Audio</button>
-                            </div>
-                        </div>` : '';
+                    // Functional Audio Control with Play Button
+                    let audioControls = '';
+                    if (record.audioUrl && record.audioUrl.trim() !== '') {
+                        audioControls = `
+                            <div style="margin-top: 6px; padding: 8px; background: rgba(212,175,55,0.12); border-radius: 4px; display: flex; align-items: center; justify-content: space-between;">
+                                <span style="color: #d4af37; font-weight: bold; font-size: 0.75rem;">🎵 Audio Testimony</span>
+                                <div>
+                                    <audio id="audio-elem-${id}" src="${record.audioUrl}" preload="none"></audio>
+                                    <button type="button" onclick="toggleAudioPlayback('${id}')" id="audio-btn-${id}" style="padding: 5px 12px; background: #27ae60; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.75rem;">▶ Listen Audio</button>
+                                </div>
+                            </div>`;
+                    }
 
-                    let videoControls = record.videoUrl ? `
-                        <div style="margin-top: 6px; padding: 6px; background: rgba(212,175,55,0.08); border-radius: 4px;">
-                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
-                                <span style="color: #d4af37; font-weight: bold; font-size: 0.75rem;">🎬 Video Testimony</span>
-                                <button onclick="toggleVideoPlayback('${id}')" id="video-btn-${id}" style="padding: 4px 10px; background: #3498db; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.75rem;">▶ Watch Video</button>
-                            </div>
-                            <div id="video-container-${id}" style="display: none; margin-top: 6px;">
-                                <video id="video-elem-${id}" src="${record.videoUrl}" controls style="width: 100%; max-height: 160px; border-radius: 4px;"></video>
-                            </div>
-                        </div>` : '';
+                    // Functional Video Control with Watch Button and Hidden Container
+                    let videoControls = '';
+                    if (record.videoUrl && record.videoUrl.trim() !== '') {
+                        videoControls = `
+                            <div style="margin-top: 6px; padding: 8px; background: rgba(212,175,55,0.12); border-radius: 4px;">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+                                    <span style="color: #d4af37; font-weight: bold; font-size: 0.75rem;">🎬 Video Testimony</span>
+                                    <button type="button" onclick="toggleVideoPlayback('${id}')" id="video-btn-${id}" style="padding: 5px 12px; background: #3498db; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.75rem;">▶ Watch Video</button>
+                                </div>
+                                <div id="video-container-${id}" style="display: none; margin-top: 6px;">
+                                    <video id="video-elem-${id}" src="${record.videoUrl}" controls style="width: 100%; max-height: 160px; border-radius: 4px;"></video>
+                                </div>
+                            </div>`;
+                    }
 
                     div.innerHTML = `
                         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px;">
@@ -356,7 +363,7 @@
                                 <strong style="color: #27ae60; font-size: 0.9rem;">${record.name}</strong>
                                 <span style="opacity: 0.5; margin-left: 8px; font-size: 0.75rem;">📅 ${record.date || ''} at ${record.time || ''}</span>
                             </div>
-                            <button onclick="deleteTestimonyRecord('${id}')" style="background: none; border: none; color: #ff4d4d; cursor: pointer; font-size: 0.9rem; font-weight: bold; padding: 0 4px;" onmouseover="this.style.opacity=0.7" onmouseout="this.style.opacity=1">✕</button>
+                            <button type="button" onclick="deleteTestimonyRecord('${id}')" style="background: none; border: none; color: #ff4d4d; cursor: pointer; font-size: 0.9rem; font-weight: bold; padding: 0 4px;" onmouseover="this.style.opacity=0.7" onmouseout="this.style.opacity=1">✕</button>
                         </div>
                         <div style="opacity: 0.85; margin-bottom: 4px; font-size: 0.78rem;">📞 Phone: ${record.phone || 'N/A'} | ✉️ Email: ${record.email || 'N/A'}</div>
                         ${textHtml}
@@ -368,13 +375,14 @@
             });
         }
 
-        // Dedicated Playback Functions for the Pastor in Mission Control
+        // Dedicated Playback Handlers for Audio and Video
         function toggleAudioPlayback(id) {
             const audioElem = document.getElementById(`audio-elem-${id}`);
             const audioBtn = document.getElementById(`audio-btn-${id}`);
+            if (!audioElem || !audioBtn) return;
 
             if (audioElem.paused) {
-                audioElem.play();
+                audioElem.play().catch(e => console.error("Audio playback error:", e));
                 audioBtn.innerText = "⏸ Pause Audio";
                 audioBtn.style.background = "#e67e22";
             } else {
@@ -393,10 +401,11 @@
             const videoContainer = document.getElementById(`video-container-${id}`);
             const videoElem = document.getElementById(`video-elem-${id}`);
             const videoBtn = document.getElementById(`video-btn-${id}`);
+            if (!videoContainer || !videoElem || !videoBtn) return;
 
-            if (videoContainer.style.display === "none") {
+            if (videoContainer.style.display === "none" || !videoContainer.style.display) {
                 videoContainer.style.display = "block";
-                videoElem.play();
+                videoElem.play().catch(e => console.error("Video playback error:", e));
                 videoBtn.innerText = "✖ Close Video";
                 videoBtn.style.background = "#e74c3c";
             } else {
@@ -406,7 +415,6 @@
                 videoBtn.style.background = "#3498db";
             }
         }
-
         function logTestimonyRecord() {
             const nameInput = document.getElementById('input-testifier-name').value.trim();
             const phoneInput = document.getElementById('input-testifier-phone').value.trim();
