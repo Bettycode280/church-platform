@@ -391,29 +391,75 @@
                 activeStream = null;
             }
         }
+async function submitTestimonyForm() {
+            const name = document.getElementById('input-testifier-name').value.trim();
+            const phone = document.getElementById('input-testifier-phone').value.trim();
+            const email = document.getElementById('input-testifier-email').value.trim();
+            const testimonyText = document.getElementById('input-testimony-text').value.trim();
 
-        async function generateVideoThumbnail(videoBlob) {
-            return new Promise((resolve) => {
-                const video = document.createElement('video');
-                video.src = URL.createObjectURL(videoBlob);
-                video.muted = true;
-                video.playsInline = true;
-                video.currentTime = 1.0;
+            if (!name) {
+                alert("Please enter your name.");
+                return;
+            }
 
-                video.onloadeddata = () => { video.play(); };
-                video.onseeked = () => {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = 320;
-                    canvas.height = 180;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                    canvas.toBlob((blob) => { resolve(blob); }, 'image/jpeg', 0.75);
-                };
-                setTimeout(() => resolve(null), 4000);
-            });
-        }
+            const db = firebase.firestore();
+            const storage = firebase.storage();
 
-        async function submitTestimonyForm() {
+            let mediaUrl = "";
+            let thumbnailUrl = "";
+            const submitBtn = document.getElementById('submit-testimony-btn');
+            submitBtn.innerText = "Submitting...";
+            submitBtn.disabled = true;
+
+            try {
+                if (window.pendingRecordedBlob && currentMediaType !== 'text') {
+                    const fileExt = 'webm';
+                    const fileName = `testimonies/${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+                    const fileRef = storage.ref().child(fileName);
+                    
+                    const uploadSnapshot = await fileRef.put(window.pendingRecordedBlob);
+                    mediaUrl = await uploadSnapshot.ref.getDownloadURL();
+
+                    if (currentMediaType === 'video') {
+                        const thumbBlob = await generateVideoThumbnail(window.pendingRecordedBlob);
+                        if (thumbBlob) {
+                            const thumbRef = storage.ref().child(`thumbnails/${Date.now()}_thumb.jpg`);
+                            const thumbSnap = await thumbRef.put(thumbBlob);
+                            thumbnailUrl = await thumbSnap.ref.getDownloadURL();
+                        }
+                    }
+                }
+
+                await db.collection("testimonies").add({
+                    name: name,
+                    phone: phone || "N/A",
+                    email: email || "N/A",
+                    testimony: testimonyText || "",
+                    mediaType: currentMediaType,
+                    mediaUrl: mediaUrl,
+                    thumbnailUrl: thumbnailUrl,
+                    approved: false,
+                    archived: false,
+                    viewed: false,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                alert("Testimony submitted successfully!");
+                document.getElementById('input-testifier-name').value = '';
+                document.getElementById('input-testifier-phone').value = '';
+                document.getElementById('input-testifier-email').value = '';
+                document.getElementById('input-testimony-text').value = '';
+                window.pendingRecordedBlob = null;
+                document.getElementById('media-preview-area').innerHTML = '';
+                setTestimonyMode('text');
+            } catch (error) {
+                console.error("Error submitting testimony:", error);
+                alert("Failed to submit testimony: " + error.message);
+            } finally {
+                submitBtn.innerText = "✨ Submit Testimony Record";
+                submitBtn.disabled = false;
+            }
+        }async function submitTestimonyForm() {
             const name = document.getElementById('input-testifier-name').value.trim();
             const phone = document.getElementById('input-testifier-phone').value.trim();
             const email = document.getElementById('input-testifier-email').value.trim();
