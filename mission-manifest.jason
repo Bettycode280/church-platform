@@ -1,7 +1,7 @@
 {
   "name": "DLCC Mission Control",
   "short_name": "Mission Tool",
-  "start_url": "mission.html",
+  "start_url": "admin.html",
   "display": "standalone",
   "background_color": "#121212",
   "theme_color": "#D4AF37",
