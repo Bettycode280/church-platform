@@ -566,7 +566,7 @@ async function submitTestimonyForm() {
                     const div = document.createElement('div');
                     div.style.cssText = "background: rgba(255,255,255,0.05); padding: 10px 12px; border-radius: 6px; border-left: 3px solid " + (record.approved ? "#27ae60" : "#e67e22") + "; font-size: 0.8rem; color: #fff; margin-bottom: 6px;";
                     
-                    // Normalize media type to support both record.mediaType and record.type regardless of casing
+                    // Normalize the media type check to support both 'type' and 'mediaType'
                     const mediaTypeVal = (record.mediaType || record.type || '').toLowerCase();
                     const hasMedia = record.mediaUrl && record.mediaUrl.trim() !== '';
 
