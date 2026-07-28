@@ -301,79 +301,77 @@
                 alert("Failed to submit appointment request.");
             }
         }
+<script>
+        async function submitTestimony() {
+            const typeInput = document.getElementById('t_type');
+            const nameInput = document.getElementById('t_name');
+            const phoneInput = document.getElementById('t_phone');
+            const emailInput = document.getElementById('t_email');
+            const msgInput = document.getElementById('t_msg');
+            
+            const testimonyType = typeInput ? typeInput.value : 'Text';
 
-       async function submitTestimony() {
-    const typeInput = document.getElementById('t_type');
-    const nameInput = document.getElementById('t_name');
-    const phoneInput = document.getElementById('t_phone');
-    const emailInput = document.getElementById('t_email');
-    const msgInput = document.getElementById('t_msg');
-    
-    const testimonyType = typeInput ? typeInput.value : 'Text';
+            if (!nameInput || !nameInput.value.trim()) {
+                alert("Please enter your full name.");
+                return;
+            }
 
-    if (!nameInput || !nameInput.value.trim()) {
-        alert("Please enter your full name.");
-        return;
-    }
+            if ((testimonyType === 'Audio' || testimonyType === 'Video') && !window.liveRecordedBlob) {
+                alert(`Please record your ${testimonyType.toLowerCase()} testimony before submitting.`);
+                return;
+            }
 
-    // Validate that audio/video exists if required
-    if ((testimonyType === 'Audio' || testimonyType === 'Video') && !window.liveRecordedBlob) {
-        alert(`Please record your ${testimonyType.toLowerCase()} testimony before submitting.`);
-        return;
-    }
+            let mediaUrl = '';
 
-    let mediaUrl = '';
+            try {
+                if (window.liveRecordedBlob && (testimonyType === 'Audio' || testimonyType === 'Video')) {
+                    console.log("Uploading media to Firebase Storage...");
+                    const storageRef = firebase.storage().ref();
+                    const fileName = `testimonies/${Date.now()}_recording.webm`;
+                    const mediaRef = storageRef.child(fileName);
 
-    try {
-        // If an audio or video recording exists, upload it to Firebase Storage first
-        if (window.liveRecordedBlob && (testimonyType === 'Audio' || testimonyType === 'Video')) {
-            console.log("Uploading media to Firebase Storage...");
-            const storageRef = firebase.storage().ref();
-            const fileName = `testimonies/${Date.now()}_recording.webm`;
-            const mediaRef = storageRef.child(fileName);
+                    const snapshot = await mediaRef.put(window.liveRecordedBlob);
+                    mediaUrl = await snapshot.ref.getDownloadURL();
+                    console.log("Media uploaded successfully. URL:", mediaUrl);
+                }
 
-            const snapshot = await mediaRef.put(window.liveRecordedBlob);
-            mediaUrl = await snapshot.ref.getDownloadURL(); // This generates the required link!
-            console.log("Media uploaded successfully. URL:", mediaUrl);
+                const db = firebase.firestore();
+                await db.collection("testimonies").add({
+                    type: testimonyType,
+                    mediaType: testimonyType.toLowerCase(),
+                    name: nameInput.value.trim(),
+                    phone: phoneInput ? phoneInput.value.trim() : '',
+                    email: emailInput ? emailInput.value.trim() : '',
+                    testimony: msgInput && msgInput.value.trim() ? msgInput.value.trim() : 'Media submission',
+                    mediaUrl: mediaUrl,
+                    status: 'Pending',
+                    approved: false,
+                    archived: false,
+                    date: new Date().toISOString().split('T')[0],
+                    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                alert("Testimony Submitted Successfully.");
+                if (typeof closeModals === 'function') closeModals();
+                
+                nameInput.value = "";
+                if(phoneInput) phoneInput.value = "";
+                if(emailInput) emailInput.value = "";
+                if(msgInput) msgInput.value = "";
+                window.liveRecordedBlob = null;
+
+                const preview = document.getElementById("livePreview");
+                if(preview) preview.srcObject = null;
+
+            } catch (error) {
+                console.error("Error submitting testimony: ", error);
+                alert("Failed to submit testimony. Check your network or storage rules.");
+            }
         }
+    </script>
 
-        const db = firebase.firestore();
-        await db.collection("testimonies").add({
-            type: testimonyType,
-            mediaType: testimonyType.toLowerCase(),
-            name: nameInput.value.trim(),
-            phone: phoneInput ? phoneInput.value.trim() : '',
-            email: emailInput ? emailInput.value.trim() : '',
-            testimony: msgInput && msgInput.value.trim() ? msgInput.value.trim() : 'Media submission',
-            mediaUrl: mediaUrl, // Saves the generated storage link to Firestore
-            status: 'Pending',
-            approved: false,
-            archived: false,
-            date: new Date().toISOString().split('T')[0],
-            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        });
-
-        alert("Testimony Submitted Successfully.");
-        if (typeof closeModals === 'function') closeModals();
-        
-        nameInput.value = "";
-        if(phoneInput) phoneInput.value = "";
-        if(emailInput) emailInput.value = "";
-        if(msgInput) msgInput.value = "";
-        window.liveRecordedBlob = null;
-
-        const preview = document.getElementById("livePreview");
-        if(preview) preview.srcObject = null;
-
-    } catch (error) {
-        console.error("Error submitting testimony: ", error);
-        alert("Failed to submit testimony. Check your network or storage rules.");
-    }
-}
-</script>
     <!-- Additional External Logic Script -->
     <script src="church-logic.js"></script>
 </body>
 </html>
-
