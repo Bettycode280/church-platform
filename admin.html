@@ -403,7 +403,7 @@ async function submitTestimonyForm() {
     const name = document.getElementById('input-testifier-name').value.trim();
     const phone = document.getElementById('input-testifier-phone').value.trim();
     const email = document.getElementById('input-testifier-email').value.trim();
-    const testimonyText = document.getElementById('input-testimony-text').value.trim();
+    let testimonyText = document.getElementById('input-testimony-text').value.trim();
 
     if (!name) {
         alert("Please enter your name.");
@@ -420,23 +420,36 @@ async function submitTestimonyForm() {
     submitBtn.disabled = true;
 
     try {
+        // If a recording was made, upload it first
         if (window.pendingRecordedBlob && currentMediaType !== 'text') {
             const fileExt = 'webm';
             const fileName = `testimonies/${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
             const fileRef = storage.ref().child(fileName);
             
+            console.log("Uploading media blob to Firebase Storage...");
             const uploadSnapshot = await fileRef.put(window.pendingRecordedBlob);
             mediaUrl = await uploadSnapshot.ref.getDownloadURL();
+            console.log("Media upload successful. URL:", mediaUrl);
 
             if (currentMediaType === 'video') {
-                const thumbBlob = await generateVideoThumbnail(window.pendingRecordedBlob);
-                if (thumbBlob) {
-                    const thumbRef = storage.ref().child(`thumbnails/${Date.now()}_thumb.jpg`);
-                    const thumbSnap = await thumbRef.put(thumbBlob);
-                    thumbnailUrl = await thumbSnap.ref.getDownloadURL();
+                try {
+                    const thumbBlob = await generateVideoThumbnail(window.pendingRecordedBlob);
+                    if (thumbBlob) {
+                        const thumbRef = storage.ref().child(`thumbnails/${Date.now()}_thumb.jpg`);
+                        const thumbSnap = await thumbRef.put(thumbBlob);
+                        thumbnailUrl = await thumbSnap.ref.getDownloadURL();
+                    }
+                } catch (thumbErr) {
+                    console.warn("Thumbnail generation skipped/failed:", thumbErr);
                 }
             }
+            
+            if (!testimonyText) {
+                testimonyText = "Media submission";
+            }
         }
+
+        console.log("Saving testimony record to Firestore with mediaType:", currentMediaType, "and mediaUrl:", mediaUrl);
 
         await db.collection("testimonies").add({
             name: name,
@@ -468,7 +481,6 @@ async function submitTestimonyForm() {
         submitBtn.disabled = false;
     }
 }
-
 function initLiveTestimonyListener() {
     const historyList = document.getElementById('testimony-history-list');
     const badgeElem = document.getElementById('notification-badge');
