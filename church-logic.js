@@ -241,7 +241,6 @@ async function submitBooking() {
         alert("Failed to send request. Please try again.");
     }
 }
-
 async function submitTestimony() {
     if (typeof firebase === 'undefined') return;
     const db = firebase.firestore();
@@ -256,49 +255,73 @@ async function submitTestimony() {
         return;
     }
 
-    const testimonyType = typeInput ? typeInput.value : "Text";
-    let testimonyContent = '';
+    const testimonyType = typeInput ? typeInput.value : 'Text';
+    let mediaUrl = '';
+    let testimonyText = '';
 
     if (testimonyType === 'Text') {
         const msgEl = document.getElementById('t_msg');
-        testimonyContent = msgEl ? msgEl.value.trim() : '';
-        if (!testimonyContent) {
+        testimonyText = msgEl ? msgEl.value.trim() : '';
+        if (!testimonyText) {
             alert("Please write your testimony.");
             return;
         }
     } else {
-        const fileInput = document.getElementById('t_file');
-        if (fileInput && fileInput.files.length > 0) {
-            testimonyContent = `[Attached ${testimonyType} File: ${fileInput.files[0].name}]`;
-        } else {
-            testimonyContent = `[${testimonyType} testimony submitted]`;
+        // Validate that a live recording exists
+        if (!window.liveRecordedBlob) {
+            alert(`Please record your ${testimonyType.toLowerCase()} testimony before submitting.`);
+            return;
         }
+        testimonyText = 'Media submission';
     }
 
     try {
-        await db.collection("churchPrayers").add({
-            type: "TESTIMONY",
+        // Upload audio/video blob to Firebase Storage if present
+        if (window.liveRecordedBlob && (testimonyType === 'Audio' || testimonyType === 'Video')) {
+            console.log("Uploading media to Firebase Storage...");
+            const storageRef = firebase.storage().ref();
+            const fileName = `testimonies/${Date.now()}_recording.webm`;
+            const mediaRef = storageRef.child(fileName);
+
+            const snapshot = await mediaRef.put(window.liveRecordedBlob);
+            mediaUrl = await snapshot.ref.getDownloadURL();
+            console.log("Media uploaded successfully. URL:", mediaUrl);
+        }
+
+        // Save to the 'testimonies' collection that Mission Control reads from
+        await db.collection("testimonies").add({
+            type: testimonyType,
+            mediaType: testimonyType.toLowerCase(),
             name: nameInput.value.trim(),
-            phone: phoneInput ? phoneInput.value.trim() : "N/A",
-            email: emailInput ? emailInput.value.trim() : "N/A",
-            text: `[${testimonyType}] ${testimonyContent}`,
-            time: firebase.firestore.FieldValue.serverTimestamp()
+            phone: phoneInput ? phoneInput.value.trim() : 'N/A',
+            email: emailInput ? emailInput.value.trim() : 'N/A',
+            testimony: testimonyText,
+            mediaUrl: mediaUrl,
+            status: 'Pending',
+            approved: false,
+            archived: false,
+            date: new Date().toISOString().split('T')[0],
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
 
         alert("Praise God! Your testimony has been successfully submitted.");
-        closeModals();
+        if (typeof closeModals === 'function') closeModals();
 
         nameInput.value = "";
         if (phoneInput) phoneInput.value = "";
         if (emailInput) emailInput.value = "";
         if (document.getElementById('t_msg')) document.getElementById('t_msg').value = "";
+        window.liveRecordedBlob = null;
+
+        const preview = document.getElementById("livePreview");
+        if (preview) preview.srcObject = null;
 
     } catch (error) {
         console.error("Error submitting testimony: ", error);
-        alert("Failed to submit testimony. Please check your connection.");
+        alert("Failed to submit testimony. Check your connection or storage rules.");
     }
 }
-
 function watchMyAppointment(userName) {
     if (!userName || typeof firebase === 'undefined') return;
     const db = firebase.firestore();
