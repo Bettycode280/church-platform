@@ -399,32 +399,6 @@ function stopAllMediaStreams() {
     }
 }
 
-function generateVideoThumbnail(videoBlob) {
-    return new Promise((resolve) => {
-        const video = document.createElement('video');
-        video.autoplay = true;
-        video.muted = true;
-        video.src = URL.createObjectURL(videoBlob);
-        video.onloadeddata = () => {
-            video.currentTime = 1;
-        };
-        video.onseeked = () => {
-            const canvas = document.createElement('canvas');
-            canvas.width = video.videoWidth || 320;
-            canvas.height = video.videoHeight || 180;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            canvas.toBlob((blob) => {
-                URL.revokeObjectURL(video.src);
-                resolve(blob);
-            }, 'image/jpeg', 0.7);
-        };
-        video.onerror = () => {
-            resolve(null);
-        };
-    });
-}
-
 async function submitTestimonyForm() {
     const name = document.getElementById('input-testifier-name').value.trim();
     const phone = document.getElementById('input-testifier-phone').value.trim();
@@ -446,13 +420,16 @@ async function submitTestimonyForm() {
     submitBtn.disabled = true;
 
     try {
+        // If a recording was made, upload it first
         if (window.pendingRecordedBlob && currentMediaType !== 'text') {
             const fileExt = 'webm';
             const fileName = `testimonies/${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
             const fileRef = storage.ref().child(fileName);
             
+            console.log("Uploading media blob to Firebase Storage...");
             const uploadSnapshot = await fileRef.put(window.pendingRecordedBlob);
             mediaUrl = await uploadSnapshot.ref.getDownloadURL();
+            console.log("Media upload successful. URL:", mediaUrl);
 
             if (currentMediaType === 'video') {
                 try {
@@ -471,6 +448,8 @@ async function submitTestimonyForm() {
                 testimonyText = "Media submission";
             }
         }
+
+        console.log("Saving testimony record to Firestore with mediaType:", currentMediaType, "and mediaUrl:", mediaUrl);
 
         await db.collection("testimonies").add({
             name: name,
@@ -502,7 +481,6 @@ async function submitTestimonyForm() {
         submitBtn.disabled = false;
     }
 }
-
 function initLiveTestimonyListener() {
     const historyList = document.getElementById('testimony-history-list');
     const badgeElem = document.getElementById('notification-badge');
@@ -530,27 +508,8 @@ function initLiveTestimonyListener() {
 
             if (record.archived) return;
 
-            let appointmentStatusHtml = '';
-            const statusVal = (record.appointmentStatus || record.status || 'Pending').toLowerCase();
-            
-            let statusColor = '#e67e22';
-            let statusText = 'Pending';
-
-            if (statusVal.includes('accept') || record.approved) {
-                statusColor = '#27ae60';
-                statusText = 'Accepted';
-            } else if (statusVal.includes('reject')) {
-                statusColor = '#c0392b';
-                statusText = 'Rejected';
-            } else if (statusVal.includes('reschedule')) {
-                statusColor = '#2980b9';
-                statusText = 'Rescheduled';
-            }
-
-            appointmentStatusHtml = `<span style="background: ${statusColor}; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; margin-left: 6px;">Status: ${statusText}</span>`;
-
             const div = document.createElement('div');
-            div.style.cssText = "background: rgba(255,255,255,0.05); padding: 10px 12px; border-radius: 6px; border-left: 3px solid " + statusColor + "; font-size: 0.8rem; color: #fff; margin-bottom: 6px;";
+            div.style.cssText = "background: rgba(255,255,255,0.05); padding: 10px 12px; border-radius: 6px; border-left: 3px solid " + (record.approved ? "#27ae60" : "#e67e22") + "; font-size: 0.8rem; color: #fff; margin-bottom: 6px;";
             
             const mediaTypeVal = (record.mediaType || record.type || '').trim().toLowerCase();
             const hasMedia = record.mediaUrl && record.mediaUrl.trim() !== '';
@@ -593,12 +552,10 @@ function initLiveTestimonyListener() {
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px;">
                     <div>
                         <strong style="color: #27ae60; font-size: 0.9rem;">${record.name}</strong>
-                        ${appointmentStatusHtml}
+                        <span style="opacity: 0.5; margin-left: 8px; font-size: 0.75rem;">Status: ${record.approved ? '✅ Approved' : '⏳ Pending'}</span>
                     </div>
                     <div>
-                        <button type="button" onclick="updateAppointmentStatus('${id}', 'Accepted')" style="background: #27ae60; color: #fff; border: none; padding: 3px 6px; border-radius: 3px; cursor: pointer; font-size: 0.7rem; margin-right: 2px;">✔ Accept</button>
-                        <button type="button" onclick="updateAppointmentStatus('${id}', 'Rescheduled')" style="background: #2980b9; color: #fff; border: none; padding: 3px 6px; border-radius: 3px; cursor: pointer; font-size: 0.7rem; margin-right: 2px;">📅 Reschedule</button>
-                        <button type="button" onclick="updateAppointmentStatus('${id}', 'Rejected')" style="background: #c0392b; color: #fff; border: none; padding: 3px 6px; border-radius: 3px; cursor: pointer; font-size: 0.7rem; margin-right: 4px;">❌ Reject</button>
+                        ${!record.approved ? `<button type="button" onclick="approveTestimony('${id}')" style="background: #27ae60; color: #fff; border: none; padding: 3px 6px; border-radius: 3px; cursor: pointer; font-size: 0.7rem; margin-right: 4px;">✔ Approve</button>` : ''}
                         <button type="button" onclick="archiveTestimony('${id}')" style="background: #e67e22; color: #fff; border: none; padding: 3px 6px; border-radius: 3px; cursor: pointer; font-size: 0.7rem; margin-right: 4px;">📦 Archive</button>
                         <button type="button" onclick="deleteTestimonyRecord('${id}')" style="background: #c0392b; color: #fff; border: none; padding: 3px 6px; border-radius: 3px; cursor: pointer; font-size: 0.7rem;">🗑 Delete</button>
                     </div>
@@ -621,15 +578,9 @@ function initLiveTestimonyListener() {
     });
 }
 
-async function updateAppointmentStatus(id, status) {
+async function approveTestimony(id) {
     const db = firebase.firestore();
-    await db.collection("testimonies").doc(id).update({
-        appointmentStatus: status,
-        approved: status === 'Accepted'
-    }).catch((error) => {
-        console.error("Error updating status:", error);
-        alert("Failed to update status.");
-    });
+    await db.collection("testimonies").doc(id).update({ approved: true });
 }
 
 async function archiveTestimony(id) {
@@ -696,7 +647,8 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 });
     </script>
-       
 
-
+    <script src="church-logic.js"></script>
+</body>
+</html>
 
