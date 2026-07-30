@@ -12,19 +12,29 @@
     <!-- Mobile Home Screen Icons -->
     <link rel="icon" type="image/jpeg" href="logo.jpg">
     <link rel="apple-touch-icon" href="logo.jpg">
+</head>
+<body>
+    <!-- Background element only (Overlay tint removed) -->
+    <div class="main-bg"></div>
 
+    <img src="logo.jpg" class="app-logo" alt="DLCC Logo">
+
+    <!-- Running Marquee Text at the Bottom in Gold -->
+    <marquee style="color: #D4AF37; font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 1.6rem; position: absolute; bottom: 30px; width: 100%;">
+        Welcome to Divine Life Christian Centre (Bradford & East London) &nbsp;&nbsp;&bull;&nbsp;&nbsp; Living by Faith, Walking in Love & Transforming the World &nbsp;&nbsp;&bull;&nbsp;&nbsp; Sunday Service: 10:30 AM - 12:30 PM &nbsp;&nbsp;&bull;&nbsp;&nbsp; Fridays: 06:30 PM - 08:00 PM &nbsp;&nbsp;&bull;&nbsp;&nbsp; Jesus is Lord!
+    </marquee>
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-</head>
-<body>
-    <!-- Background element and Overlays -->
+</body>
+</html>
+
     <div class="main-bg"></div>
     <div class="overlay-tint"></div>
 
     <img src="logo.jpg" class="app-logo" alt="DLCC Logo">
     
-    <div class="menu-trigger" onclick="toggleMenu()">
+   <div class="menu-trigger" onclick="toggleMenu()">
         <div class="line"></div>
         <div class="line"></div>
         <div class="line"></div>
@@ -140,11 +150,6 @@
             <button type="button" class="premium-gold-btn" onclick="closeModals()">RETURN</button>
         </div>
     </div>
-
-    <!-- Running Marquee Text at the Bottom in Gold -->
-    <marquee style="color: #D4AF37; font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 1.6rem; position: absolute; bottom: 30px; width: 100%;">
-        Welcome to Divine Life Christian Centre (Bradford & East London) &nbsp;&nbsp;&bull;&nbsp;&nbsp; Living by Faith, Walking in Love & Transforming the World &nbsp;&nbsp;&bull;&nbsp;&nbsp; Sunday Service: 10:30 AM - 12:30 PM &nbsp;&nbsp;&bull;&nbsp;&nbsp; Fridays: 06:30 PM - 08:00 PM &nbsp;&nbsp;&bull;&nbsp;&nbsp; Jesus is Lord!
-    </marquee>
 
     <audio id="alert-sound" src="alert.mp3" preload="auto"></audio>
 
@@ -296,8 +301,7 @@
                 alert("Failed to submit appointment request.");
             }
         }
-
-        async function submitTestimony() {
+ async function submitTestimony() {
             const typeInput = document.getElementById('t_type');
             const nameInput = document.getElementById('t_name');
             const phoneInput = document.getElementById('t_phone');
@@ -339,3 +343,4 @@
     <script src="church-logic.js"></script>
 </body>
 </html>
+
