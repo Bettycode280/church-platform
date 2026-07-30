@@ -151,6 +151,10 @@ function selectTestimonyType(type, buttonElement) {
     }
 }
 
+// ==========================================
+// CHURCH LOGIC & MISSION CONTROL SCRIPT
+// ==========================================
+
 async function updateSermon() {
     if (typeof firebase === 'undefined') return;
     const db = firebase.firestore();
@@ -186,11 +190,17 @@ async function submitPrayer() {
     }
 
     try {
-        await db.collection("churchPrayers").add({ 
+        await db.collection("testimonies").add({ 
             type: "PRAYER", 
+            mediaType: "prayer",
             name: nameInput.value.trim(), 
             text: msgInput.value.trim(), 
-            time: firebase.firestore.FieldValue.serverTimestamp() 
+            testimony: msgInput.value.trim(),
+            status: "Pending",
+            approved: false,
+            archived: false,
+            time: firebase.firestore.FieldValue.serverTimestamp(),
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
         
         alert("Sent to Pastor."); 
@@ -219,16 +229,22 @@ async function submitBooking() {
     }
 
     const userName = nameInput.value.trim();
+    const requestedMeeting = `${dayInput ? dayInput.value : "Monday"} at ${timeInput ? timeInput.value : "14:00"}`;
 
     try {
-        await db.collection("churchPrayers").add({ 
+        await db.collection("testimonies").add({ 
             type: "APPOINTMENT", 
+            mediaType: "appointment",
             name: userName, 
             email: emailInput ? emailInput.value.trim() : "",
             phone: phoneInput ? phoneInput.value.trim() : "",
-            text: `${dayInput ? dayInput.value : "Monday"} at ${timeInput ? timeInput.value : "14:00"}`, 
+            text: requestedMeeting,
+            testimony: `Appointment Request for ${requestedMeeting}`,
             status: "Pending", 
-            time: firebase.firestore.FieldValue.serverTimestamp() 
+            approved: false,
+            archived: false,
+            time: firebase.firestore.FieldValue.serverTimestamp(),
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
         
         localStorage.setItem('church_user_name', userName);
@@ -241,6 +257,7 @@ async function submitBooking() {
         alert("Failed to send request. Please try again.");
     }
 }
+
 async function submitTestimony() {
     if (typeof firebase === 'undefined') return;
     const db = firebase.firestore();
@@ -258,6 +275,7 @@ async function submitTestimony() {
     const testimonyType = typeInput ? typeInput.value : 'Text';
     let mediaUrl = '';
     let testimonyText = '';
+    const activeBlob = window.liveRecordedBlob || window.pendingRecordedBlob;
 
     if (testimonyType === 'Text') {
         const msgEl = document.getElementById('t_msg');
@@ -267,8 +285,7 @@ async function submitTestimony() {
             return;
         }
     } else {
-        // Validate that a live recording exists
-        if (!window.liveRecordedBlob) {
+        if (!activeBlob) {
             alert(`Please record your ${testimonyType.toLowerCase()} testimony before submitting.`);
             return;
         }
@@ -276,32 +293,32 @@ async function submitTestimony() {
     }
 
     try {
-        // Upload audio/video blob to Firebase Storage if present
-        if (window.liveRecordedBlob && (testimonyType === 'Audio' || testimonyType === 'Video')) {
+        if (activeBlob && (testimonyType === 'Audio' || testimonyType === 'Video')) {
             console.log("Uploading media to Firebase Storage...");
             const storageRef = firebase.storage().ref();
             const fileName = `testimonies/${Date.now()}_recording.webm`;
             const mediaRef = storageRef.child(fileName);
 
-            const snapshot = await mediaRef.put(window.liveRecordedBlob);
+            const snapshot = await mediaRef.put(activeBlob);
             mediaUrl = await snapshot.ref.getDownloadURL();
             console.log("Media uploaded successfully. URL:", mediaUrl);
         }
 
-        // Save to the 'testimonies' collection that Mission Control reads from
         await db.collection("testimonies").add({
-            type: testimonyType,
+            type: testimonyType.toUpperCase(),
             mediaType: testimonyType.toLowerCase(),
             name: nameInput.value.trim(),
             phone: phoneInput ? phoneInput.value.trim() : 'N/A',
             email: emailInput ? emailInput.value.trim() : 'N/A',
+            text: testimonyText,
             testimony: testimonyText,
             mediaUrl: mediaUrl,
             status: 'Pending',
             approved: false,
             archived: false,
             date: new Date().toISOString().split('T')[0],
-            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            timeString: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            time: firebase.firestore.FieldValue.serverTimestamp(),
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
 
@@ -313,6 +330,7 @@ async function submitTestimony() {
         if (emailInput) emailInput.value = "";
         if (document.getElementById('t_msg')) document.getElementById('t_msg').value = "";
         window.liveRecordedBlob = null;
+        window.pendingRecordedBlob = null;
 
         const preview = document.getElementById("livePreview");
         if (preview) preview.srcObject = null;
@@ -322,11 +340,12 @@ async function submitTestimony() {
         alert("Failed to submit testimony. Check your connection or storage rules.");
     }
 }
+
 function watchMyAppointment(userName) {
     if (!userName || typeof firebase === 'undefined') return;
     const db = firebase.firestore();
 
-    db.collection("churchPrayers")
+    db.collection("testimonies")
         .where("name", "==", userName)
         .where("type", "==", "APPOINTMENT")
         .onSnapshot((snapshot) => {
@@ -341,7 +360,7 @@ function watchMyAppointment(userName) {
             snapshot.forEach((doc) => {
                 const data = doc.data();
                 let statusColor = "#f39c12"; 
-                if (data.status === "Accepted") statusColor = "#2ecc71"; 
+                if (data.status === "Accepted" || data.status === "Approved") statusColor = "#2ecc71"; 
                 if (data.status === "Rejected") statusColor = "#e74c3c"; 
                 if (data.status === "Rescheduled") statusColor = "#3498db"; 
 
@@ -366,7 +385,7 @@ async function updateAppointmentStatus(docId, newStatus) {
     if (typeof firebase === 'undefined') return;
     const db = firebase.firestore();
     try {
-        await db.collection("churchPrayers").doc(docId).update({
+        await db.collection("testimonies").doc(docId).update({
             status: newStatus
         });
     } catch (error) {
@@ -384,8 +403,9 @@ async function rescheduleAppointment(docId) {
     if (!newDay || !newTime) return;
 
     try {
-        await db.collection("churchPrayers").doc(docId).update({
+        await db.collection("testimonies").doc(docId).update({
             text: `${newDay} at ${newTime}`,
+            testimony: `Appointment Request for ${newDay} at ${newTime}`,
             status: "Rescheduled"
         });
         alert("Appointment rescheduled successfully.");
@@ -401,7 +421,7 @@ function loadPrayers() {
     const list = document.getElementById('prayer-list');
     if (!list) return;
 
-    db.collection("churchPrayers").orderBy("time", "desc").onSnapshot(snap => {
+    db.collection("testimonies").orderBy("timestamp", "desc").onSnapshot(snap => {
         list.innerHTML = "";
         
         if (snap.empty) {
@@ -419,7 +439,7 @@ function loadPrayers() {
             if (data.type === "APPOINTMENT") {
                 const currentStatus = data.status || "Pending";
                 let statusColor = "#f39c12"; 
-                if (currentStatus === "Accepted") statusColor = "#2ecc71"; 
+                if (currentStatus === "Accepted" || currentStatus === "Approved") statusColor = "#2ecc71"; 
                 if (currentStatus === "Rejected") statusColor = "#e74c3c"; 
                 if (currentStatus === "Rescheduled") statusColor = "#3498db"; 
 
@@ -427,32 +447,32 @@ function loadPrayers() {
                     <p style="margin: 4px 0;"><strong>Name:</strong> ${data.name}</p>
                     <p style="margin: 2px 0; font-size: 13px; color: #D4AF37;">📧 <strong>Email:</strong> ${data.email || 'N/A'}</p>
                     <p style="margin: 2px 0; font-size: 13px; color: #D4AF37;">☎️ <strong>Phone:</strong> ${data.phone || 'N/A'}</p>
-                    <p style="margin: 4px 0; opacity: 0.9;">📅 <strong>Requested:</strong> ${data.text}</p>
+                    <p style="margin: 4px 0; opacity: 0.9;">📅 <strong>Requested:</strong> ${data.text || data.testimony}</p>
                     <p style="margin: 4px 0 8px 0; font-size: 12px;">Status: <span style="color: ${statusColor}; font-weight: bold;">${currentStatus}</span></p>
                 `;
 
                 actionButtons = `
                     <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                        <button onclick="updateAppointmentStatus('${docId}', 'Accepted')" style="background: #2ecc71; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 650;">Accept</button>
-                        <button onclick="updateAppointmentStatus('${docId}', 'Rejected')" style="background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 650;">Reject</button>
+                        <button onclick="updateAppointmentStatus('${docId}', 'Accepted')" style="background: #27ae60; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 650;">Accept</button>
+                        <button onclick="updateAppointmentStatus('${docId}', 'Approved')" style="background: #2ecc71; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 650;">Approved</button>
                         <button onclick="rescheduleAppointment('${docId}')" style="background: #3498db; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 650;">Reschedule</button>
-                        <button onclick="deleteFeedItem('${docId}')" style="background: #555; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 650;">Delete</button>
+                        <button onclick="deleteFeedItem('${docId}')" style="background: #c0392b; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 650;">Delete</button>
                     </div>
                 `;
             } else {
                 detailsContent = `
                     <p style="margin: 4px 0;"><strong>Name:</strong> ${data.name}</p>
-                    <p style="margin: 0 0 8px 0; opacity: 0.9;">${data.text}</p>
+                    <p style="margin: 0 0 8px 0; opacity: 0.9;">${data.text || data.testimony}</p>
                 `;
                 actionButtons = `
-                    <button onclick="deleteFeedItem('${docId}')" style="background: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;">Delete</button>
+                    <button onclick="deleteFeedItem('${docId}')" style="background: #c0392b; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;">Delete</button>
                 `;
             }
 
             list.innerHTML += `
-                <div class="request-card" style="margin-bottom: 12px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 6px;">
+                <div class="request-card" style="margin-bottom: 12px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 6px; border: 1px solid rgba(212,175,55,0.2);">
                     <div style="margin-bottom: 8px;">
-                        <small style="color:#D4AF37; font-weight:bold;">${data.type}</small>
+                        <small style="color:#D4AF37; font-weight:bold;">${data.type || 'PRAYER'}</small>
                         ${detailsContent}
                     </div>
                     ${actionButtons}
@@ -465,15 +485,32 @@ function deleteFeedItem(docId) {
     if (typeof firebase === 'undefined') return;
     const db = firebase.firestore();
     if (confirm("Remove this item from the Mission Control feed permanently?")) {
-        db.collection("churchPrayers").doc(docId).delete().catch((error) => {
+        db.collection("testimonies").doc(docId).delete().catch((error) => {
             console.error("Error removing document: ", error);
             alert("Delete action failed. Check connection.");
         });
     }
 }
 
+// Day selection helper for the appointment modal
+function selectDay(day, btnElement) {
+    const dayInput = document.getElementById('b_day');
+    if (dayInput) dayInput.value = day;
+    
+    const buttons = document.querySelectorAll('#day-selector-grid .day-btn');
+    buttons.forEach(btn => {
+        btn.style.background = "rgba(255,255,255,0.08)";
+        btn.style.borderColor = "rgba(212,175,55,0.3)";
+    });
+    
+    if (btnElement) {
+        btnElement.style.background = "rgba(212,175,55,0.25)";
+        btnElement.style.borderColor = "#D4AF37";
+    }
+}
+
 // ==========================================
-// 6. WHATSAPP & MEMBER DIRECTORY
+// MEMBER DIRECTORY & WHATSAPP
 // ==========================================
 
 function messageIndividualWhatsApp(phoneNumber, memberName) {
@@ -523,9 +560,6 @@ function deleteMember(docId, memberName) {
     
     if (confirm(`Are you sure you want to remove ${memberName} from the directory?`)) {
         db.collection("members").doc(docId).delete()
-        .then(() => {
-            console.log("Member successfully deleted.");
-        })
         .catch((error) => {
             console.error("Error removing member: ", error);
             alert("Failed to delete member. Check connection.");
@@ -539,13 +573,6 @@ function loadMemberDirectory() {
     const directoryContainer = document.getElementById('member-directory-list');
     
     if (!directoryContainer) return;
-
-    directoryContainer.style.display = "flex";
-    directoryContainer.style.flexDirection = "column";
-    directoryContainer.style.maxHeight = "350px";
-    directoryContainer.style.overflowY = "auto";
-    directoryContainer.style.overflowX = "hidden";
-    directoryContainer.style.paddingRight = "5px";
 
     db.collection("members")
       .orderBy("name", "asc")
@@ -569,10 +596,10 @@ function loadMemberDirectory() {
                       <strong style="display: block; font-size: 0.95rem;">${data.name}</strong>
                       <span style="font-size: 0.75rem; color: #aaa;">${data.phone}</span>
                   </div>
-                  <div style="display: flex; gap: 6px; overflow-x: auto; white-space: nowrap; padding-bottom: 4px; scrollbar-width: thin;">
+                  <div style="display: flex; gap: 6px; overflow-x: auto; white-space: nowrap; padding-bottom: 4px;">
                       <button class="premium-gold-btn" onclick="messageIndividualWhatsApp('${data.phone}', '${data.name}')" style="margin: 0; padding: 6px 12px; font-size: 0.65rem; background: #25D366; color: #fff; border: none; border-radius: 4px; cursor: pointer; flex-shrink: 0;">WhatsApp</button>
                       <button onclick="window.location.href='tel:${data.phone}'" style="margin: 0; padding: 6px 12px; font-size: 0.65rem; background: #3498db; color: #fff; border: none; border-radius: 4px; cursor: pointer; flex-shrink: 0;">Call</button>
-                      <button onclick="deleteMember('${docId}', '${data.name}')" style="margin: 0; padding: 6px 12px; font-size: 0.65rem; background: #e74c3c; color: #fff; border: none; border-radius: 4px; cursor: pointer; flex-shrink: 0;">Delete</button>
+                      <button onclick="deleteMember('${docId}', '${data.name}')" style="margin: 0; padding: 6px 12px; font-size: 0.65rem; background: #c0392b; color: #fff; border: none; border-radius: 4px; cursor: pointer; flex-shrink: 0;">Delete</button>
                   </div>
               `;
               
@@ -582,7 +609,7 @@ function loadMemberDirectory() {
 }
 
 // ==========================================
-// SAVED MESSAGES & SERMONS MANAGEMENT
+// SERMONS & NOTES MANAGEMENT
 // ==========================================
 function saveSermonNotes() {
     if (typeof firebase === 'undefined') return;
@@ -641,17 +668,11 @@ function loadSavedSermons() {
               
               sermonCard.style.cssText = "background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; border: 1px solid rgba(212,175,55,0.2); text-align: left; margin-bottom: 8px;";
               
-              let dateString = "";
+              let dateString = "Just now";
               if (data.createdAt && typeof data.createdAt.toDate === 'function') {
                   dateString = data.createdAt.toDate().toLocaleDateString(undefined, {
-                      year: 'numeric',
-                      month: 'short',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
+                      year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
                   });
-              } else {
-                  dateString = "Just now";
               }
 
               const encodedTitle = encodeURIComponent(data.title || "Sermon");
@@ -665,11 +686,7 @@ function loadSavedSermons() {
                       </div>
                       <div style="display: flex; gap: 4px; flex-wrap: wrap;">
                           <button onclick="shareToWhatsApp('${encodedTitle}', '${encodedContent}')" style="background: #25D366; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; font-size: 0.6rem; cursor: pointer;">WhatsApp</button>
-                          <button onclick="shareToFacebook('${encodedTitle}', '${encodedContent}')" style="background: #1877F2; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; font-size: 0.6rem; cursor: pointer;">Facebook</button>
-                          <button onclick="shareToTikTok('${encodedTitle}', '${encodedContent}')" style="background: #000000; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; font-size: 0.6rem; cursor: pointer; border: 1px solid #333;">TikTok</button>
-                          <button onclick="shareToYouTube()" style="background: #FF0000; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; font-size: 0.6rem; cursor: pointer;">YouTube</button>
-                          <button onclick="downloadSermonFile('${encodedTitle}', '${encodedContent}')" style="background: #3498db; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; font-size: 0.6rem; cursor: pointer;">Download</button>
-                          <button onclick="deleteSermon('${docId}')" style="background: #e74c3c; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; font-size: 0.6rem; cursor: pointer;">Delete</button>
+                          <button onclick="deleteSermon('${docId}')" style="background: #c0392b; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; font-size: 0.6rem; cursor: pointer;">Delete</button>
                       </div>
                   </div>
                   <p style="color: #ddd; font-size: 0.8rem; white-space: pre-wrap; margin: 0; opacity: 0.9;">${data.content}</p>
@@ -687,57 +704,11 @@ function shareToWhatsApp(encodedTitle, encodedContent) {
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
 }
 
-function shareToFacebook(encodedTitle, encodedContent) {
-    const title = decodeURIComponent(encodedTitle);
-    const content = decodeURIComponent(encodedContent);
-    navigator.clipboard.writeText(`${title}\n\n${content}`).then(() => {
-        alert("Sermon copied to clipboard! You can now paste it directly into Facebook.");
-        window.open('https://www.facebook.com/', '_blank');
-    }).catch(() => {
-        window.open('https://www.facebook.com/', '_blank');
-    });
-}
-
-function shareToTikTok(encodedTitle, encodedContent) {
-    const title = decodeURIComponent(encodedTitle);
-    const content = decodeURIComponent(encodedContent);
-    navigator.clipboard.writeText(`${title}\n\n${content}`).then(() => {
-        alert("Sermon copied to clipboard! You can now paste it directly into your TikTok caption or video script.");
-        window.open('https://www.tiktok.com/', '_blank');
-    }).catch(() => {
-        window.open('https://www.tiktok.com/', '_blank');
-    });
-}
-
-function shareToYouTube() {
-    alert("Opening YouTube Studio so you can use these notes for your video description or community post.");
-    window.open('https://studio.youtube.com/', '_blank');
-}
-
-function downloadSermonFile(encodedTitle, encodedContent) {
-    const title = decodeURIComponent(encodedTitle);
-    const content = decodeURIComponent(encodedContent);
-    
-    const fileContent = `TITLE: ${title}\n\n${content}`;
-    const blob = new Blob([fileContent], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${title.replace(/[^a-zA-Z0-9]/g, '_')}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-}
-
 function deleteSermon(docId) {
     if (typeof firebase === 'undefined') return;
     const db = firebase.firestore();
-    
     if (confirm("Are you sure you want to delete these sermon notes?")) {
-        db.collection("sermons").doc(docId).delete()
-        .catch((error) => {
+        db.collection("sermons").doc(docId).delete().catch((error) => {
             console.error("Error deleting sermon: ", error);
             alert("Failed to delete message.");
         });
