@@ -362,6 +362,13 @@
                 historyList.appendChild(div);
             });
         }
+        // --- PASTE IT RIGHT HERE ---
+        // Automatically refresh the testimony archive if a new submission is saved from another tab/window
+        window.addEventListener('storage', (event) => {
+            if (event.key === 'church_testimony_history') {
+                renderTestimonyHistory();
+            }
+        });
 
         window.addEventListener('DOMContentLoaded', () => {
             renderAnalyticsHistory();
