@@ -7,13 +7,12 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <link rel="manifest" href="manifest.json">
     
     <!-- Mobile Home Screen Icons -->
     <link rel="icon" type="image/jpeg" href="logo.jpg">
     <link rel="apple-touch-icon" href="logo.jpg">
 
-    <!-- Firebase SDKs -->
+    <!-- Firebase SDKs (Version 8) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 </head>
@@ -245,7 +244,7 @@
                 msgInput.value = "";
             } catch (error) {
                 console.error("Error submitting prayer: ", error);
-                alert("Failed to send prayer request.");
+                alert("Failed to send prayer request: " + error.message);
             }
         }
 
@@ -277,7 +276,7 @@
                 closeModals();
             } catch (error) {
                 console.error("Error submitting booking: ", error);
-                alert("Failed to submit appointment request.");
+                alert("Failed to submit appointment request: " + error.message);
             }
         }
 
@@ -309,7 +308,7 @@
                 nameInput.value = "";
             } catch (error) {
                 console.error("Error submitting testimony: ", error);
-                alert("Failed to submit testimony.");
+                alert("Failed to submit testimony: " + error.message);
             }
         }
 
@@ -349,6 +348,8 @@
                 `;
                 container.appendChild(itemDiv);
             });
+        }, (error) => {
+            console.error("Firestore live feed error: ", error);
         });
 
         async function updateItemStatus(id, newStatus) {
@@ -357,6 +358,7 @@
                 alert(`Item status updated to: ${newStatus}`);
             } catch (err) {
                 console.error("Error updating status: ", err);
+                alert("Failed to update status.");
             }
         }
 
@@ -366,6 +368,7 @@
                     await db.collection("churchFeed").doc(id).delete();
                 } catch (err) {
                     console.error("Error deleting item: ", err);
+                    alert("Failed to delete item.");
                 }
             }
         }
