@@ -399,6 +399,32 @@ function stopAllMediaStreams() {
     }
 }
 
+function generateVideoThumbnail(videoBlob) {
+    return new Promise((resolve) => {
+        const video = document.createElement('video');
+        video.autoplay = true;
+        video.muted = true;
+        video.src = URL.createObjectURL(videoBlob);
+        video.onloadeddata = () => {
+            video.currentTime = 1;
+        };
+        video.onseeked = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth || 320;
+            canvas.height = video.videoHeight || 180;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            canvas.toBlob((blob) => {
+                URL.revokeObjectURL(video.src);
+                resolve(blob);
+            }, 'image/jpeg', 0.7);
+        };
+        video.onerror = () => {
+            resolve(null);
+        };
+    });
+}
+
 async function submitTestimonyForm() {
     const name = document.getElementById('input-testifier-name').value.trim();
     const phone = document.getElementById('input-testifier-phone').value.trim();
@@ -420,16 +446,13 @@ async function submitTestimonyForm() {
     submitBtn.disabled = true;
 
     try {
-        // If a recording was made, upload it first
         if (window.pendingRecordedBlob && currentMediaType !== 'text') {
             const fileExt = 'webm';
             const fileName = `testimonies/${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
             const fileRef = storage.ref().child(fileName);
             
-            console.log("Uploading media blob to Firebase Storage...");
             const uploadSnapshot = await fileRef.put(window.pendingRecordedBlob);
             mediaUrl = await uploadSnapshot.ref.getDownloadURL();
-            console.log("Media upload successful. URL:", mediaUrl);
 
             if (currentMediaType === 'video') {
                 try {
@@ -448,8 +471,6 @@ async function submitTestimonyForm() {
                 testimonyText = "Media submission";
             }
         }
-
-        console.log("Saving testimony record to Firestore with mediaType:", currentMediaType, "and mediaUrl:", mediaUrl);
 
         await db.collection("testimonies").add({
             name: name,
@@ -481,6 +502,7 @@ async function submitTestimonyForm() {
         submitBtn.disabled = false;
     }
 }
+
 function initLiveTestimonyListener() {
     const historyList = document.getElementById('testimony-history-list');
     const badgeElem = document.getElementById('notification-badge');
@@ -508,11 +530,10 @@ function initLiveTestimonyListener() {
 
             if (record.archived) return;
 
-            // Determine appointment/submission status display color and text
             let appointmentStatusHtml = '';
             const statusVal = (record.appointmentStatus || record.status || 'Pending').toLowerCase();
             
-            let statusColor = '#e67e22'; // default orange for pending
+            let statusColor = '#e67e22';
             let statusText = 'Pending';
 
             if (statusVal.includes('accept') || record.approved) {
@@ -675,8 +696,10 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 });
     </script>
-
-    <script src="church-logic.js"></script>
+        <script src="church-logic.js"></script>
 </body>
 </html>
+
+
+
 
