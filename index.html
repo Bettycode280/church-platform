@@ -7,17 +7,13 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
     
     <!-- Mobile Home Screen Icons -->
     <link rel="icon" type="image/jpeg" href="logo.jpg">
     <link rel="apple-touch-icon" href="logo.jpg">
-
-    <!-- Firebase SDKs (Version 8) -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 </head>
 <body>
-    <!-- Background elements -->
     <div class="main-bg"></div>
     <div class="overlay-tint"></div>
 
@@ -48,9 +44,10 @@
         </div>
     </nav>
 
-    <!-- Pastor's Live Feed Container -->
-    <div id="pastor-feed-container" class="glass-feed">
-        <!-- Feed items are populated here by JavaScript with Approve/Accept/Reject/Delete actions -->
+    <!-- Pastor's Mission Control Live Feed Container -->
+    <div id="pastor-feed-container" class="glass-feed" style="margin: 20px auto; max-width: 600px; padding: 10px;">
+        <h3 style="color: #D4AF37; text-align: center; margin-bottom: 15px;">MISSION CONTROL FEED</h3>
+        <!-- Feed items with action controls populate here -->
     </div>
 
     <!-- Prayer Modal -->
@@ -60,7 +57,7 @@
             <p class="form-hint">Direct to the Pastor's Screen</p>
             <input type="text" id="p_name" placeholder="Your Name" class="sleek-input">
             <textarea id="p_msg" placeholder="Type your prayer request..." rows="4" class="sleek-input"></textarea>
-            <button type="button" class="premium-gold-btn" onclick="submitPrayer()">SEND TO PASTOR</button>
+            <button class="premium-gold-btn" onclick="submitPrayer()">SEND TO PASTOR</button>
             <div class="cancel-link" onclick="closeModals()">Cancel</div>
         </div>
     </div>
@@ -90,10 +87,10 @@
             <label style="color: #D4AF37; font-size: 11px; display: block; text-align: left; margin: 4px 0;">Select Time</label>
             <input type="time" id="b_time" value="14:00" class="sleek-input" style="cursor: pointer;">
 
-            <button type="button" class="premium-gold-btn" onclick="submitBooking()" style="margin-top: 10px;">REQUEST MEETING</button>
+            <button class="premium-gold-btn" onclick="submitBooking()" style="margin-top: 10px;">REQUEST MEETING</button>
             <div class="cancel-link" onclick="closeModals(); toggleMenu();">Back</div>
 
-            <!-- Container where live status displays for the user -->
+            <!-- Live Status Tracker Display for Congregants -->
             <div id="my-appointment-status" style="margin-top: 15px; color: #D4AF37; font-size: 0.9rem; font-weight: 600; text-align: center;"></div>
         </div>
     </div>
@@ -148,6 +145,10 @@
 
     <audio id="alert-sound" src="alert.mp3" preload="auto"></audio>
 
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
     <!-- Firebase Initialization & Core Logic Script -->
     <script>
         const firebaseConfig = {
@@ -162,9 +163,13 @@
         if (!firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
         }
+
+
         function toggleMenu() { 
             const nav = document.getElementById('side-menu');
-            if (nav) nav.classList.toggle('open');
+            if (nav) {
+                nav.classList.toggle('open');
+            }
         }
 
         function openModal(id) { 
@@ -176,25 +181,36 @@
         }
 
         function closeModals() {
-            document.querySelectorAll('.modal').forEach(modal => modal.classList.remove('open'));
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                modal.classList.remove('open');
+            });
         }
 
         function selectDay(day, buttonElement) {
-            document.getElementById('b_day').value = day;
-            document.querySelectorAll('.day-btn').forEach(btn => {
+            const dayInput = document.getElementById('b_day');
+            if (dayInput) dayInput.value = day;
+
+            const buttons = document.querySelectorAll('.day-btn');
+            buttons.forEach(btn => {
                 btn.style.background = "rgba(255,255,255,0.08)";
                 btn.style.borderColor = "rgba(212,175,55,0.3)";
             });
+
             buttonElement.style.background = "rgba(212, 175, 55, 0.25)";
             buttonElement.style.borderColor = "#D4AF37";
         }
 
         function selectTestimonyType(type, buttonElement) {
-            document.getElementById('t_type').value = type;
-            document.querySelectorAll('.testimony-type-btn').forEach(btn => {
+            const typeInput = document.getElementById('t_type');
+            if (typeInput) typeInput.value = type;
+
+            const buttons = document.querySelectorAll('.testimony-type-btn');
+            buttons.forEach(btn => {
                 btn.style.background = "rgba(255,255,255,0.08)";
                 btn.style.borderColor = "rgba(212,175,55,0.3)";
             });
+
             buttonElement.style.background = "rgba(212, 175, 55, 0.25)";
             buttonElement.style.borderColor = "#D4AF37";
 
@@ -238,7 +254,7 @@
                     timestamp: firebase.firestore.FieldValue.serverTimestamp() 
                 });
                 
-                alert("Prayer request sent successfully."); 
+                alert("Sent to Pastor."); 
                 closeModals();
                 nameInput.value = "";
                 msgInput.value = "";
@@ -272,8 +288,11 @@
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
-                alert("Appointment request submitted successfully.");
+                alert("Appointment Request Sent.");
                 closeModals();
+                nameInput.value = "";
+                if(emailInput) emailInput.value = "";
+                if(phoneInput) phoneInput.value = "";
             } catch (error) {
                 console.error("Error submitting booking: ", error);
                 alert("Failed to submit appointment request: " + error.message);
@@ -303,46 +322,55 @@
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
-                alert("Testimony submitted successfully.");
+                alert("Testimony Submitted Successfully.");
                 closeModals();
                 nameInput.value = "";
+                if(phoneInput) phoneInput.value = "";
+                if(emailInput) emailInput.value = "";
+                if(msgInput) msgInput.value = "";
             } catch (error) {
                 console.error("Error submitting testimony: ", error);
                 alert("Failed to submit testimony: " + error.message);
             }
         }
 
-        // Real-time live feed listener displaying Pastor management actions
+        // Real-time live feed listener for Mission Control with Pastor actions (Approve, Accept, Reschedule, Delete)
         db.collection("churchFeed").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
             const container = document.getElementById('pastor-feed-container');
             if (!container) return;
             
-            container.innerHTML = "";
+            container.innerHTML = '<h3 style="color: #D4AF37; text-align: center; margin-bottom: 15px;">MISSION CONTROL FEED</h3>';
+            
+            if (snapshot.empty) {
+                container.innerHTML += '<p style="color: #ccc; text-align: center;">No live feed items right now.</p>';
+                return;
+            }
+
             snapshot.forEach((doc) => {
                 const data = doc.data();
                 const id = doc.id;
                 
                 const itemDiv = document.createElement('div');
                 itemDiv.className = "feed-card";
-                itemDiv.style.cssText = "background: rgba(0,0,0,0.6); border: 1px solid rgba(212,175,55,0.3); padding: 15px; margin-bottom: 12px; border-radius: 8px; color: #fff;";
+                itemDiv.style.cssText = "background: rgba(0,0,0,0.7); border: 1px solid rgba(212,175,55,0.4); padding: 15px; margin-bottom: 12px; border-radius: 8px; color: #fff;";
                 
                 let contentDetails = '';
                 if (data.type === 'APPOINTMENT') {
-                    contentDetails = `<p><strong>Appointment:</strong> ${data.day} at ${data.time}</p><p><strong>Phone:</strong> ${data.phone}</p>`;
+                    contentDetails = `<p><strong>Requested Meeting:</strong> ${data.day} at ${data.time}</p><p><strong>Phone:</strong> ${data.phone || 'N/A'}</p>`;
                 } else {
-                    contentDetails = `<p><strong>Message:</strong> ${data.text || data.testimony}</p>`;
+                    contentDetails = `<p><strong>Message:</strong> ${data.text || data.testimony || ''}</p>`;
                 }
 
                 itemDiv.innerHTML = `
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <span style="color:#D4AF37; font-weight:bold; font-size:0.85rem;">[${data.type}] - ${data.name}</span>
-                        <span style="font-size:0.75rem; background:rgba(212,175,55,0.2); padding:2px 6px; border-radius:4px;">Status: ${data.status || 'Pending'}</span>
+                        <span style="font-size:0.75rem; background:rgba(212,175,55,0.2); padding:2px 6px; border-radius:4px; color:#fff;">Status: ${data.status || 'Pending'}</span>
                     </div>
                     <div style="margin: 8px 0; font-size:0.95rem;">${contentDetails}</div>
                     <div style="display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap;">
                         <button onclick="updateItemStatus('${id}', 'Approved')" style="background:#28a745; color:#fff; border:none; padding:5px 10px; border-radius:4px; cursor:pointer; font-size:11px;">Approve</button>
                         <button onclick="updateItemStatus('${id}', 'Accepted')" style="background:#007bff; color:#fff; border:none; padding:5px 10px; border-radius:4px; cursor:pointer; font-size:11px;">Accept</button>
-                        <button onclick="updateItemStatus('${id}', 'Rejected')" style="background:#ffc107; color:#000; border:none; padding:5px 10px; border-radius:4px; cursor:pointer; font-size:11px;">Reject</button>
+                        <button onclick="rescheduleItem('${id}')" style="background:#ffc107; color:#000; border:none; padding:5px 10px; border-radius:4px; cursor:pointer; font-size:11px;">Reschedule</button>
                         <button onclick="deleteFeedItem('${id}')" style="background:#dc3545; color:#fff; border:none; padding:5px 10px; border-radius:4px; cursor:pointer; font-size:11px;">Delete</button>
                     </div>
                 `;
@@ -355,10 +383,28 @@
         async function updateItemStatus(id, newStatus) {
             try {
                 await db.collection("churchFeed").doc(id).update({ status: newStatus });
-                alert(`Item status updated to: ${newStatus}`);
+                alert(`Status updated to: ${newStatus}`);
             } catch (err) {
                 console.error("Error updating status: ", err);
-                alert("Failed to update status.");
+                alert("Failed to update status: " + err.message);
+            }
+        }
+
+        async function rescheduleItem(id) {
+            const newDay = prompt("Enter new day (e.g. Wednesday):");
+            const newTime = prompt("Enter new time (e.g. 15:00):");
+            if (!newDay || !newTime) return;
+
+            try {
+                await db.collection("churchFeed").doc(id).update({ 
+                    day: newDay, 
+                    time: newTime, 
+                    status: "Rescheduled" 
+                });
+                alert("Appointment successfully rescheduled.");
+            } catch (err) {
+                console.error("Error rescheduling: ", err);
+                alert("Failed to reschedule: " + err.message);
             }
         }
 
@@ -368,12 +414,12 @@
                     await db.collection("churchFeed").doc(id).delete();
                 } catch (err) {
                     console.error("Error deleting item: ", err);
-                    alert("Failed to delete item.");
+                    alert("Failed to delete item: " + err.message);
                 }
             }
         }
 
-        // Live check for congregant to track their pending requests/appointments instantly by name
+        // Live check for congregants to track their pending bookings/requests instantly by entering their name
         function watchMyAppointment(name) {
             const statusContainer = document.getElementById('my-appointment-status');
             if (!statusContainer) return;
@@ -385,13 +431,17 @@
 
             db.collection("churchFeed").where("name", "==", name).onSnapshot((snapshot) => {
                 if (snapshot.empty) {
-                    statusContainer.innerHTML = "No active requests found for this name.";
+                    statusContainer.innerHTML = "No requests found for this name yet.";
                     return;
                 }
-                let statusHtml = "<strong>Your Request Status:</strong><br>";
+                let statusHtml = "<strong>Your Request Statuses:</strong><br>";
                 snapshot.forEach(doc => {
                     const d = doc.data();
-                    statusHtml += `- [${d.type}] Status: <span style="color:${d.status === 'Approved' || d.status === 'Accepted' ? '#28a745' : '#ffc107'}">${d.status || 'Pending'}</span><br>`;
+                    let color = '#ffc107';
+                    if (d.status === 'Approved' || d.status === 'Accepted') color = '#28a745';
+                    if (d.status === 'Rescheduled') color = '#17a2b8';
+                    
+                    statusHtml += `- [${d.type}] Status: <span style="color:${color}; font-weight:bold;">${d.status || 'Pending'}</span><br>`;
                 });
                 statusContainer.innerHTML = statusHtml;
             });
