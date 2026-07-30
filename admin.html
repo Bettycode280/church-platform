@@ -2,17 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DLCC | Mission Control</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     
-    <meta name="theme-color" content="#121212">
-    <!-- PWA Manifest and Icons for Admin/Mission -->
-    <link rel="manifest" href="mission-manifest.json">
-    <link rel="icon" type="image/jpeg" href="logo.jpg">
-    <link rel="apple-touch-icon" href="logo.jpg">
-
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
@@ -397,7 +391,29 @@
                 activeStream = null;
             }
         }
-async function submitTestimonyForm() {
+
+        async function generateVideoThumbnail(videoBlob) {
+            return new Promise((resolve) => {
+                const video = document.createElement('video');
+                video.src = URL.createObjectURL(videoBlob);
+                video.muted = true;
+                video.playsInline = true;
+                video.currentTime = 1.0;
+
+                video.onloadeddata = () => { video.play(); };
+                video.onseeked = () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 320;
+                    canvas.height = 180;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    canvas.toBlob((blob) => { resolve(blob); }, 'image/jpeg', 0.75);
+                };
+                setTimeout(() => resolve(null), 4000);
+            });
+        }
+
+        async function submitTestimonyForm() {
             const name = document.getElementById('input-testifier-name').value.trim();
             const phone = document.getElementById('input-testifier-phone').value.trim();
             const email = document.getElementById('input-testifier-email').value.trim();
@@ -460,75 +476,7 @@ async function submitTestimonyForm() {
                 setTestimonyMode('text');
             } catch (error) {
                 console.error("Error submitting testimony:", error);
-                alert("Failed to submit testimony: " + error.message);
-            } finally {
-                submitBtn.innerText = "✨ Submit Testimony Record";
-                submitBtn.disabled = false;
-            }
-        }async function submitTestimonyForm() {
-            const name = document.getElementById('input-testifier-name').value.trim();
-            const phone = document.getElementById('input-testifier-phone').value.trim();
-            const email = document.getElementById('input-testifier-email').value.trim();
-            const testimonyText = document.getElementById('input-testimony-text').value.trim();
-
-            if (!name) {
-                alert("Please enter your name.");
-                return;
-            }
-
-            const db = firebase.firestore();
-            const storage = firebase.storage();
-
-            let mediaUrl = "";
-            let thumbnailUrl = "";
-            const submitBtn = document.getElementById('submit-testimony-btn');
-            submitBtn.innerText = "Submitting...";
-            submitBtn.disabled = true;
-
-            try {
-                if (window.pendingRecordedBlob && currentMediaType !== 'text') {
-                    const fileExt = 'webm';
-                    const fileName = `testimonies/${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
-                    const fileRef = storage.ref().child(fileName);
-                    
-                    const uploadSnapshot = await fileRef.put(window.pendingRecordedBlob);
-                    mediaUrl = await uploadSnapshot.ref.getDownloadURL();
-
-                    if (currentMediaType === 'video') {
-                        const thumbBlob = await generateVideoThumbnail(window.pendingRecordedBlob);
-                        if (thumbBlob) {
-                            const thumbRef = storage.ref().child(`thumbnails/${Date.now()}_thumb.jpg`);
-                            const thumbSnap = await thumbRef.put(thumbBlob);
-                            thumbnailUrl = await thumbSnap.ref.getDownloadURL();
-                        }
-                    }
-                }
-
-                await db.collection("testimonies").add({
-                    name: name,
-                    phone: phone || "N/A",
-                    email: email || "N/A",
-                    testimony: testimonyText || "",
-                    mediaType: currentMediaType,
-                    mediaUrl: mediaUrl,
-                    thumbnailUrl: thumbnailUrl,
-                    approved: false,
-                    archived: false,
-                    viewed: false,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                });
-
-                alert("Testimony submitted successfully!");
-                document.getElementById('input-testifier-name').value = '';
-                document.getElementById('input-testifier-phone').value = '';
-                document.getElementById('input-testifier-email').value = '';
-                document.getElementById('input-testimony-text').value = '';
-                window.pendingRecordedBlob = null;
-                document.getElementById('media-preview-area').innerHTML = '';
-                setTestimonyMode('text');
-            } catch (error) {
-                console.error("Error submitting testimony:", error);
-                alert("Failed to submit testimony: " + error.message);
+                alert("Failed to submit testimony.");
             } finally {
                 submitBtn.innerText = "✨ Submit Testimony Record";
                 submitBtn.disabled = false;
