@@ -239,34 +239,42 @@
             }
         }
 
-        async function submitPrayer() {
-            const nameInput = document.getElementById('p_name');
-            const msgInput = document.getElementById('p_msg');
+        async function submitBooking() {
+            const nameInput = document.getElementById('b_name');
+            const emailInput = document.getElementById('b_email');
+            const phoneInput = document.getElementById('b_phone');
+            const dayInput = document.getElementById('b_day');
+            const timeInput = document.getElementById('b_time');
 
-            if (!nameInput || !msgInput || !nameInput.value.trim() || !msgInput.value.trim()) {
-                alert("Please fill all fields.");
+            if (!nameInput || !nameInput.value.trim()) {
+                alert("Please enter your full name for the appointment.");
                 return;
             }
 
             try {
                 const db = firebase.firestore();
-                await db.collection("churchPrayers").add({ 
-                    type: "PRAYER", 
-                    name: nameInput.value.trim(), 
-                    text: msgInput.value.trim(), 
-                    time: firebase.firestore.FieldValue.serverTimestamp() 
+                // Changed collection name from "churchBookings" to "churchPrayers" 
+                // so it matches the live feed collection listener.
+                await db.collection("churchPrayers").add({
+                    type: "APPOINTMENT",
+                    name: nameInput.value.trim(),
+                    email: emailInput ? emailInput.value.trim() : '',
+                    phone: phoneInput ? phoneInput.value.trim() : '',
+                    text: `${dayInput ? dayInput.value : 'Monday'} at ${timeInput ? timeInput.value : '14:00'}`,
+                    status: "Pending",
+                    time: firebase.firestore.FieldValue.serverTimestamp()
                 });
-                
-                alert("Sent to Pastor."); 
+
+                alert("Appointment Request Sent.");
                 closeModals();
                 nameInput.value = "";
-                msgInput.value = "";
+                if(emailInput) emailInput.value = "";
+                if(phoneInput) phoneInput.value = "";
             } catch (error) {
-                console.error("Error submitting prayer: ", error);
-                alert("Failed to send prayer request. Please check your connection.");
+                console.error("Error submitting booking: ", error);
+                alert("Failed to submit appointment request.");
             }
         }
-
         async function submitBooking() {
             const nameInput = document.getElementById('b_name');
             const emailInput = document.getElementById('b_email');
