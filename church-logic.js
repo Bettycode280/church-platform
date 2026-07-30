@@ -14,6 +14,7 @@ if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig); 
 }
 const db = firebase.firestore();
+
 // ==========================================
 // 2. NAVIGATION & UI CONTROLS
 // ==========================================
@@ -56,6 +57,7 @@ function checkPass() {
         const adminUI = document.getElementById('admin-ui');
         if (adminUI) adminUI.style.display = 'block';
 
+        // Load dashboard data immediately upon login
         loadPrayers();
         loadMemberDirectory();
 
@@ -114,41 +116,6 @@ function selectDay(day, buttonElement) {
 
     buttonElement.style.background = "rgba(212, 175, 55, 0.25)";
     buttonElement.style.borderColor = "#D4AF37";
-}
-
-function selectTestimonyType(type, buttonElement) {
-    const typeInput = document.getElementById('t_type');
-    if (typeInput) typeInput.value = type;
-
-    const buttons = document.querySelectorAll('.testimony-type-btn');
-    buttons.forEach(btn => {
-        btn.style.background = "rgba(255,255,255,0.08)";
-        btn.style.borderColor = "rgba(212,175,55,0.3)";
-    });
-
-    buttonElement.style.background = "rgba(212, 175, 55, 0.25)";
-    buttonElement.style.borderColor = "#D4AF37";
-
-    const container = document.getElementById('testimony-input-container');
-    if (!container) return;
-
-    if (type === 'Text') {
-        container.innerHTML = `<textarea id="t_msg" placeholder="Write your testimony or praise report here..." rows="4" class="sleek-input"></textarea>`;
-    } else if (type === 'Audio') {
-        container.innerHTML = `
-            <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 6px; border: 1px dashed rgba(212,175,55,0.4); text-align: center; margin-bottom: 5px;">
-                <p style="font-size: 0.8rem; color: #ccc; margin-bottom: 8px;">Select your audio testimony file:</p>
-                <input type="file" id="t_file" accept="audio/*" class="sleek-input" style="font-size: 0.75rem; cursor: pointer;">
-            </div>
-        `;
-    } else if (type === 'Video') {
-        container.innerHTML = `
-            <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 6px; border: 1px dashed rgba(212,175,55,0.4); text-align: center; margin-bottom: 5px;">
-                <p style="font-size: 0.8rem; color: #ccc; margin-bottom: 8px;">Select your video testimony file:</p>
-                <input type="file" id="t_file" accept="video/*" class="sleek-input" style="font-size: 0.75rem; cursor: pointer;">
-            </div>
-        `;
-    }
 }
 
 async function updateSermon() {
@@ -241,7 +208,6 @@ async function submitBooking() {
         alert("Failed to send request. Please try again.");
     }
 }
-
 
 function watchMyAppointment(userName) {
     if (!userName || typeof firebase === 'undefined') return;
@@ -392,7 +358,6 @@ function deleteFeedItem(docId) {
         });
     }
 }
-
 // ==========================================
 // 6. WHATSAPP & MEMBER DIRECTORY
 // ==========================================
@@ -461,6 +426,55 @@ function loadMemberDirectory() {
     
     if (!directoryContainer) return;
 
+    // Set container to support side scrolling or vertical scrolling window
+    directoryContainer.style.display = "flex";
+    directoryContainer.style.flexDirection = "column";
+    directoryContainer.style.maxHeight = "350px";
+    directoryContainer.style.overflowY = "auto";
+    directoryContainer.style.overflowX = "hidden";
+    directoryContainer.style.paddingRight = "5px";
+
+    db.collection("members")
+      .orderBy("name", "asc")
+      .onSnapshot((snapshot) => {
+          directoryContainer.innerHTML = "";
+
+          if (snapshot.empty) {
+              directoryContainer.innerHTML = '<p style="opacity: 0.3; text-align: center; padding: 10px;">No members saved yet.</p>';
+              return;
+          }
+
+          snapshot.forEach((doc) => {
+              const data = doc.data();
+              const docId = doc.id;
+              const memberCard = document.createElement('div');
+              
+              // Each card uses a side-scrolling inner container for actions if needed
+              memberCard.style.cssText = "background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; display: flex; flex-direction: column; gap: 8px; border: 1px solid rgba(212,175,55,0.2); margin-bottom: 8px;";
+              
+              memberCard.innerHTML = `
+                  <div style="color: #fff; text-align: left;">
+                      <strong style="display: block; font-size: 0.95rem;">${data.name}</strong>
+                      <span style="font-size: 0.75rem; color: #aaa;">${data.phone}</span>
+                  </div>
+                  <div style="display: flex; gap: 6px; overflow-x: auto; white-space: nowrap; padding-bottom: 4px; scrollbar-width: thin;">
+                      <button class="premium-gold-btn" onclick="messageIndividualWhatsApp('${data.phone}', '${data.name}')" style="margin: 0; padding: 6px 12px; font-size: 0.65rem; background: #25D366; color: #fff; border: none; border-radius: 4px; cursor: pointer; flex-shrink: 0;">WhatsApp</button>
+                      <button onclick="window.location.href='tel:${data.phone}'" style="margin: 0; padding: 6px 12px; font-size: 0.65rem; background: #3498db; color: #fff; border: none; border-radius: 4px; cursor: pointer; flex-shrink: 0;">Call</button>
+                      <button onclick="deleteMember('${docId}', '${data.name}')" style="margin: 0; padding: 6px 12px; font-size: 0.65rem; background: #e74c3c; color: #fff; border: none; border-radius: 4px; cursor: pointer; flex-shrink: 0;">Delete</button>
+                  </div>
+              `;
+              
+              directoryContainer.appendChild(memberCard);
+          });
+      });
+}
+function loadMemberDirectory() {
+    if (typeof firebase === 'undefined') return;
+    const db = firebase.firestore();
+    const directoryContainer = document.getElementById('member-directory-list');
+    
+    if (!directoryContainer) return;
+
     directoryContainer.style.display = "flex";
     directoryContainer.style.flexDirection = "column";
     directoryContainer.style.maxHeight = "350px";
@@ -501,7 +515,6 @@ function loadMemberDirectory() {
           });
       });
 }
-
 // ==========================================
 // SAVED MESSAGES & SERMONS MANAGEMENT
 // ==========================================
