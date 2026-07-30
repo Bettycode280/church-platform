@@ -2,14 +2,21 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>DLCC | Mission Control</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     
+    <meta name="theme-color" content="#121212">
+    <!-- PWA Manifest and Icons for Admin/Mission -->
+    <link rel="manifest" href="mission-manifest.json">
+    <link rel="icon" type="image/jpeg" href="logo.jpg">
+    <link rel="apple-touch-icon" href="logo.jpg">
+
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
 </head>
 <body style="overflow-y: auto;"> 
     <div class="main-bg"></div>
@@ -158,11 +165,14 @@
         </div>
 
         <!-- 9. Member Testimonies & Praise Reports Panel -->
-        <div class="admin-panel" style="margin-top: 20px; margin-bottom: 20px; max-height: 400px; overflow-y: auto; padding-right: 5px;">
-            <button class="premium-gold-btn" style="width: 100%; margin-bottom: 5px; font-size: 1.1rem; text-align: center; color: #000000; background: linear-gradient(135deg, #d4af37 0%, #aa7c11 100%); padding: 12px; border-radius: 6px; font-weight: bold; border: none; cursor: default;">🙏 Member Testimonies & Praise Reports</button>
-            <p class="form-hint" style="font-size: 0.8rem; color: #aaa; margin-bottom: 10px;">Receive and review testimonies, breakthrough reports, and contact info submitted by members.</p>
+        <div class="admin-panel" style="margin-top: 20px; margin-bottom: 20px; max-height: 550px; overflow-y: auto; padding-right: 5px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                <button class="premium-gold-btn" style="flex: 1; font-size: 1.1rem; text-align: center; color: #000000; background: linear-gradient(135deg, #d4af37 0%, #aa7c11 100%); padding: 12px; border-radius: 6px; font-weight: bold; border: none; cursor: default;">🙏 Member Testimonies & Praise Reports</button>
+                <div id="notification-badge" style="display: none; background: #e74c3c; color: #fff; font-weight: bold; padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; margin-left: 8px;">0</div>
+            </div>
+            <p class="form-hint" style="font-size: 0.8rem; color: #aaa; margin-bottom: 10px;">Receive, record directly, and review testimonies with multimedia support.</p>
             
-            <!-- Testimony Input Form Box -->
+            <!-- Testimony Input & Direct Recording Box -->
             <div style="background: rgba(255,255,255,0.02); padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 15px;">
                 <div style="display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap;">
                     <input type="text" id="input-testifier-name" placeholder="Member Name" class="sleek-input" style="flex: 1; min-width: 140px; padding: 10px; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; font-size: 0.85rem;">
@@ -174,12 +184,28 @@
                 <div style="margin-bottom: 10px;">
                     <textarea id="input-testimony-text" placeholder="Share testimony details or praise report..." class="sleek-input" rows="3" style="width: 100%; padding: 10px; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; font-size: 0.85rem; resize: vertical;"></textarea>
                 </div>
-                <button onclick="logTestimonyRecord()" style="width: 100%; padding: 10px; background: #d4af37; color: #000; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.9rem;">✨ Submit Testimony Record</button>
+
+                <!-- Media Mode Selection Tabs -->
+                <div style="display: flex; gap: 6px; margin-bottom: 10px;">
+                    <button type="button" id="tab-text" class="testimony-tab active" onclick="setTestimonyMode('text')" style="flex: 1; padding: 6px; background: #27ae60; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">📝 Text Only</button>
+                    <button type="button" id="tab-audio" class="testimony-tab" onclick="setTestimonyMode('audio')" style="flex: 1; padding: 6px; background: rgba(255,255,255,0.1); color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">🎤 Record Audio</button>
+                    <button type="button" id="tab-video" class="testimony-tab" onclick="setTestimonyMode('video')" style="flex: 1; padding: 6px; background: rgba(255,255,255,0.1); color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">📹 Record Video</button>
+                </div>
+
+                <!-- Recorder UI Container (Hidden by default for text) -->
+                <div id="recorder-ui-container" style="display: none; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 6px; margin-bottom: 10px; text-align: center;">
+                    <div id="media-preview-area" style="margin-bottom: 8px;"></div>
+                    <p id="recording-status-text" style="font-size: 0.75rem; color: #d4af37; margin-bottom: 6px;">Ready to record</p>
+                    <button type="button" id="start-rec-btn" onclick="startRecordingSession()" style="padding: 6px 14px; background: #e74c3c; color: #fff; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.75rem;">🔴 Start Recording</button>
+                    <button type="button" id="stop-rec-btn" onclick="stopRecordingSession()" style="display: none; padding: 6px 14px; background: #7f8c8d; color: #fff; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.75rem;">⏹ Stop Recording</button>
+                </div>
+
+                <button type="button" id="submit-testimony-btn" onclick="submitTestimonyForm()" style="width: 100%; padding: 10px; background: #d4af37; color: #000; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.9rem;">✨ Submit Testimony Record</button>
             </div>
 
             <!-- Testimony Records List Area -->
             <h3 style="font-size: 0.9rem; color: #d4af37; margin-bottom: 8px; font-weight: bold;">📜 Received Testimonies Archive</h3>
-            <div id="testimony-history-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 220px; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px;">
+            <div id="testimony-history-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 260px; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px;">
                 <p style="opacity: 0.3; text-align: center; padding: 10px; font-size: 0.8rem;">No testimonies recorded yet.</p>
             </div>
         </div>
@@ -276,104 +302,182 @@
             });
         }
 
-        // --- Testimony Functions ---
-        function getTestimonyHistory() {
-            const data = localStorage.getItem('church_testimony_history');
-            return data ? JSON.parse(data) : [];
+
+       // --- Unified Testimony Recording & Pastor Mission Control System ---
+
+let mediaRecorder;
+let recordedChunks = [];
+let activeStream = null;
+let currentMediaType = 'text';
+
+function setTestimonyMode(mode) {
+    currentMediaType = mode;
+    document.querySelectorAll('.testimony-tab').forEach(t => {
+        t.style.background = 'rgba(255,255,255,0.1)';
+    });
+    document.getElementById(`tab-${mode}`).style.background = '#27ae60';
+    
+    const recorderBox = document.getElementById('recorder-ui-container');
+    if (mode === 'text') {
+        recorderBox.style.display = 'none';
+        stopAllMediaStreams();
+    } else {
+        recorderBox.style.display = 'block';
+        initMediaRecorder(mode);
+    }
+}
+
+async function initMediaRecorder(type) {
+    const previewContainer = document.getElementById('media-preview-area');
+    previewContainer.innerHTML = '';
+    
+    try {
+        const constraints = type === 'video' ? { video: { width: 1280, height: 720 }, audio: true } : { audio: true };
+        activeStream = await navigator.mediaDevices.getUserMedia(constraints);
+
+        if (type === 'video') {
+            const videoElem = document.createElement('video');
+            videoElem.autoplay = true;
+            videoElem.muted = true;
+            videoElem.playsInline = true;
+            videoElem.srcObject = activeStream;
+            videoElem.style.cssText = "width: 100%; max-height: 160px; border-radius: 4px; background: #000;";
+            previewContainer.appendChild(videoElem);
+        } else {
+            previewContainer.innerHTML = `<p style="color: #27ae60; font-weight: bold; font-size: 0.75rem;">🎤 Microphone ready. Click Start Recording.</p>`;
         }
+    } catch (err) {
+        console.error("Media access error:", err);
+        alert("Could not access camera or microphone. Please check permissions.");
+    }
+}
 
-        function saveTestimonyHistory(history) {
-            localStorage.setItem('church_testimony_history', JSON.stringify(history));
+function startRecordingSession() {
+    recordedChunks = [];
+    if (!activeStream) {
+        alert("Please select Audio or Video first.");
+        return;
+    }
+
+    try {
+        mediaRecorder = new MediaRecorder(activeStream, { mimeType: currentMediaType === 'video' ? 'video/webm;codecs=vp8,opus' : 'audio/webm' });
+    } catch (e) {
+        mediaRecorder = new MediaRecorder(activeStream);
+    }
+
+    mediaRecorder.ondataavailable = (event) => {
+        if (event.data && event.data.size > 0) {
+            recordedChunks.push(event.data);
         }
+    };
 
-        function logTestimonyRecord() {
-            const nameInput = document.getElementById('input-testifier-name').value.trim();
-            const phoneInput = document.getElementById('input-testifier-phone').value.trim();
-            const emailInput = document.getElementById('input-testifier-email').value.trim();
-            const textInput = document.getElementById('input-testimony-text').value.trim();
+    mediaRecorder.onstop = async () => {
+        const blob = new Blob(recordedChunks, { type: currentMediaType === 'video' ? 'video/webm' : 'audio/webm' });
+        window.pendingRecordedBlob = blob;
+        document.getElementById('recording-status-text').innerText = "✅ Recording ready for submission!";
+    };
 
-            if (!nameInput || !textInput) {
-                alert('Please enter the member name and testimony details.');
-                return;
-            }
+    mediaRecorder.start();
+    document.getElementById('recording-status-text').innerText = "🔴 Recording in progress...";
+    document.getElementById('start-rec-btn').style.display = 'none';
+    document.getElementById('stop-rec-btn').style.display = 'inline-block';
+}
 
-            const now = new Date();
-            const dateStr = now.toISOString().split('T')[0];
-            const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+function stopRecordingSession() {
+    if (mediaRecorder && mediaRecorder.state !== "inactive") {
+        mediaRecorder.stop();
+    }
+    stopAllMediaStreams();
+    document.getElementById('start-rec-btn').style.display = 'inline-block';
+    document.getElementById('stop-rec-btn').style.display = 'none';
+}
 
-            const history = getTestimonyHistory();
+function stopAllMediaStreams() {
+    if (activeStream) {
+        activeStream.getTracks().forEach(track => track.stop());
+        activeStream = null;
+    }
+}
+
+async function submitTestimonyForm() {
+    const name = document.getElementById('input-testifier-name').value.trim();
+    const phone = document.getElementById('input-testifier-phone').value.trim();
+    const email = document.getElementById('input-testifier-email').value.trim();
+    let testimonyText = document.getElementById('input-testimony-text').value.trim();
+
+    if (!name) {
+        alert("Please enter your name.");
+        return;
+    }
+
+    const db = firebase.firestore();
+    const storage = firebase.storage();
+
+    let mediaUrl = "";
+    let thumbnailUrl = "";
+    const submitBtn = document.getElementById('submit-testimony-btn');
+    submitBtn.innerText = "Submitting...";
+    submitBtn.disabled = true;
+
+    try {
+        // If a recording was made, upload it first
+        if (window.pendingRecordedBlob && currentMediaType !== 'text') {
+            const fileExt = 'webm';
+            const fileName = `testimonies/${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+            const fileRef = storage.ref().child(fileName);
             
-            history.push({
-                date: dateStr,
-                time: timeStr,
-                name: nameInput,
-                phone: phoneInput || 'N/A',
-                email: emailInput || 'N/A',
-                testimony: textInput
-            });
+            console.log("Uploading media blob to Firebase Storage...");
+            const uploadSnapshot = await fileRef.put(window.pendingRecordedBlob);
+            mediaUrl = await uploadSnapshot.ref.getDownloadURL();
+            console.log("Media upload successful. URL:", mediaUrl);
 
-            history.sort((a, b) => new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time));
-
-            saveTestimonyHistory(history);
-            renderTestimonyHistory();
-
-            document.getElementById('input-testifier-name').value = '';
-            document.getElementById('input-testifier-phone').value = '';
-            document.getElementById('input-testifier-email').value = '';
-            document.getElementById('input-testimony-text').value = '';
-        }
-
-        function deleteTestimonyRecord(index) {
-            if (confirm('Are you sure you want to delete this testimony record?')) {
-                const history = getTestimonyHistory();
-                history.splice(index, 1);
-                saveTestimonyHistory(history);
-                renderTestimonyHistory();
+            if (currentMediaType === 'video') {
+                try {
+                    const thumbBlob = await generateVideoThumbnail(window.pendingRecordedBlob);
+                    if (thumbBlob) {
+                        const thumbRef = storage.ref().child(`thumbnails/${Date.now()}_thumb.jpg`);
+                        const thumbSnap = await thumbRef.put(thumbBlob);
+                        thumbnailUrl = await thumbSnap.ref.getDownloadURL();
+                    }
+                } catch (thumbErr) {
+                    console.warn("Thumbnail generation skipped/failed:", thumbErr);
+                }
+            }
+            
+            if (!testimonyText) {
+                testimonyText = "Media submission";
             }
         }
 
-        function renderTestimonyHistory() {
-            const historyList = document.getElementById('testimony-history-list');
-            if (!historyList) return;
+        console.log("Saving testimony record to Firestore with mediaType:", currentMediaType, "and mediaUrl:", mediaUrl);
 
-            const history = getTestimonyHistory();
-            historyList.innerHTML = '';
-
-            if (history.length === 0) {
-                historyList.innerHTML = '<p style="opacity: 0.3; text-align: center; padding: 10px; font-size: 0.8rem;">No testimonies recorded yet.</p>';
-                return;
-            }
-
-            history.forEach((record, index) => {
-                const div = document.createElement('div');
-                div.style.cssText = "background: rgba(255,255,255,0.05); padding: 10px 12px; border-radius: 6px; border-left: 3px solid #27ae60; font-size: 0.8rem; color: #fff; margin-bottom: 4px;";
-                
-                div.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px;">
-                        <div>
-                            <strong style="color: #27ae60; font-size: 0.9rem;">${record.name}</strong>
-                            <span style="opacity: 0.5; margin-left: 8px; font-size: 0.75rem;">📅 ${record.date} at ${record.time}</span>
-                        </div>
-                        <button onclick="deleteTestimonyRecord(${index})" style="background: none; border: none; color: #ff4d4d; cursor: pointer; font-size: 0.9rem; font-weight: bold; padding: 0 4px;" onmouseover="this.style.opacity=0.7" onmouseout="this.style.opacity=1">✕</button>
-                    </div>
-                    <div style="opacity: 0.85; margin-bottom: 6px; font-size: 0.78rem;">📞 Phone: ${record.phone} | ✉️ Email: ${record.email}</div>
-                    <p style="background: rgba(0,0,0,0.15); padding: 8px; border-radius: 4px; margin: 0; color: #ddd; font-style: italic; font-size: 0.8rem;">"${record.testimony}"</p>
-                `;
-                historyList.appendChild(div);
-            });
-        }
-        
-
-        window.addEventListener('DOMContentLoaded', () => {
-            renderAnalyticsHistory();
-            renderTestimonyHistory();
-            const dateControl = document.getElementById('input-analytics-date');
-            if (dateControl) {
-                dateControl.value = new Date().toISOString().split('T')[0];
-            }
+        await db.collection("testimonies").add({
+            name: name,
+            phone: phone || "N/A",
+            email: email || "N/A",
+            testimony: testimonyText || "",
+            mediaType: currentMediaType,
+            mediaUrl: mediaUrl,
+            thumbnailUrl: thumbnailUrl,
+            approved: false,
+            archived: false,
+            viewed: false,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
-    </script>
 
-    <script src="church-logic.js"></script>
-</body>
-</html>
+        alert("Testimony submitted successfully!");
+        document.getElementById('input-testifier-name').value = '';
+        document.getElementById('input-testifier-phone').value = '';
+        document.getElementById('input-testifier-email').value = '';
+        document.getElementById('input-testimony-text').value = '';
+        window.pendingRecordedBlob = null;
+        document.getElementById('media-preview-area').innerHTML = '';
+        setTestimonyMode('text');
+    } catch (error) {
+        console.error("Error submitting testimony:", error);
+        alert("Failed to submit testimony: " + error.message);
+    } finally {
+        submitBtn.innerText = "✨ Submit Testimony Record";
+        submitBtn.disabled = false;
+    }
+}
