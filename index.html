@@ -12,8 +12,9 @@
     <link rel="icon" type="image/jpeg" href="logo.jpg">
     <link rel="apple-touch-icon" href="logo.jpg">
     
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 </head>
 <body>
     <div class="main-bg"></div>
@@ -51,6 +52,7 @@
         <!-- Feed items are populated here by JavaScript -->
     </div>
 
+    <!-- Prayer Modal -->
     <div id="prayer-modal" class="modal">
         <div class="glass-card">
             <h2 class="gold-text">Prayer Line</h2>
@@ -62,6 +64,7 @@
         </div>
     </div>
 
+    <!-- Appointment Modal -->
     <div id="booking-modal" class="modal">
         <div class="glass-card">
             <h2 class="gold-text">Appointment</h2>
@@ -71,7 +74,6 @@
             <input type="email" id="b_email" placeholder="Email" class="sleek-input">
             <input type="tel" id="b_phone" placeholder="Phone" class="sleek-input">
             
-            <!-- Clickable Grid Selection (Monday - Sunday) -->
             <label style="color: #D4AF37; font-size: 11px; display: block; text-align: left; margin: 4px 0;">Select Day</label>
             <div id="day-selector-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-bottom: 10px;">
                 <button type="button" class="day-btn" onclick="selectDay('Monday', this)" style="padding: 8px; background: rgba(212,175,55,0.25); border: 1px solid #D4AF37; color: #fff; border-radius: 6px; cursor: pointer; font-size: 13px;">Monday</button>
@@ -84,14 +86,12 @@
             </div>
             <input type="hidden" id="b_day" value="Monday">
 
-            <!-- Round Clock Picker Input -->
             <label style="color: #D4AF37; font-size: 11px; display: block; text-align: left; margin: 4px 0;">Select Time</label>
             <input type="time" id="b_time" value="14:00" class="sleek-input" style="cursor: pointer;">
 
             <button class="premium-gold-btn" onclick="submitBooking()" style="margin-top: 10px;">REQUEST MEETING</button>
             <div class="cancel-link" onclick="closeModals(); toggleMenu();">Back</div>
 
-            <!-- Container where the live appointment status will display -->
             <div id="my-appointment-status"></div>
         </div>
     </div>
@@ -102,7 +102,6 @@
             <h2 class="gold-text">Testimony & Praise</h2>
             <p class="form-hint">Share What God Has Done</p>
             
-            <!-- Testimony Type Selector -->
             <label style="color: #D4AF37; font-size: 11px; display: block; text-align: left; margin: 4px 0;">Testimony Format</label>
             <div id="testimony-type-selector" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 10px;">
                 <button type="button" class="testimony-type-btn" onclick="selectTestimonyType('Text', this)" style="padding: 8px 4px; background: rgba(212,175,55,0.25); border: 1px solid #D4AF37; color: #fff; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold;">📝 Text</button>
@@ -115,7 +114,6 @@
             <input type="tel" id="t_phone" placeholder="Phone Number" class="sleek-input">
             <input type="email" id="t_email" placeholder="Email Address (Optional)" class="sleek-input">
             
-            <!-- Dynamic Field Container -->
             <div id="testimony-input-container">
                 <textarea id="t_msg" placeholder="Write your testimony or praise report here..." rows="4" class="sleek-input"></textarea>
             </div>
@@ -143,20 +141,15 @@
 
     <audio id="alert-sound" src="alert.mp3" preload="auto"></audio>
 
-    <!-- 1. REQUIRED: Load Firebase Database SDK -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-
-    <!-- 2. Firebase Configuration & Initialization -->
+    <!-- Firebase Initialization -->
     <script>
-                const firebaseConfig = {
-    apiKey: "AIzaSyDhLq4p_W0ArYVXYHmOZbsuyyvLqWde6js",
-    authDomain: "glorywheels-507df.firebaseapp.com",
-    projectId: "glorywheels-507df",
-    storageBucket: "glorywheels-507df.firebasestorage.app",
-    messagingSenderId: "369831733781",
-    appId: "1:369831733781:web:a7402fd123de519d7e3c1c"
-
+        const firebaseConfig = {
+            apiKey: "AIzaSyDhLq4p_W0ArYVXYHmOZbsuyyvLqWde6js",
+            authDomain: "glorywheels-507df.firebaseapp.com",
+            projectId: "glorywheels-507df",
+            storageBucket: "glorywheels-507df.firebasestorage.app",
+            messagingSenderId: "369831733781",
+            appId: "1:369831733781:web:a7402fd123de519d7e3c1c"
         };
         
         if (!firebase.apps.length) {
@@ -164,12 +157,12 @@
         }
     </script>
 
-    <!-- 3. Navigation & UI Controls (Using classList.toggle/add/remove to match CSS) -->
+    <!-- Frontend UI & Submission Script (Addresses Hypothesis: ensures submitPrayer connects cleanly to Firestore matching Mission Control) -->
     <script>
         function toggleMenu() { 
             const nav = document.getElementById('side-menu');
             if (nav) {
-                nav.classList.toggle('open'); 
+                nav.classList.toggle('open');
             }
         }
 
@@ -189,10 +182,8 @@
         }
 
         function selectDay(day, buttonElement) {
-            if (typeof selectedDayValue !== 'undefined') {
-                selectedDayValue = day;
-            }
-            document.getElementById('b_day').value = day;
+            const dayInput = document.getElementById('b_day');
+            if (dayInput) dayInput.value = day;
 
             const buttons = document.querySelectorAll('.day-btn');
             buttons.forEach(btn => {
@@ -205,7 +196,8 @@
         }
 
         function selectTestimonyType(type, buttonElement) {
-            document.getElementById('t_type').value = type;
+            const typeInput = document.getElementById('t_type');
+            if (typeInput) typeInput.value = type;
 
             const buttons = document.querySelectorAll('.testimony-type-btn');
             buttons.forEach(btn => {
@@ -217,6 +209,8 @@
             buttonElement.style.borderColor = "#D4AF37";
 
             const container = document.getElementById('testimony-input-container');
+            if (!container) return;
+
             if (type === 'Text') {
                 container.innerHTML = `<textarea id="t_msg" placeholder="Write your testimony or praise report here..." rows="4" class="sleek-input"></textarea>`;
             } else if (type === 'Audio') {
@@ -236,59 +230,36 @@
             }
         }
 
-        function submitTestimony() {
-            const name = document.getElementById('t_name').value.trim();
-            const phone = document.getElementById('t_phone').value.trim();
-            const email = document.getElementById('t_email').value.trim();
-            const testimonyType = document.getElementById('t_type').value;
-            
-            let testimonyContent = '';
-            if (testimonyType === 'Text') {
-                const msgEl = document.getElementById('t_msg');
-                testimonyContent = msgEl ? msgEl.value.trim() : '';
-            } else {
-                const fileInput = document.getElementById('t_file');
-                if (fileInput && fileInput.files.length > 0) {
-                    testimonyContent = `[Attached ${testimonyType} File: ${fileInput.files[0].name}]`;
-                } else {
-                    testimonyContent = `[${testimonyType} testimony submitted without attached media file]`;
-                }
-            }
+        async function submitPrayer() {
+            const nameInput = document.getElementById('p_name');
+            const msgInput = document.getElementById('p_msg');
 
-            if (!name || (testimonyType === 'Text' && !testimonyContent)) {
-                alert('Please provide your name and testimony details.');
+            if (!nameInput || !msgInput || !nameInput.value.trim() || !msgInput.value.trim()) {
+                alert("Please fill all fields.");
                 return;
             }
 
-            const now = new Date();
-            const dateStr = now.toISOString().split('T')[0];
-            const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-            // Save directly to Firebase Realtime Database
-            firebase.database().ref('testimonies').push({
-                date: dateStr,
-                time: timeStr,
-                type: testimonyType,
-                name: name,
-                phone: phone || 'N/A',
-                email: email || 'N/A',
-                testimony: testimonyContent
-            }).then(() => {
-                alert('Praise God! Your testimony has been successfully submitted to the pastoral team.');
+            try {
+                const db = firebase.firestore();
+                await db.collection("churchPrayers").add({ 
+                    type: "PRAYER", 
+                    name: nameInput.value.trim(), 
+                    text: msgInput.value.trim(), 
+                    time: firebase.firestore.FieldValue.serverTimestamp() 
+                });
                 
-                document.getElementById('t_name').value = '';
-                document.getElementById('t_phone').value = '';
-                document.getElementById('t_email').value = '';
-                if (document.getElementById('t_msg')) document.getElementById('t_msg').value = '';
-                
+                alert("Sent to Pastor."); 
                 closeModals();
-            }).catch((error) => {
-                alert('Error submitting testimony. Please check your network connection.');
-                console.error(error);
-            });
+                nameInput.value = "";
+                msgInput.value = "";
+            } catch (error) {
+                console.error("Error submitting prayer: ", error);
+                alert("Failed to send prayer request. Please check your connection.");
+            }
         }
     </script>
 
+    <!-- Additional Logic Scripts -->
     <script src="script.js"></script>
     <script src="church-logic.js"></script>
 </body>
