@@ -420,7 +420,6 @@ function loadPrayers() {
     const list = document.getElementById('prayer-list');
     if (!list) return;
 
-    // Fetch all documents ordered by timestamp
     db.collection("testimonies").orderBy("timestamp", "desc").onSnapshot(snap => {
         list.innerHTML = "";
         
@@ -434,18 +433,21 @@ function loadPrayers() {
         snap.forEach(doc => {
             const data = doc.data();
             const docId = doc.id;
-            const type = (data.type || "PRAYER").toUpperCase();
+            
+            // Normalize type and mediaType to catch all possible formats
+            const rawType = (data.type || data.mediaType || "PRAYER").toUpperCase();
 
-            // EXCLUDE testimonies from this Live Feed panel
-            if (type !== "PRAYER" && type !== "APPOINTMENT") {
+            // EXCLUDE actual testimonies (TEXT, AUDIO, VIDEO) from the Live Feed
+            if (rawType.includes("TESTIMONY") || rawType === "TEXT" || rawType === "AUDIO" || rawType === "VIDEO") {
                 return;
             }
 
             validItemsCount++;
             let detailsContent = "";
             let actionButtons = "";
+            const displayType = rawType.includes("APPOINTMENT") ? "APPOINTMENT" : "PRAYER";
 
-            if (type === "APPOINTMENT") {
+            if (displayType === "APPOINTMENT") {
                 const currentStatus = data.status || "Pending";
                 let statusColor = "#f39c12"; 
                 if (currentStatus === "Accepted" || currentStatus === "Approved") statusColor = "#2ecc71"; 
@@ -469,7 +471,6 @@ function loadPrayers() {
                     </div>
                 `;
             } else {
-                // Default handling for Prayer requests and older records
                 detailsContent = `
                     <p style="margin: 4px 0;"><strong>Name:</strong> ${data.name}</p>
                     <p style="margin: 0 0 8px 0; opacity: 0.9;">${data.text || data.testimony}</p>
@@ -482,7 +483,7 @@ function loadPrayers() {
             list.innerHTML += `
                 <div class="request-card" style="margin-bottom: 12px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 6px; border: 1px solid rgba(212,175,55,0.2);">
                     <div style="margin-bottom: 8px;">
-                        <small style="color:#D4AF37; font-weight:bold;">${type}</small>
+                        <small style="color:#D4AF37; font-weight:bold;">${displayType}</small>
                         ${detailsContent}
                     </div>
                     ${actionButtons}
