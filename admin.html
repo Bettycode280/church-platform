@@ -504,190 +504,67 @@ async function submitTestimonyForm() {
                         }
                     }
                 }
-
-                await db.collection("testimonies").add({
-                    name: name,
-                    phone: phone || "N/A",
-                    email: email || "N/A",
-                    testimony: testimonyText || "",
-                    mediaType: currentMediaType,
-                    mediaUrl: mediaUrl,
-                    thumbnailUrl: thumbnailUrl,
-                    approved: false,
-                    archived: false,
-                    viewed: false,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                });
-
-                alert("Testimony submitted successfully!");
-                document.getElementById('input-testifier-name').value = '';
-                document.getElementById('input-testifier-phone').value = '';
-                document.getElementById('input-testifier-email').value = '';
-                document.getElementById('input-testimony-text').value = '';
-                window.pendingRecordedBlob = null;
-                document.getElementById('media-preview-area').innerHTML = '';
-                setTestimonyMode('text');
-            } catch (error) {
-                console.error("Error submitting testimony:", error);
-                alert("Failed to submit testimony: " + error.message);
-            } finally {
-                submitBtn.innerText = "✨ Submit Testimony Record";
-                submitBtn.disabled = false;
-            }
-        }
-
-        function initLiveTestimonyListener() {
-            const historyList = document.getElementById('testimony-history-list');
-            const badgeElem = document.getElementById('notification-badge');
-            if (!historyList) return;
-
-            const db = firebase.firestore();
-
-            db.collection("testimonies").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
-                historyList.innerHTML = '';
-                let pendingCount = 0;
-
-                if (snapshot.empty) {
-                    historyList.innerHTML = '<p style="opacity: 0.3; text-align: center; padding: 10px; font-size: 0.8rem;">No testimonies recorded yet.</p>';
-                    if (badgeElem) badgeElem.style.display = 'none';
-                    return;
-                }
-
-                snapshot.forEach((doc) => {
-                    const record = doc.data();
-                    const id = doc.id;
-
-                    if (!record.approved && !record.archived) {
-                        pendingCount++;
-                    }
-
-                    if (record.archived) return;
-
-                    const div = document.createElement('div');
-                    div.style.cssText = "background: rgba(255,255,255,0.05); padding: 10px 12px; border-radius: 6px; border-left: 3px solid " + (record.approved ? "#27ae60" : "#e67e22") + "; font-size: 0.8rem; color: #fff; margin-bottom: 6px;";
-                    
-                    let mediaControls = '';
-                    if (record.mediaType === 'audio' && record.mediaUrl) {
-                        mediaControls = `
-                            <div style="margin-top: 6px; padding: 8px; background: rgba(212,175,55,0.12); border-radius: 4px; display: flex; align-items: center; justify-content: space-between;">
-                                <span style="color: #d4af37; font-weight: bold; font-size: 0.75rem;">🎵 Audio Testimony</span>
-                                <div>
-                                    <audio id="audio-elem-${id}" src="${record.mediaUrl}" preload="none"></audio>
-                                    <button type="button" onclick="toggleAudioPlayback('${id}')" id="audio-btn-${id}" style="padding: 5px 12px; background: #27ae60; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.75rem;">▶ Listen Audio</button>
-                                </div>
-                            </div>`;
-                    } else if (record.mediaType === 'video' && record.mediaUrl) {
-                        mediaControls = `
-                            <div style="margin-top: 6px; padding: 8px; background: rgba(212,175,55,0.12); border-radius: 4px;">
-                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
-                                    <span style="color: #d4af37; font-weight: bold; font-size: 0.75rem;">🎬 Video Testimony</span>
-                                    <button type="button" onclick="toggleVideoPlayback('${id}')" id="video-btn-${id}" style="padding: 5px 12px; background: #3498db; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.75rem;">▶ Watch Video</button>
-                                </div>
-                                ${record.thumbnailUrl ? `<div style="margin-bottom: 4px;"><img src="${record.thumbnailUrl}" style="width: 100%; max-height: 120px; object-fit: cover; border-radius: 4px;" alt="Thumbnail"></div>` : ''}
-                                <div id="video-container-${id}" style="display: none; margin-top: 6px;">
-                                    <video id="video-elem-${id}" src="${record.mediaUrl}" controls style="width: 100%; max-height: 160px; border-radius: 4px;"></video>
-                                </div>
-                            </div>`;
-                    }
-
-                    div.innerHTML = `
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px;">
-                            <div>
-                                <strong style="color: #27ae60; font-size: 0.9rem;">${record.name}</strong>
-                                <span style="opacity: 0.5; margin-left: 8px; font-size: 0.75rem;">Status: ${record.approved ? '✅ Approved' : '⏳ Pending'}</span>
-                            </div>
-                            <div>
-                                ${!record.approved ? `<button type="button" onclick="approveTestimony('${id}')" style="background: #27ae60; color: #fff; border: none; padding: 3px 6px; border-radius: 3px; cursor: pointer; font-size: 0.7rem; margin-right: 4px;">✔ Approve</button>` : ''}
-                                <button type="button" onclick="archiveTestimony('${id}')" style="background: #e67e22; color: #fff; border: none; padding: 3px 6px; border-radius: 3px; cursor: pointer; font-size: 0.7rem; margin-right: 4px;">📦 Archive</button>
-                                <button type="button" onclick="deleteTestimonyRecord('${id}')" style="background: #c0392b; color: #fff; border: none; padding: 3px 6px; border-radius: 3px; cursor: pointer; font-size: 0.7rem;">🗑 Delete</button>
-                            </div>
-                        </div>
-                        <div style="opacity: 0.85; margin-bottom: 4px; font-size: 0.78rem;">📞 Phone: ${record.phone || 'N/A'} | ✉️ Email: ${record.email || 'N/A'}</div>
-                        ${record.testimony ? `<p style="background: rgba(0,0,0,0.15); padding: 8px; border-radius: 4px; margin: 4px 0 0 0; color: #ddd; font-style: italic; font-size: 0.8rem;">"${record.testimony}"</p>` : ''}
-                        ${mediaControls}
-                    `;
-                    historyList.appendChild(div);
-                });
-
-                if (badgeElem) {
-                    if (pendingCount > 0) {
-                        badgeElem.innerText = pendingCount;
-                        badgeElem.style.display = 'inline-block';
-                    } else {
-                        badgeElem.style.display = 'none';
-                    }
-                }
+await db.collection("testimonies").add({
+                name: name,
+                phone: phone || "N/A",
+                email: email || "N/A",
+                testimony: testimonyText || "",
+                mediaType: currentMediaType,
+                mediaUrl: mediaUrl,
+                time: firebase.firestore.FieldValue.serverTimestamp()
             });
+
+            alert("Testimony submitted successfully!");
+            submitBtn.innerText = "✨ Submit Testimony Record";
+            submitBtn.disabled = false;
+        } catch (error) {
+            console.error("Error submitting testimony:", error);
+            alert("Failed to submit testimony.");
+            submitBtn.innerText = "✨ Submit Testimony Record";
+            submitBtn.disabled = false;
         }
+    }
 
-        async function approveTestimony(id) {
-            const db = firebase.firestore();
-            await db.collection("testimonies").doc(id).update({ approved: true });
-        }
+    // --- Firebase Initialization & Live Feed Loader ---
+    const firebaseConfig = {
+        apiKey: "AIzaSyDhLq4p_W0ArYVXYHmOZbsuyyvLqWde6js",
+        authDomain: "glorywheels-507df.firebaseapp.com",
+        projectId: "glorywheels-507df",
+        storageBucket: "glorywheels-507df.firebasestorage.app",
+        messagingSenderId: "369831733781",
+        appId: "1:369831733781:web:a7402fd123de519d7e3c1c"
+    };
 
-        async function archiveTestimony(id) {
-            const db = firebase.firestore();
-            await db.collection("testimonies").doc(id).update({ archived: true, approved: false });
-        }
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    
+    const db = firebase.firestore();
 
-        function deleteTestimonyRecord(id) {
-            if (confirm('Are you sure you want to delete this testimony record?')) {
-                firebase.firestore().collection("testimonies").doc(id).delete().catch((error) => {
-                    alert('Failed to delete testimony.');
-                });
-            }
-        }
-
-        function toggleAudioPlayback(id) {
-            const audioElem = document.getElementById(`audio-elem-${id}`);
-            const audioBtn = document.getElementById(`audio-btn-${id}`);
-            if (!audioElem || !audioBtn) return;
-
-            if (audioElem.paused) {
-                audioElem.play().catch(e => console.error(e));
-                audioBtn.innerText = "⏸ Pause Audio";
-                audioBtn.style.background = "#e67e22";
-            } else {
-                audioElem.pause();
-                audioBtn.innerText = "▶ Listen Audio";
-                audioBtn.style.background = "#27ae60";
-            }
-            audioElem.onended = () => {
-                audioBtn.innerText = "▶ Listen Audio";
-                audioBtn.style.background = "#27ae60";
-            };
-        }
-
-        function toggleVideoPlayback(id) {
-            const videoContainer = document.getElementById(`video-container-${id}`);
-            const videoElem = document.getElementById(`video-elem-${id}`);
-            const videoBtn = document.getElementById(`video-btn-${id}`);
-            if (!videoContainer || !videoElem || !videoBtn) return;
-
-            if (videoContainer.style.display === "none" || !videoContainer.style.display) {
-                videoContainer.style.display = "block";
-                videoElem.play().catch(e => console.error(e));
-                videoBtn.innerText = "✖ Close Video";
-                videoBtn.style.background = "#e74c3c";
-            } else {
-                videoElem.pause();
-                videoContainer.style.display = "none";
-                videoBtn.innerText = "▶ Watch Video";
-                videoBtn.style.background = "#3498db";
-            }
-        }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            renderAnalyticsHistory();
-            initLiveTestimonyListener();
+    // Optional: Add your live feed listener here so it populates the 🕊️ LIVE FEED section
+    function loadLiveFeed() {
+        db.collection("churchPrayers").orderBy("time", "desc").onSnapshot((snapshot) => {
+            const feedList = document.getElementById('prayer-list');
+            if (!feedList) return;
             
-            const dateControl = document.getElementById('input-analytics-date');
-            if (dateControl) {
-                dateControl.value = new Date().toISOString().split('T')[0];
+            feedList.innerHTML = '';
+            if (snapshot.empty) {
+                feedList.innerHTML = '<p style="opacity: 0.3; margin-top: 20px;">Waiting for mission data...</p>';
+                return;
             }
-        });
-    </script>
 
-    <script src="church-logic.js"></script>
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                const div = document.createElement('div');
+                div.style.cssText = "background: rgba(255,255,255,0.05); padding: 10px; margin-bottom: 8px; border-radius: 6px; border-left: 3px solid #d4af37; font-size: 0.85rem;";
+                div.innerHTML = `<strong style="color: #d4af37;">${data.type || 'REQUEST'} - ${data.name}</strong><p style="margin: 4px 0 0 0;">${data.text || data.testimony || ''}</p>`;
+                feedList.appendChild(div);
+            });
+        });
+    }
+
+    // Call this inside your checkPass() login success function so the live feed loads when unlocked
+    // loadLiveFeed();
+    </script>
 </body>
 </html>
