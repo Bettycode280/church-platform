@@ -403,7 +403,7 @@ async function submitTestimonyForm() {
     const name = document.getElementById('input-testifier-name').value.trim();
     const phone = document.getElementById('input-testifier-phone').value.trim();
     const email = document.getElementById('input-testifier-email').value.trim();
-    let testimonyText = document.getElementById('input-testimony-text').value.trim();
+    const testimonyText = document.getElementById('input-testimony-text').value.trim();
 
     if (!name) {
         alert("Please enter your name.");
@@ -420,36 +420,23 @@ async function submitTestimonyForm() {
     submitBtn.disabled = true;
 
     try {
-        // If a recording was made, upload it first
         if (window.pendingRecordedBlob && currentMediaType !== 'text') {
             const fileExt = 'webm';
             const fileName = `testimonies/${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
             const fileRef = storage.ref().child(fileName);
             
-            console.log("Uploading media blob to Firebase Storage...");
             const uploadSnapshot = await fileRef.put(window.pendingRecordedBlob);
             mediaUrl = await uploadSnapshot.ref.getDownloadURL();
-            console.log("Media upload successful. URL:", mediaUrl);
 
             if (currentMediaType === 'video') {
-                try {
-                    const thumbBlob = await generateVideoThumbnail(window.pendingRecordedBlob);
-                    if (thumbBlob) {
-                        const thumbRef = storage.ref().child(`thumbnails/${Date.now()}_thumb.jpg`);
-                        const thumbSnap = await thumbRef.put(thumbBlob);
-                        thumbnailUrl = await thumbSnap.ref.getDownloadURL();
-                    }
-                } catch (thumbErr) {
-                    console.warn("Thumbnail generation skipped/failed:", thumbErr);
+                const thumbBlob = await generateVideoThumbnail(window.pendingRecordedBlob);
+                if (thumbBlob) {
+                    const thumbRef = storage.ref().child(`thumbnails/${Date.now()}_thumb.jpg`);
+                    const thumbSnap = await thumbRef.put(thumbBlob);
+                    thumbnailUrl = await thumbSnap.ref.getDownloadURL();
                 }
             }
-            
-            if (!testimonyText) {
-                testimonyText = "Media submission";
-            }
         }
-
-        console.log("Saving testimony record to Firestore with mediaType:", currentMediaType, "and mediaUrl:", mediaUrl);
 
         await db.collection("testimonies").add({
             name: name,
@@ -481,3 +468,175 @@ async function submitTestimonyForm() {
         submitBtn.disabled = false;
     }
 }
+
+function initLiveTestimonyListener() {
+    const historyList = document.getElementById('testimony-history-list');
+    const badgeElem = document.getElementById('notification-badge');
+    if (!historyList) return;
+
+    const db = firebase.firestore();
+
+    db.collection("testimonies").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
+        historyList.innerHTML = '';
+        let pendingCount = 0;
+
+        if (snapshot.empty) {
+            historyList.innerHTML = '<p style="opacity: 0.3; text-align: center; padding: 10px; font-size: 0.8rem;">No testimonies recorded yet.</p>';
+            if (badgeElem) badgeElem.style.display = 'none';
+            return;
+        }
+
+        snapshot.forEach((doc) => {
+            const record = doc.data();
+            const id = doc.id;
+
+            if (!record.approved && !record.archived) {
+                pendingCount++;
+            }
+
+            if (record.archived) return;
+
+            const div = document.createElement('div');
+            div.style.cssText = "background: rgba(255,255,255,0.05); padding: 10px 12px; border-radius: 6px; border-left: 3px solid " + (record.approved ? "#27ae60" : "#e67e22") + "; font-size: 0.8rem; color: #fff; margin-bottom: 6px;";
+            
+            const mediaTypeVal = (record.mediaType || record.type || '').trim().toLowerCase();
+            const hasMedia = record.mediaUrl && record.mediaUrl.trim() !== '';
+
+            let mediaControls = '';
+            if (hasMedia) {
+                const isVideo = mediaTypeVal.includes('video');
+                
+                if (isVideo) {
+                    mediaControls = `
+                        <div style="margin-top: 6px; padding: 8px; background: rgba(212,175,55,0.12); border-radius: 4px;">
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; flex-wrap: wrap; gap: 4px;">
+                                <span style="color: #d4af37; font-weight: bold; font-size: 0.75rem;">🎬 Video Testimony</span>
+                                <div>
+                                    <button type="button" onclick="toggleVideoPlayback('${id}')" id="video-btn-${id}" style="padding: 4px 10px; background: #3498db; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.75rem;">▶ Watch Video</button>
+                                    <a href="${record.mediaUrl}" target="_blank" download style="padding: 4px 8px; background: #34495e; color: #fff; text-decoration: none; border-radius: 4px; font-size: 0.75rem; margin-left: 4px;">📥 Download</a>
+                                    <button type="button" onclick="navigator.share ? navigator.share({title: 'Testimony from ${record.name}', url: '${record.mediaUrl}'}).catch(console.error) : navigator.clipboard.writeText('${record.mediaUrl}').then(() => alert('Link copied to clipboard!'));" style="padding: 4px 8px; background: #8e44ad; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 0.75rem; margin-left: 4px;">🔗 Share</button>
+                                </div>
+                            </div>
+                            ${record.thumbnailUrl ? `<div style="margin-bottom: 4px;"><img src="${record.thumbnailUrl}" style="width: 100%; max-height: 120px; object-fit: cover; border-radius: 4px;" alt="Thumbnail"></div>` : ''}
+                            <div id="video-container-${id}" style="display: none; margin-top: 6px;">
+                                <video id="video-elem-${id}" src="${record.mediaUrl}" controls style="width: 100%; max-height: 160px; border-radius: 4px;"></video>
+                            </div>
+                        </div>`;
+                } else {
+                    mediaControls = `
+                        <div style="margin-top: 6px; padding: 8px; background: rgba(212,175,55,0.12); border-radius: 4px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px;">
+                            <span style="color: #d4af37; font-weight: bold; font-size: 0.75rem;">🎵 Audio Testimony</span>
+                            <div>
+                                <audio id="audio-elem-${id}" src="${record.mediaUrl}" preload="none" style="display: none;"></audio>
+                                <button type="button" onclick="toggleAudioPlayback('${id}')" id="audio-btn-${id}" style="padding: 4px 10px; background: #27ae60; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.75rem;">▶ Listen Audio</button>
+                                <a href="${record.mediaUrl}" target="_blank" download style="padding: 4px 8px; background: #34495e; color: #fff; text-decoration: none; border-radius: 4px; font-size: 0.75rem; margin-left: 4px;">📥 Download</a>
+                                <button type="button" onclick="navigator.share ? navigator.share({title: 'Testimony from ${record.name}', url: '${record.mediaUrl}'}).catch(console.error) : navigator.clipboard.writeText('${record.mediaUrl}').then(() => alert('Link copied to clipboard!'));" style="padding: 4px 8px; background: #8e44ad; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 0.75rem; margin-left: 4px;">🔗 Share</button>
+                            </div>
+                        </div>`;
+                }
+            }
+
+            div.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px;">
+                    <div>
+                        <strong style="color: #27ae60; font-size: 0.9rem;">${record.name}</strong>
+                        <span style="opacity: 0.5; margin-left: 8px; font-size: 0.75rem;">Status: ${record.approved ? '✅ Approved' : '⏳ Pending'}</span>
+                    </div>
+                    <div>
+                        ${!record.approved ? `<button type="button" onclick="approveTestimony('${id}')" style="background: #27ae60; color: #fff; border: none; padding: 3px 6px; border-radius: 3px; cursor: pointer; font-size: 0.7rem; margin-right: 4px;">✔ Approve</button>` : ''}
+                        <button type="button" onclick="archiveTestimony('${id}')" style="background: #e67e22; color: #fff; border: none; padding: 3px 6px; border-radius: 3px; cursor: pointer; font-size: 0.7rem; margin-right: 4px;">📦 Archive</button>
+                        <button type="button" onclick="deleteTestimonyRecord('${id}')" style="background: #c0392b; color: #fff; border: none; padding: 3px 6px; border-radius: 3px; cursor: pointer; font-size: 0.7rem;">🗑 Delete</button>
+                    </div>
+                </div>
+                <div style="opacity: 0.85; margin-bottom: 4px; font-size: 0.78rem;">📞 Phone: ${record.phone || 'N/A'} | ✉️ Email: ${record.email || 'N/A'}</div>
+                ${record.testimony && record.testimony !== 'Media submission' ? `<p style="background: rgba(0,0,0,0.15); padding: 8px; border-radius: 4px; margin: 4px 0 0 0; color: #ddd; font-style: italic; font-size: 0.8rem;">"${record.testimony}"</p>` : ''}
+                ${mediaControls}
+            `;
+            historyList.appendChild(div);
+        });
+
+        if (badgeElem) {
+            if (pendingCount > 0) {
+                badgeElem.innerText = pendingCount;
+                badgeElem.style.display = 'inline-block';
+            } else {
+                badgeElem.style.display = 'none';
+            }
+        }
+    });
+}
+
+async function approveTestimony(id) {
+    const db = firebase.firestore();
+    await db.collection("testimonies").doc(id).update({ approved: true });
+}
+
+async function archiveTestimony(id) {
+    const db = firebase.firestore();
+    await db.collection("testimonies").doc(id).update({ archived: true, approved: false });
+}
+
+function deleteTestimonyRecord(id) {
+    if (confirm('Are you sure you want to delete this testimony record?')) {
+        firebase.firestore().collection("testimonies").doc(id).delete().catch((error) => {
+            alert('Failed to delete testimony.');
+        });
+    }
+}
+
+function toggleAudioPlayback(id) {
+    const audioElem = document.getElementById(`audio-elem-${id}`);
+    const audioBtn = document.getElementById(`audio-btn-${id}`);
+    if (!audioElem || !audioBtn) return;
+
+    if (audioElem.paused) {
+        audioElem.play().catch(e => console.error(e));
+        audioBtn.innerText = "⏸ Pause Audio";
+        audioBtn.style.background = "#e67e22";
+    } else {
+        audioElem.pause();
+        audioBtn.innerText = "▶ Listen Audio";
+        audioBtn.style.background = "#27ae60";
+    }
+    audioElem.onended = () => {
+        audioBtn.innerText = "▶ Listen Audio";
+        audioBtn.style.background = "#27ae60";
+    };
+}
+
+function toggleVideoPlayback(id) {
+    const videoContainer = document.getElementById(`video-container-${id}`);
+    const videoElem = document.getElementById(`video-elem-${id}`);
+    const videoBtn = document.getElementById(`video-btn-${id}`);
+    if (!videoContainer || !videoElem || !videoBtn) return;
+
+    if (videoContainer.style.display === "none" || !videoContainer.style.display) {
+        videoContainer.style.display = "block";
+        videoElem.play().catch(e => console.error(e));
+        videoBtn.innerText = "✖ Close Video";
+        videoBtn.style.background = "#e74c3c";
+    } else {
+        videoElem.pause();
+        videoContainer.style.display = "none";
+        videoBtn.innerText = "▶ Watch Video";
+        videoBtn.style.background = "#3498db";
+    }
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+    if (typeof renderAnalyticsHistory === 'function') {
+        renderAnalyticsHistory();
+    }
+    initLiveTestimonyListener();
+    
+    const dateControl = document.getElementById('input-analytics-date');
+    if (dateControl) {
+        dateControl.value = new Date().toISOString().split('T')[0];
+    }
+});
+    </script>
+
+    <script src="church-logic.js"></script>
+</body>
+</html>
+
