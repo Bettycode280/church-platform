@@ -414,14 +414,17 @@ async function rescheduleAppointment(docId) {
         alert("Failed to reschedule.");
     }
 }
-
 function loadPrayers() {
     if (typeof firebase === 'undefined') return;
     const db = firebase.firestore();
     const list = document.getElementById('prayer-list');
     if (!list) return;
 
-    db.collection("testimonies").orderBy("timestamp", "desc").onSnapshot(snap => {
+    // Only fetch prayers and appointments for the Live Feed panel
+    db.collection("testimonies")
+      .where("type", "in", ["PRAYER", "APPOINTMENT"])
+      .orderBy("timestamp", "desc")
+      .onSnapshot(snap => {
         list.innerHTML = "";
         
         if (snap.empty) {
@@ -472,7 +475,7 @@ function loadPrayers() {
             list.innerHTML += `
                 <div class="request-card" style="margin-bottom: 12px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 6px; border: 1px solid rgba(212,175,55,0.2);">
                     <div style="margin-bottom: 8px;">
-                        <small style="color:#D4AF37; font-weight:bold;">${data.type || 'PRAYER'}</small>
+                        <small style="color:#D4AF37; font-weight:bold;">${data.type}</small>
                         ${detailsContent}
                     </div>
                     ${actionButtons}
