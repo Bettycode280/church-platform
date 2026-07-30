@@ -508,8 +508,28 @@ function initLiveTestimonyListener() {
 
             if (record.archived) return;
 
+            // Determine appointment/submission status display color and text
+            let appointmentStatusHtml = '';
+            const statusVal = (record.appointmentStatus || record.status || 'Pending').toLowerCase();
+            
+            let statusColor = '#e67e22'; // default orange for pending
+            let statusText = 'Pending';
+
+            if (statusVal.includes('accept') || record.approved) {
+                statusColor = '#27ae60';
+                statusText = 'Accepted';
+            } else if (statusVal.includes('reject')) {
+                statusColor = '#c0392b';
+                statusText = 'Rejected';
+            } else if (statusVal.includes('reschedule')) {
+                statusColor = '#2980b9';
+                statusText = 'Rescheduled';
+            }
+
+            appointmentStatusHtml = `<span style="background: ${statusColor}; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; margin-left: 6px;">Status: ${statusText}</span>`;
+
             const div = document.createElement('div');
-            div.style.cssText = "background: rgba(255,255,255,0.05); padding: 10px 12px; border-radius: 6px; border-left: 3px solid " + (record.approved ? "#27ae60" : "#e67e22") + "; font-size: 0.8rem; color: #fff; margin-bottom: 6px;";
+            div.style.cssText = "background: rgba(255,255,255,0.05); padding: 10px 12px; border-radius: 6px; border-left: 3px solid " + statusColor + "; font-size: 0.8rem; color: #fff; margin-bottom: 6px;";
             
             const mediaTypeVal = (record.mediaType || record.type || '').trim().toLowerCase();
             const hasMedia = record.mediaUrl && record.mediaUrl.trim() !== '';
@@ -552,10 +572,12 @@ function initLiveTestimonyListener() {
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px;">
                     <div>
                         <strong style="color: #27ae60; font-size: 0.9rem;">${record.name}</strong>
-                        <span style="opacity: 0.5; margin-left: 8px; font-size: 0.75rem;">Status: ${record.approved ? '✅ Approved' : '⏳ Pending'}</span>
+                        ${appointmentStatusHtml}
                     </div>
                     <div>
-                        ${!record.approved ? `<button type="button" onclick="approveTestimony('${id}')" style="background: #27ae60; color: #fff; border: none; padding: 3px 6px; border-radius: 3px; cursor: pointer; font-size: 0.7rem; margin-right: 4px;">✔ Approve</button>` : ''}
+                        <button type="button" onclick="updateAppointmentStatus('${id}', 'Accepted')" style="background: #27ae60; color: #fff; border: none; padding: 3px 6px; border-radius: 3px; cursor: pointer; font-size: 0.7rem; margin-right: 2px;">✔ Accept</button>
+                        <button type="button" onclick="updateAppointmentStatus('${id}', 'Rescheduled')" style="background: #2980b9; color: #fff; border: none; padding: 3px 6px; border-radius: 3px; cursor: pointer; font-size: 0.7rem; margin-right: 2px;">📅 Reschedule</button>
+                        <button type="button" onclick="updateAppointmentStatus('${id}', 'Rejected')" style="background: #c0392b; color: #fff; border: none; padding: 3px 6px; border-radius: 3px; cursor: pointer; font-size: 0.7rem; margin-right: 4px;">❌ Reject</button>
                         <button type="button" onclick="archiveTestimony('${id}')" style="background: #e67e22; color: #fff; border: none; padding: 3px 6px; border-radius: 3px; cursor: pointer; font-size: 0.7rem; margin-right: 4px;">📦 Archive</button>
                         <button type="button" onclick="deleteTestimonyRecord('${id}')" style="background: #c0392b; color: #fff; border: none; padding: 3px 6px; border-radius: 3px; cursor: pointer; font-size: 0.7rem;">🗑 Delete</button>
                     </div>
@@ -578,9 +600,15 @@ function initLiveTestimonyListener() {
     });
 }
 
-async function approveTestimony(id) {
+async function updateAppointmentStatus(id, status) {
     const db = firebase.firestore();
-    await db.collection("testimonies").doc(id).update({ approved: true });
+    await db.collection("testimonies").doc(id).update({
+        appointmentStatus: status,
+        approved: status === 'Accepted'
+    }).catch((error) => {
+        console.error("Error updating status:", error);
+        alert("Failed to update status.");
+    });
 }
 
 async function archiveTestimony(id) {
