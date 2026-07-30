@@ -242,62 +242,6 @@ async function submitBooking() {
     }
 }
 
-async function submitTestimony() {
-    if (typeof firebase === 'undefined') return;
-    const db = firebase.firestore();
-    
-    const nameInput = document.getElementById('t_name');
-    const phoneInput = document.getElementById('t_phone');
-    const emailInput = document.getElementById('t_email');
-    const typeInput = document.getElementById('t_type');
-
-    if (!nameInput || !nameInput.value.trim()) {
-        alert("Please provide your name.");
-        return;
-    }
-
-    const testimonyType = typeInput ? typeInput.value : "Text";
-    let testimonyContent = '';
-
-    if (testimonyType === 'Text') {
-        const msgEl = document.getElementById('t_msg');
-        testimonyContent = msgEl ? msgEl.value.trim() : '';
-        if (!testimonyContent) {
-            alert("Please write your testimony.");
-            return;
-        }
-    } else {
-        const fileInput = document.getElementById('t_file');
-        if (fileInput && fileInput.files.length > 0) {
-            testimonyContent = `[Attached ${testimonyType} File: ${fileInput.files[0].name}]`;
-        } else {
-            testimonyContent = `[${testimonyType} testimony submitted]`;
-        }
-    }
-
-    try {
-        await db.collection("churchPrayers").add({
-            type: "TESTIMONY",
-            name: nameInput.value.trim(),
-            phone: phoneInput ? phoneInput.value.trim() : "N/A",
-            email: emailInput ? emailInput.value.trim() : "N/A",
-            text: `[${testimonyType}] ${testimonyContent}`,
-            time: firebase.firestore.FieldValue.serverTimestamp()
-        });
-
-        alert("Praise God! Your testimony has been successfully submitted.");
-        closeModals();
-
-        nameInput.value = "";
-        if (phoneInput) phoneInput.value = "";
-        if (emailInput) emailInput.value = "";
-        if (document.getElementById('t_msg')) document.getElementById('t_msg').value = "";
-
-    } catch (error) {
-        console.error("Error submitting testimony: ", error);
-        alert("Failed to submit testimony. Please check your connection.");
-    }
-}
 
 function watchMyAppointment(userName) {
     if (!userName || typeof firebase === 'undefined') return;
@@ -707,6 +651,7 @@ function downloadSermonFile(encodedTitle, encodedContent) {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 }
+
 function deleteSermon(docId) {
     if (typeof firebase === 'undefined') return;
     const db = firebase.firestore();
