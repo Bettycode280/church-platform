@@ -398,14 +398,14 @@ async function rescheduleAppointment(docId) {
 function loadPrayers() {
     if (typeof firebase === 'undefined') return;
     const db = firebase.firestore();
-    const list = document.getElementById('prayer-list');
+    const list = document.getElementById('pastor-feed-container');
     if (!list) return;
 
-    db.collection("churchPrayers").orderBy("time", "desc").onSnapshot(snap => {
-        list.innerHTML = "";
+    db.collection("churchPrayers").orderBy("timeField", "desc").onSnapshot(snap => {
+        list.innerHTML = '<h3 style="color: #D4AF37; text-align: center; margin-bottom: 15px;">MISSION CONTROL FEED</h3>';
         
         if (snap.empty) {
-            list.innerHTML = '<p style="opacity: 0.3; margin-top: 20px;">Waiting for mission data...</p>';
+            list.innerHTML += '<p style="opacity: 0.3; text-align: center; margin-top: 20px;">Waiting for mission data...</p>';
             return;
         }
 
@@ -419,7 +419,7 @@ function loadPrayers() {
             if (data.type === "APPOINTMENT") {
                 const currentStatus = data.status || "Pending";
                 let statusColor = "#f39c12"; 
-                if (currentStatus === "Accepted") statusColor = "#2ecc71"; 
+                if (currentStatus === "Accepted" || currentStatus === "Approved") statusColor = "#2ecc71"; 
                 if (currentStatus === "Rejected") statusColor = "#e74c3c"; 
                 if (currentStatus === "Rescheduled") statusColor = "#3498db"; 
 
@@ -427,13 +427,14 @@ function loadPrayers() {
                     <p style="margin: 4px 0;"><strong>Name:</strong> ${data.name}</p>
                     <p style="margin: 2px 0; font-size: 13px; color: #D4AF37;">📧 <strong>Email:</strong> ${data.email || 'N/A'}</p>
                     <p style="margin: 2px 0; font-size: 13px; color: #D4AF37;">☎️ <strong>Phone:</strong> ${data.phone || 'N/A'}</p>
-                    <p style="margin: 4px 0; opacity: 0.9;">📅 <strong>Requested:</strong> ${data.text}</p>
+                    <p style="margin: 4px 0; opacity: 0.9;">📅 <strong>Requested:</strong> ${data.text || (data.day + ' at ' + data.time)}</p>
                     <p style="margin: 4px 0 8px 0; font-size: 12px;">Status: <span style="color: ${statusColor}; font-weight: bold;">${currentStatus}</span></p>
                 `;
 
                 actionButtons = `
                     <div style="display: flex; gap: 6px; flex-wrap: wrap;">
                         <button onclick="updateAppointmentStatus('${docId}', 'Accepted')" style="background: #2ecc71; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 650;">Accept</button>
+                        <button onclick="updateAppointmentStatus('${docId}', 'Approved')" style="background: #27ae60; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 650;">Approve</button>
                         <button onclick="updateAppointmentStatus('${docId}', 'Rejected')" style="background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 650;">Reject</button>
                         <button onclick="rescheduleAppointment('${docId}')" style="background: #3498db; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 650;">Reschedule</button>
                         <button onclick="deleteFeedItem('${docId}')" style="background: #555; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 650;">Delete</button>
@@ -450,7 +451,7 @@ function loadPrayers() {
             }
 
             list.innerHTML += `
-                <div class="request-card" style="margin-bottom: 12px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 6px;">
+                <div class="request-card" style="margin-bottom: 12px; padding: 15px; background: rgba(0,0,0,0.7); border: 1px solid rgba(212,175,55,0.4); border-radius: 8px; color: #fff;">
                     <div style="margin-bottom: 8px;">
                         <small style="color:#D4AF37; font-weight:bold;">${data.type}</small>
                         ${detailsContent}
@@ -460,7 +461,6 @@ function loadPrayers() {
         });
     });
 }
-
 function deleteFeedItem(docId) {
     if (typeof firebase === 'undefined') return;
     const db = firebase.firestore();
