@@ -333,128 +333,151 @@ async function rescheduleAppointment(docId) {
     }
 }
 
-function loadPrayers() {
-    if (typeof firebase === 'undefined') return;
-    const db = firebase.firestore();
-    const list = document.getElementById('prayer-list');
-    if (!list) return;
+let editingSermonId = null;
 
-    db.collection("churchPrayers").orderBy("time", "desc").onSnapshot(snap => {
-        list.innerHTML = "";
-        
-        if (snap.empty) {
-            list.innerHTML = '<p style="opacity: 0.3; margin-top: 20px;">Waiting for mission data...</p>';
+// 1. Load Saved Sermons & Render Cards
+function loadSavedSermons() {
+    if (typeof firebase === 'undefined') return;
+    const listDiv = document.getElementById('saved-sermons-list');
+    if (!listDiv) return;
+
+    db.collection("sermons").orderBy("time", "desc").onSnapshot((snapshot) => {
+        listDiv.innerHTML = "";
+
+        if (snapshot.empty) {
+            listDiv.innerHTML = '<p style="opacity: 0.3; text-align: center; padding: 10px;">No saved messages yet.</p>';
             return;
         }
 
-        snap.forEach(doc => {
+        snapshot.forEach((doc) => {
             const data = doc.data();
             const docId = doc.id;
             
-            let detailsContent = "";
-            let actionButtons = "";
-
-            if (data.type === "APPOINTMENT") {
-                const currentStatus = data.status || "Pending";
-                let statusColor = "#f39c12"; 
-                if (currentStatus === "Accepted") statusColor = "#2ecc71"; 
-                if (currentStatus === "Rejected") statusColor = "#e74c3c"; 
-                if (currentStatus === "Rescheduled") statusColor = "#3498db"; 
-
-                detailsContent = `
-                    <p style="margin: 4px 0;"><strong>Name:</strong> ${data.name}</p>
-                    <p style="margin: 2px 0; font-size: 13px; color: #D4AF37;">📧 <strong>Email:</strong> ${data.email || 'N/A'}</p>
-                    <p style="margin: 2px 0; font-size: 13px; color: #D4AF37;">☎️ <strong>Phone:</strong> ${data.phone || 'N/A'}</p>
-                    <p style="margin: 4px 0; opacity: 0.9;">📅 <strong>Requested:</strong> ${data.text}</p>
-                    <p style="margin: 4px 0 8px 0; font-size: 12px;">Status: <span style="color: ${statusColor}; font-weight: bold;">${currentStatus}</span></p>
-                `;
-
-                actionButtons = `
-                    <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                        <button onclick="updateAppointmentStatus('${docId}', 'Accepted')" style="background: #2ecc71; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 650;">Accept</button>
-                        <button onclick="updateAppointmentStatus('${docId}', 'Rejected')" style="background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 650;">Reject</button>
-                        <button onclick="rescheduleAppointment('${docId}')" style="background: #3498db; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 650;">Reschedule</button>
-                        <button onclick="deleteFeedItem('${docId}')" style="background: #555; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 650;">Delete</button>
-                    </div>
-                `;
-            } else {
-                detailsContent = `
-                    <p style="margin: 4px 0;"><strong>Name:</strong> ${data.name}</p>
-                    <p style="margin: 0 0 8px 0; opacity: 0.9;">${data.text}</p>
-                `;
-                actionButtons = `
-                    <button onclick="deleteFeedItem('${docId}')" style="background: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;">Delete</button>
-                `;
+            let dateString = "Recent";
+            if (data.time && typeof data.time.toDate === 'function') {
+                dateString = data.time.toDate().toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                });
             }
 
-            list.innerHTML += `
-                <div class="request-card" style="margin-bottom: 12px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 6px;">
-                    <div style="margin-bottom: 8px;">
-                        <small style="color:#D4AF37; font-weight:bold;">${data.type}</small>
-                        ${detailsContent}
+            const fullShareText = encodeURIComponent(`*${data.title}*\n\n${data.content}`);
+            const emailSubject = encodeURIComponent(data.title);
+            const emailBody = encodeURIComponent(`${data.title}\n\n${data.content}`);
+            const timestampMillis = data.time && data.time.toMillis ? data.time.toMillis() : Date.now();
+
+            const encodedTitle = encodeURIComponent(data.title || '');
+            const encodedContent = encodeURIComponent(data.content || '');
+
+            listDiv.innerHTML += `
+                <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; border: 1px solid rgba(212,175,55,0.2); margin-bottom: 8px; text-align: left; color: #fff;">
+                    <!-- Title & Date Header -->
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; gap: 8px;">
+                        <strong style="color: #D4AF37; font-size: 1rem; line-height: 1.2;">${data.title}</strong>
+                        <span style="font-size: 0.7rem; color: #aaa; background: rgba(255,255,255,0.08); padding: 3px 6px; border-radius: 4px; white-space: nowrap;">📅 ${dateString}</span>
                     </div>
-                    ${actionButtons}
-                </div>`;
+                    
+                    <!-- Content -->
+                    <p style="margin: 0 0 10px 0; font-size: 0.9rem; opacity: 0.9; white-space: pre-wrap;">${data.content}</p>
+                    
+                    <!-- Action Buttons -->
+                    <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px;">
+                        <button onclick="editSermon('${docId}', decodeURIComponent('${encodedTitle}'), decodeURIComponent('${encodedContent}'), ${timestampMillis})" style="background: #f39c12; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold;">Edit</button>
+                        <a href="https://wa.me/?text=${fullShareText}" target="_blank" style="background: #25D366; color: white; text-decoration: none; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: bold;">WhatsApp</a>
+                        <a href="https://www.facebook.com/sharer/sharer.php?u=&quote=${fullShareText}" target="_blank" style="background: #1877F2; color: white; text-decoration: none; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: bold;">Facebook</a>
+                        <a href="mailto:?subject=${emailSubject}&body=${emailBody}" style="background: #9b59b6; color: white; text-decoration: none; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: bold;">Email</a>
+                        <a href="https://www.tiktok.com" target="_blank" style="background: #000000; color: white; text-decoration: none; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; border: 1px solid #333;">TikTok</a>
+                        <a href="https://www.youtube.com" target="_blank" style="background: #FF0000; color: white; text-decoration: none; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: bold;">YouTube</a>
+                        <button onclick="deleteSermon('${docId}')" style="background: #e74c3c; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold;">Delete</button>
+                    </div>
+                </div>
+            `;
         });
     });
 }
 
-function deleteFeedItem(docId) {
-    if (typeof firebase === 'undefined') return;
-    const db = firebase.firestore();
-    if (confirm("Remove this item from the Mission Control feed permanently?")) {
-        db.collection("churchPrayers").doc(docId).delete().catch((error) => {
-            console.error("Error removing document: ", error);
-            alert("Delete action failed. Check connection.");
-        });
+// 2. Load Sermon Data into Form Inputs for Live Editing
+function editSermon(docId, title, content, timestampMillis) {
+    editingSermonId = docId;
+    
+    const titleInput = document.getElementById('sermon_title');
+    const contentInput = document.getElementById('sermon_content');
+    const dateInput = document.getElementById('sermon_date');
+    const saveButton = document.querySelector('button[onclick="saveSermonNotes()"]');
+
+    if (titleInput && contentInput) {
+        titleInput.value = title;
+        contentInput.value = content;
+        titleInput.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    if (dateInput && timestampMillis) {
+        const dateObj = new Date(timestampMillis);
+        const localIsoString = new Date(dateObj.getTime() - (dateObj.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+        dateInput.value = localIsoString;
+    }
+
+    if (saveButton) {
+        saveButton.innerText = "UPDATE SERMON NOTES";
+        saveButton.style.background = "#f39c12";
     }
 }
 
-// ==========================================
-// 6. WHATSAPP & MEMBER DIRECTORY
-// ==========================================
-
-function messageIndividualWhatsApp(phoneNumber, memberName) {
-    const quickMsgInput = document.getElementById('wa_quick_message');
-    const customMessage = quickMsgInput ? quickMsgInput.value.trim() : '';
-    const textToSend = customMessage ? customMessage : `Hello ${memberName}, God bless you! Checking in from the church.`;
-    const encodedMessage = encodeURIComponent(textToSend);
-    const cleanPhone = phoneNumber.replace(/[^0-9+]/g, '');
-    const url = `https://wa.me/${cleanPhone}?text=${encodedMessage}`;
-    window.open(url, '_blank');
-}
-
-function saveNewMember() {
+// 3. Save or Update Sermon Notes in Firebase
+async function saveSermonNotes() {
     if (typeof firebase === 'undefined') return;
-    const db = firebase.firestore();
-    const nameInput = document.getElementById('new_member_name');
-    const phoneInput = document.getElementById('new_member_phone');
+    const titleInput = document.getElementById('sermon_title');
+    const contentInput = document.getElementById('sermon_content');
+    const dateInput = document.getElementById('sermon_date');
+    const saveButton = document.querySelector('button[onclick="saveSermonNotes()"]');
 
-    if (!nameInput || !phoneInput) return;
-    const name = nameInput.value.trim();
-    const phone = phoneInput.value.trim();
+    if (!titleInput || !contentInput) return;
 
-    if (!name || !phone) {
-        alert("Please enter both a name and a phone number.");
+    const title = titleInput.value.trim();
+    const content = contentInput.value.trim();
+    
+    let sermonTime = firebase.firestore.FieldValue.serverTimestamp();
+    if (dateInput && dateInput.value) {
+        sermonTime = firebase.firestore.Timestamp.fromDate(new Date(dateInput.value));
+    }
+
+    if (!title || !content) {
+        alert("Please fill in both the title and content.");
         return;
     }
 
-    db.collection("members").add({
-        name: name,
-        phone: phone,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    })
-    .then(() => {
-        alert(`${name} added successfully!`);
-        nameInput.value = '';
-        phoneInput.value = '';
-    })
-    .catch((error) => {
-        console.error("Error adding member: ", error);
-        alert("Failed to save member.");
-    });
-}
+    try {
+        if (editingSermonId) {
+            await db.collection("sermons").doc(editingSermonId).update({
+                title: title,
+                content: content,
+                time: sermonTime
+            });
+            alert("Sermon updated successfully!");
+            editingSermonId = null;
+            if (saveButton) {
+                saveButton.innerText = "SAVE SERMON NOTES";
+                saveButton.style.background = "#d4af37";
+            }
+        } else {
+            await db.collection("sermons").add({
+                title: title,
+                content: content,
+                time: sermonTime
+            });
+            alert("Sermon notes saved successfully!");
+        }
 
+        titleInput.value = '';
+        contentInput.value = '';
+        if (dateInput) dateInput.value = '';
+        loadSavedSermons();
+    } catch (error) {
+        console.error("Error saving sermon notes: ", error);
+        alert("Failed to save sermon notes. Check connection.");
+    }
+}
 function deleteMember(docId, memberName) {
     if (typeof firebase === 'undefined') return;
     const db = firebase.firestore();
