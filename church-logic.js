@@ -397,7 +397,73 @@ function loadSavedSermons() {
     });
 }
 
-// 2. Load Sermon Data into Form Inputs for Live Editing
+let editingSermonId = null;
+
+// 1. Load Saved Sermons & Render Cards with Date, Edit, Share, and Delete
+function loadSavedSermons() {
+    if (typeof firebase === 'undefined') return;
+    const listDiv = document.getElementById('saved-sermons-list');
+    if (!listDiv) return;
+
+    db.collection("sermons").orderBy("time", "desc").onSnapshot((snapshot) => {
+        listDiv.innerHTML = "";
+
+        if (snapshot.empty) {
+            listDiv.innerHTML = '<p style="opacity: 0.3; text-align: center; padding: 10px;">No saved messages yet.</p>';
+            return;
+        }
+
+        snapshot.forEach((doc) => {
+            const data = doc.data();
+            const docId = doc.id;
+            
+            // Format timestamp safely
+            let dateString = "Recent";
+            if (data.time && typeof data.time.toDate === 'function') {
+                dateString = data.time.toDate().toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                });
+            }
+
+            const fullShareText = encodeURIComponent(`*${data.title}*\n\n${data.content}`);
+            const emailSubject = encodeURIComponent(data.title);
+            const emailBody = encodeURIComponent(`${data.title}\n\n${data.content}`);
+
+            // Escape strings for safe injection
+            const safeTitle = (data.title || '').replace(/'/g, "\\'");
+            const safeContent = (data.content || '').replace(/'/g, "\\'").replace(/\n/g, '\\n');
+            const timestampMillis = data.time && data.time.toMillis ? data.time.toMillis() : Date.now();
+
+            listDiv.innerHTML += `
+                <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; border: 1px solid rgba(212,175,55,0.2); margin-bottom: 8px; text-align: left; color: #fff;">
+                    <!-- Title & Date Header -->
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; gap: 8px;">
+                        <strong style="color: #D4AF37; font-size: 1rem; line-height: 1.2;">${data.title}</strong>
+                        <span style="font-size: 0.7rem; color: #aaa; background: rgba(255,255,255,0.08); padding: 3px 6px; border-radius: 4px; white-space: nowrap;">📅 ${dateString}</span>
+                    </div>
+                    
+                    <!-- Content -->
+                    <p style="margin: 0 0 10px 0; font-size: 0.9rem; opacity: 0.9; white-space: pre-wrap;">${data.content}</p>
+                    
+                    <!-- Action Buttons: Edit, Share & Delete -->
+                    <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px;">
+                        <button onclick="editSermon('${docId}', '${safeTitle}', '${safeContent}', ${timestampMillis})" style="background: #f39c12; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold;">Edit</button>
+                        <a href="https://wa.me/?text=${fullShareText}" target="_blank" style="background: #25D366; color: white; text-decoration: none; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: bold;">WhatsApp</a>
+                        <a href="https://www.facebook.com/sharer/sharer.php?u=&quote=${fullShareText}" target="_blank" style="background: #1877F2; color: white; text-decoration: none; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: bold;">Facebook</a>
+                        <a href="mailto:?subject=${emailSubject}&body=${emailBody}" style="background: #9b59b6; color: white; text-decoration: none; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: bold;">Email</a>
+                        <a href="https://www.tiktok.com" target="_blank" style="background: #000000; color: white; text-decoration: none; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; border: 1px solid #333;">TikTok</a>
+                        <a href="https://www.youtube.com" target="_blank" style="background: #FF0000; color: white; text-decoration: none; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: bold;">YouTube</a>
+                        <button onclick="deleteSermon('${docId}')" style="background: #e74c3c; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; margin-left: auto;">Delete</button>
+                    </div>
+                </div>
+            `;
+        });
+    });
+}
+
+// 2. Load Sermon Data into Form Inputs for Editing
 function editSermon(docId, title, content, timestampMillis) {
     editingSermonId = docId;
     
@@ -475,7 +541,7 @@ async function saveSermonNotes() {
         loadSavedSermons();
     } catch (error) {
         console.error("Error saving sermon notes: ", error);
-        alert("Failed to save: " + error.message); // This will show the exact Firebase error on your screen
+        alert("Failed to save sermon notes. Check connection.");
     }
 }
 
