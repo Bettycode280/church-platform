@@ -81,7 +81,7 @@
         <button onclick="window.open('https://www.youtube.com/results?search_query=christian+kids+bible+stories+cartoons', '_blank')" style="flex: 1; min-width: 120px; padding: 10px; background: #3498db; color: #fff; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.8rem;">🧸 Kids Bible Cartoons</button>
     </div>
 </div>
-           <!-- 4. Sermon & Message Notes Panel -->
+       <!-- 4. Sermon & Message Notes Panel -->
 <div class="admin-panel" style="margin-bottom: 20px;">
     <h2 class="gold-text" style="font-size: 1.2rem;">✍️ Sermon & Message Notes</h2>
     <p class="form-hint" style="font-size: 0.8rem; color: #aaa; margin-bottom: 10px;">Draft and save your weekly messages</p>
@@ -92,16 +92,21 @@
     
     <button class="premium-gold-btn" onclick="saveSermonNotes()" style="width: 100%; padding: 10px; background: #d4af37; color: #000; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">SAVE SERMON NOTES</button>
 </div>
-<!-- Saved Messages List -->
-<div class="admin-panel" style="margin-bottom: 20px;">
-    <h2 class="gold-text" style="font-size: 1.2rem;">📂 Saved Messages</h2>
-    <p class="form-hint" style="font-size: 0.8rem; color: #aaa; margin-bottom: 10px;">Review your previously saved sermons</p>
+
+<!-- NEW UPGRADED FOLDER PANEL PLACED HERE -->
+<div class="admin-panel" style="margin-bottom: 20px; border: 1px solid rgba(212,175,55,0.4); border-radius: 8px; background: rgba(0,0,0,0.2);">
+    <div style="background: rgba(212,175,55,0.1); padding: 12px 15px; border-bottom: 1px solid rgba(212,175,55,0.3); display: flex; justify-content: space-between; align-items: center; border-top-left-radius: 7px; border-top-right-radius: 7px;">
+        <h2 class="gold-text" style="font-size: 1.1rem; margin: 0;">📁 Sermon Archive Folder</h2>
+        <button onclick="loadSavedSermons()" class="premium-gold-btn" style="padding: 4px 10px; background: rgba(212,175,55,0.2); color: #d4af37; border: 1px solid rgba(212,175,55,0.4); border-radius: 4px; cursor: pointer; font-size: 0.75rem;">🔄 Refresh Folder</button>
+    </div>
     
-    <!-- Button added right here -->
-    <button onclick="loadSavedSermons()" class="premium-gold-btn" style="width: 100%; margin-bottom: 10px; padding: 8px; background: rgba(212,175,55,0.2); color: #d4af37; border: 1px solid rgba(212,175,55,0.4); border-radius: 6px; cursor: pointer;">🔄 Refresh / Open Saved Messages</button>
-    
-    <div id="saved-sermons-list" style="max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">
-        <p style="opacity: 0.3; text-align: center; padding: 10px;">Loading saved messages...</p>
+    <div style="padding: 12px;">
+        <p class="form-hint" style="font-size: 0.8rem; color: #aaa; margin-bottom: 10px;">Scroll through your stored message history below</p>
+        
+        <!-- Scrollable Folder Container -->
+        <div id="saved-sermons-list" style="max-height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-right: 4px; scrollbar-width: thin; scrollbar-color: #D4AF37 rgba(255,255,255,0.05);">
+            <p style="opacity: 0.3; text-align: center; padding: 10px;">Loading archive folder...</p>
+        </div>
     </div>
 </div>
 <!-- 5. Worship & Gospel Inspiration Panel (PASTE HERE) -->
