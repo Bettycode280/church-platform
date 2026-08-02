@@ -449,7 +449,44 @@ function deleteMember(docId, memberName) {
         });
     }
 }
+// ==========================================
+// ADD THIS MISSING FUNCTION
+// ==========================================
+async function saveNewMember() {
+    if (!db) return;
+    
+    const nameInput = document.getElementById('member_name');
+    const emailInput = document.getElementById('member_email');
+    const phoneInput = document.getElementById('member_phone');
+    const roleInput = document.getElementById('member_role');
 
+    if (!nameInput || !nameInput.value.trim()) {
+        alert("Member name is required.");
+        return;
+    }
+
+    try {
+        await db.collection("members").add({
+            name: nameInput.value.trim(),
+            email: emailInput ? emailInput.value.trim() : "",
+            phone: phoneInput ? phoneInput.value.trim() : "",
+            role: roleInput ? roleInput.value.trim() : "Member",
+            time: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        alert("New member successfully added!");
+        
+        nameInput.value = "";
+        if (emailInput) emailInput.value = "";
+        if (phoneInput) phoneInput.value = "";
+        if (roleInput) roleInput.value = "";
+
+        closeModals();
+    } catch (error) {
+        console.error("Error adding member: ", error);
+        alert("Failed to save new member. Check connection.");
+    }
+}
 function loadMemberDirectory() {
     if (typeof firebase === 'undefined') return;
     const dbInstance = firebase.firestore();
