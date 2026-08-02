@@ -174,6 +174,9 @@ async function saveSermonNotes() {
         console.error("Error saving sermon notes: ", error);
         alert("Failed to save sermon notes. Check connection.");
     }
+let editingSermonId = null;
+
+// 1. Load Saved Sermons & Render Cards with Date, Edit, Share, and Delete
 function loadSavedSermons() {
     if (typeof firebase === 'undefined') return;
     const listDiv = document.getElementById('saved-sermons-list');
@@ -191,9 +194,9 @@ function loadSavedSermons() {
             const data = doc.data();
             const docId = doc.id;
             
-            // Format the Firestore timestamp cleanly
+            // Format timestamp safely
             let dateString = "Recent";
-            if (data.time && data.time.toDate) {
+            if (data.time && typeof data.time.toDate === 'function') {
                 dateString = data.time.toDate().toLocaleDateString('en-US', {
                     month: 'short',
                     day: 'numeric',
@@ -205,21 +208,25 @@ function loadSavedSermons() {
             const emailSubject = encodeURIComponent(data.title);
             const emailBody = encodeURIComponent(`${data.title}\n\n${data.content}`);
 
-            // Escape quotes for safe injection into inline edit function
+            // Escape strings for safe injection
             const safeTitle = (data.title || '').replace(/'/g, "\\'");
             const safeContent = (data.content || '').replace(/'/g, "\\'").replace(/\n/g, '\\n');
+            const timestampMillis = data.time && data.time.toMillis ? data.time.toMillis() : Date.now();
 
             listDiv.innerHTML += `
                 <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; border: 1px solid rgba(212,175,55,0.2); margin-bottom: 8px; text-align: left; color: #fff;">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px;">
-                        <strong style="color: #D4AF37; font-size: 1rem;">${data.title}</strong>
-                        <span style="font-size: 0.75rem; color: #aaa; background: rgba(255,255,255,0.08); padding: 2px 6px; border-radius: 4px;">📅 ${dateString}</span>
+                    <!-- Title & Date Header -->
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; gap: 8px;">
+                        <strong style="color: #D4AF37; font-size: 1rem; line-height: 1.2;">${data.title}</strong>
+                        <span style="font-size: 0.7rem; color: #aaa; background: rgba(255,255,255,0.08); padding: 3px 6px; border-radius: 4px; white-space: nowrap;">📅 ${dateString}</span>
                     </div>
+                    
+                    <!-- Content -->
                     <p style="margin: 0 0 10px 0; font-size: 0.9rem; opacity: 0.9; white-space: pre-wrap;">${data.content}</p>
                     
                     <!-- Action Buttons: Edit, Share & Delete -->
                     <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px;">
-                        <button onclick="editSermon('${docId}', '${safeTitle}', '${safeContent}')" style="background: #f39c12; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold;">Edit</button>
+                        <button onclick="editSermon('${docId}', '${safeTitle}', '${safeContent}', ${timestampMillis})" style="background: #f39c12; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold;">Edit</button>
                         <a href="https://wa.me/?text=${fullShareText}" target="_blank" style="background: #25D366; color: white; text-decoration: none; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: bold;">WhatsApp</a>
                         <a href="https://www.facebook.com/sharer/sharer.php?u=&quote=${fullShareText}" target="_blank" style="background: #1877F2; color: white; text-decoration: none; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: bold;">Facebook</a>
                         <a href="mailto:?subject=${emailSubject}&body=${emailBody}" style="background: #9b59b6; color: white; text-decoration: none; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: bold;">Email</a>
@@ -231,6 +238,88 @@ function loadSavedSermons() {
             `;
         });
     });
+}
+
+// 2. Load Sermon Data into Form Inputs for Editing
+function editSermon(docId, title, content, timestampMillis) {
+    editingSermonId = docId;
+    
+    const titleInput = document.getElementById('sermon_title');
+    const contentInput = document.getElementById('sermon_content');
+    const dateInput = document.getElementById('sermon_date');
+    const saveButton = document.querySelector('button[onclick="saveSermonNotes()"]');
+
+    if (titleInput && contentInput) {
+        titleInput.value = title;
+        contentInput.value = content;
+        titleInput.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    if (dateInput && timestampMillis) {
+        const dateObj = new Date(timestampMillis);
+        const localIsoString = new Date(dateObj.getTime() - (dateObj.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+        dateInput.value = localIsoString;
+    }
+
+    if (saveButton) {
+        saveButton.innerText = "UPDATE SERMON NOTES";
+        saveButton.style.background = "#f39c12";
+    }
+}
+
+// 3. Save or Update Sermon Notes in Firebase
+async function saveSermonNotes() {
+    if (typeof firebase === 'undefined') return;
+    const titleInput = document.getElementById('sermon_title');
+    const contentInput = document.getElementById('sermon_content');
+    const dateInput = document.getElementById('sermon_date');
+    const saveButton = document.querySelector('button[onclick="saveSermonNotes()"]');
+
+    if (!titleInput || !contentInput) return;
+
+    const title = titleInput.value.trim();
+    const content = contentInput.value.trim();
+    
+    let sermonTime = firebase.firestore.FieldValue.serverTimestamp();
+    if (dateInput && dateInput.value) {
+        sermonTime = firebase.firestore.Timestamp.fromDate(new Date(dateInput.value));
+    }
+
+    if (!title || !content) {
+        alert("Please fill in both the title and content.");
+        return;
+    }
+
+    try {
+        if (editingSermonId) {
+            await db.collection("sermons").doc(editingSermonId).update({
+                title: title,
+                content: content,
+                time: sermonTime
+            });
+            alert("Sermon updated successfully!");
+            editingSermonId = null;
+            if (saveButton) {
+                saveButton.innerText = "SAVE SERMON NOTES";
+                saveButton.style.background = "#d4af37";
+            }
+        } else {
+            await db.collection("sermons").add({
+                title: title,
+                content: content,
+                time: sermonTime
+            });
+            alert("Sermon notes saved successfully!");
+        }
+
+        titleInput.value = '';
+        contentInput.value = '';
+        if (dateInput) dateInput.value = '';
+        loadSavedSermons();
+    } catch (error) {
+        console.error("Error saving sermon notes: ", error);
+        alert("Failed to save sermon notes. Check connection.");
+    }
 }
 }
 async function deleteSermon(docId) {
