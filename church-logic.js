@@ -9,21 +9,13 @@ const firebaseConfig = {
     messagingSenderId: "369831733781",
     appId: "1:369831733781:web:a7402fd123de519d7e3c1c"
 };
-
-    if (!firebase.apps.length) { 
-        firebase.initializeApp(firebaseConfig); 
-    }
-    
-    // Only declare 'db' globally if it hasn't been declared yet
-    if (typeof window.db === 'undefined') {
-        window.db = firebase.firestore();
-    }
-
-// Initialize Firebase
-if (!firebase.apps.length) { 
+// Initialize Firebase safely
+if (typeof firebase !== 'undefined' && !firebase.apps.length) { 
     firebase.initializeApp(firebaseConfig); 
 }
-const db = firebase.firestore();
+
+// Only declare 'db' globally once
+const db = (typeof firebase !== 'undefined') ? firebase.firestore() : null;
 
 // ==========================================
 // 2. NAVIGATION & UI CONTROLS
@@ -50,6 +42,7 @@ function closeModals() {
         modal.classList.remove('open');
     });
 }
+
 // ==========================================
 // 3. MISSION CONTROL SECURITY
 // ==========================================
@@ -66,10 +59,9 @@ function checkPass() {
         const adminUI = document.getElementById('admin-ui');
         if (adminUI) adminUI.style.display = 'block';
 
-        // Load dashboard data immediately upon login
         loadPrayers();
         loadMemberDirectory();
-        loadSavedSermons(); // Load sermons on unlock
+        loadSavedSermons(); 
 
         console.log("Mission Control Unlocked.");
     } else { 
@@ -83,8 +75,7 @@ function checkPass() {
 const broadcastTag = document.getElementById('broadcast-tag');
 const alertSound = document.getElementById('alert-sound');
 
-if (broadcastTag && typeof firebase !== 'undefined') {
-    const db = firebase.firestore();
+if (broadcastTag && db) {
     db.collection("churchSettings").doc("live_topic").onSnapshot(doc => {
         if (doc.exists && doc.data().title && doc.data().title.trim() !== "") { 
             const sermonTitle = doc.data().title.trim();
@@ -129,8 +120,7 @@ function selectDay(day, buttonElement) {
 }
 
 async function updateSermon() {
-    if (typeof firebase === 'undefined') return;
-    const db = firebase.firestore();
+    if (!db) return;
     const topic = document.getElementById('sermon-input').value;
     const titleToSend = topic ? topic : ""; 
 
@@ -151,59 +141,8 @@ async function updateSermon() {
     }
 }
 
-// --- NEW SERMON & MESSAGE NOTES FUNCTIONS ---
-
-async function saveSermonNotes() {
-    if (typeof firebase === 'undefined') return;
-    const titleInput = document.getElementById('sermon_title');
-    const contentInput = document.getElementById('sermon_content');
-
-    if (!titleInput || !contentInput) return;
-
-    const title = titleInput.value.trim();
-    const content = contentInput.value.trim();
-
-    if (!title || !content) {
-        alert("Please fill in both the title and content.");
-        return;
-    }
-
-    try {
-        await db.collection("sermons").add({
-            title: title,
-            content: content,
-            time: firebase.firestore.FieldValue.serverTimestamp()
-        });
-
-        alert("Sermon notes saved successfully!");
-        titleInput.value = '';
-        contentInput.value = '';
-        loadSavedSermons();
-    } catch (error) {
-        console.error("Error saving sermon notes: ", error);
-        alert("Failed to save sermon notes. Check connection.");
-    }
-let editingSermonId = null;
-
-
-}
-async function deleteSermon(docId) {
-    if (typeof firebase === 'undefined') return;
-    if (confirm("Delete this saved message permanently?")) {
-        try {
-            await db.collection("sermons").doc(docId).delete();
-        } catch (error) {
-            console.error("Error deleting sermon: ", error);
-            alert("Failed to delete message.");
-        }
-    }
-}
-
-// --------------------------------------------
-
 async function submitPrayer() {
-    if (typeof firebase === 'undefined') return;
-    const db = firebase.firestore();
+    if (!db) return;
     const nameInput = document.getElementById('p_name');
     const msgInput = document.getElementById('p_msg');
 
@@ -232,8 +171,7 @@ async function submitPrayer() {
 }
 
 async function submitBooking() {
-    if (typeof firebase === 'undefined') return;
-    const db = firebase.firestore();
+    if (!db) return;
     const nameInput = document.getElementById('b_name');
     const emailInput = document.getElementById('b_email');
     const phoneInput = document.getElementById('b_phone');
@@ -270,8 +208,7 @@ async function submitBooking() {
 }
 
 function watchMyAppointment(userName) {
-    if (!userName || typeof firebase === 'undefined') return;
-    const db = firebase.firestore();
+    if (!userName || !db) return;
 
     db.collection("churchPrayers")
         .where("name", "==", userName)
@@ -310,8 +247,7 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 async function updateAppointmentStatus(docId, newStatus) {
-    if (typeof firebase === 'undefined') return;
-    const db = firebase.firestore();
+    if (!db) return;
     try {
         await db.collection("churchPrayers").doc(docId).update({
             status: newStatus
@@ -323,8 +259,7 @@ async function updateAppointmentStatus(docId, newStatus) {
 }
 
 async function rescheduleAppointment(docId) {
-    if (typeof firebase === 'undefined') return;
-    const db = firebase.firestore();
+    if (!db) return;
     const newDay = prompt("Enter new day (e.g., Tuesday):");
     const newTime = prompt("Enter new time (e.g., 15:30):");
     
@@ -346,7 +281,7 @@ let editingSermonId = null;
 
 // 1. Load Saved Sermons & Render Cards
 function loadSavedSermons() {
-    if (typeof firebase === 'undefined') return;
+    if (!db) return;
     const listDiv = document.getElementById('saved-sermons-list');
     if (!listDiv) return;
 
@@ -374,89 +309,20 @@ function loadSavedSermons() {
             const fullShareText = encodeURIComponent(`*${data.title}*\n\n${data.content}`);
             const emailSubject = encodeURIComponent(data.title);
             const emailBody = encodeURIComponent(`${data.title}\n\n${data.content}`);
-            const timestampMillis = data.time && data.time.toMillis ? data.time.toMillis() : Date.now();
 
-            const encodedTitle = encodeURIComponent(data.title || '');
-            const encodedContent = encodeURIComponent(data.content || '');
-
-            listDiv.innerHTML += `
-                <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; border: 1px solid rgba(212,175,55,0.2); margin-bottom: 8px; text-align: left; color: #fff;">
-                    <!-- Title & Date Header -->
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; gap: 8px;">
-                        <strong style="color: #D4AF37; font-size: 1rem; line-height: 1.2;">${data.title}</strong>
-                        <span style="font-size: 0.7rem; color: #aaa; background: rgba(255,255,255,0.08); padding: 3px 6px; border-radius: 4px; white-space: nowrap;">📅 ${dateString}</span>
-                    </div>
-                    
-                    <!-- Content -->
-                    <p style="margin: 0 0 10px 0; font-size: 0.9rem; opacity: 0.9; white-space: pre-wrap;">${data.content}</p>
-                    
-                    <!-- Action Buttons -->
-                    <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px;">
-                        <button onclick="editSermon('${docId}', decodeURIComponent('${encodedTitle}'), decodeURIComponent('${encodedContent}'), ${timestampMillis})" style="background: #f39c12; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold;">Edit</button>
-                        <a href="https://wa.me/?text=${fullShareText}" target="_blank" style="background: #25D366; color: white; text-decoration: none; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: bold;">WhatsApp</a>
-                        <a href="https://www.facebook.com/sharer/sharer.php?u=&quote=${fullShareText}" target="_blank" style="background: #1877F2; color: white; text-decoration: none; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: bold;">Facebook</a>
-                        <a href="mailto:?subject=${emailSubject}&body=${emailBody}" style="background: #9b59b6; color: white; text-decoration: none; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: bold;">Email</a>
-                        <a href="https://www.tiktok.com" target="_blank" style="background: #000000; color: white; text-decoration: none; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; border: 1px solid #333;">TikTok</a>
-                        <a href="https://www.youtube.com" target="_blank" style="background: #FF0000; color: white; text-decoration: none; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: bold;">YouTube</a>
-                        <button onclick="deleteSermon('${docId}')" style="background: #e74c3c; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold;">Delete</button>
-                    </div>
-                </div>
-            `;
-        });
-    });
-}
-
-let editingSermonId = null;
-
-// 1. Load Saved Sermons & Render Cards with Date, Edit, Share, and Delete
-function loadSavedSermons() {
-    if (typeof firebase === 'undefined') return;
-    const listDiv = document.getElementById('saved-sermons-list');
-    if (!listDiv) return;
-
-    db.collection("sermons").orderBy("time", "desc").onSnapshot((snapshot) => {
-        listDiv.innerHTML = "";
-
-        if (snapshot.empty) {
-            listDiv.innerHTML = '<p style="opacity: 0.3; text-align: center; padding: 10px;">No saved messages yet.</p>';
-            return;
-        }
-
-        snapshot.forEach((doc) => {
-            const data = doc.data();
-            const docId = doc.id;
-            
-            // Format timestamp safely
-            let dateString = "Recent";
-            if (data.time && typeof data.time.toDate === 'function') {
-                dateString = data.time.toDate().toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    year: 'numeric'
-                });
-            }
-
-            const fullShareText = encodeURIComponent(`*${data.title}*\n\n${data.content}`);
-            const emailSubject = encodeURIComponent(data.title);
-            const emailBody = encodeURIComponent(`${data.title}\n\n${data.content}`);
-
-            // Escape strings for safe injection
             const safeTitle = (data.title || '').replace(/'/g, "\\'");
             const safeContent = (data.content || '').replace(/'/g, "\\'").replace(/\n/g, '\\n');
             const timestampMillis = data.time && data.time.toMillis ? data.time.toMillis() : Date.now();
 
             listDiv.innerHTML += `
                 <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; border: 1px solid rgba(212,175,55,0.2); margin-bottom: 8px; text-align: left; color: #fff;">
-                    <!-- Title & Date Header -->
                     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; gap: 8px;">
                         <strong style="color: #D4AF37; font-size: 1rem; line-height: 1.2;">${data.title}</strong>
                         <span style="font-size: 0.7rem; color: #aaa; background: rgba(255,255,255,0.08); padding: 3px 6px; border-radius: 4px; white-space: nowrap;">📅 ${dateString}</span>
                     </div>
                     
-                    <!-- Content -->
                     <p style="margin: 0 0 10px 0; font-size: 0.9rem; opacity: 0.9; white-space: pre-wrap;">${data.content}</p>
                     
-                    <!-- Action Buttons: Edit, Share & Delete -->
                     <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px;">
                         <button onclick="editSermon('${docId}', '${safeTitle}', '${safeContent}', ${timestampMillis})" style="background: #f39c12; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold;">Edit</button>
                         <a href="https://wa.me/?text=${fullShareText}" target="_blank" style="background: #25D366; color: white; text-decoration: none; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: bold;">WhatsApp</a>
@@ -501,7 +367,7 @@ function editSermon(docId, title, content, timestampMillis) {
 
 // 3. Save or Update Sermon Notes in Firebase
 async function saveSermonNotes() {
-    if (typeof firebase === 'undefined') return;
+    if (!db) return;
     const titleInput = document.getElementById('sermon_title');
     const contentInput = document.getElementById('sermon_content');
     const dateInput = document.getElementById('sermon_date');
@@ -554,9 +420,9 @@ async function saveSermonNotes() {
     }
 }
 
-// 4. Delete Sermon Function (Newly Added to Fix Reference Errors)
+// 4. Delete Sermon Function
 async function deleteSermon(docId) {
-    if (typeof firebase === 'undefined') return;
+    if (!db) return;
     if (confirm("Are you sure you want to delete this saved message?")) {
         try {
             await db.collection("sermons").doc(docId).delete();
@@ -570,11 +436,10 @@ async function deleteSermon(docId) {
 
 // 5. Member Directory Functions
 function deleteMember(docId, memberName) {
-    if (typeof firebase === 'undefined') return;
-    const dbInstance = firebase.firestore();
+    if (!db) return;
     
     if (confirm(`Are you sure you want to remove ${memberName} from the directory?`)) {
-        dbInstance.collection("members").doc(docId).delete()
+        db.collection("members").doc(docId).delete()
         .then(() => {
             console.log("Member successfully deleted.");
         })
