@@ -335,8 +335,6 @@ async function rescheduleAppointment(docId) {
 
 let editingSermonId = null;
 
-let editingSermonId = null;
-
 // 1. Load Saved Sermons & Render Cards
 function loadSavedSermons() {
     if (typeof firebase === 'undefined') return;
@@ -477,7 +475,7 @@ async function saveSermonNotes() {
         loadSavedSermons();
     } catch (error) {
         console.error("Error saving sermon notes: ", error);
-        alert("Failed to save sermon notes. Check connection.");
+        alert("Failed to save: " + error.message); // This will show the exact Firebase error on your screen
     }
 }
 
