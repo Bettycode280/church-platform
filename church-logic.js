@@ -15,6 +15,12 @@ if (!firebase.apps.length) {
 }
 const db = firebase.firestore();
 
+// Initialize Firebase
+if (!firebase.apps.length) { 
+    firebase.initializeApp(firebaseConfig); 
+}
+const db = firebase.firestore();
+
 // ==========================================
 // 2. NAVIGATION & UI CONTROLS
 // ==========================================
@@ -40,7 +46,6 @@ function closeModals() {
         modal.classList.remove('open');
     });
 }
-
 // ==========================================
 // 3. MISSION CONTROL SECURITY
 // ==========================================
