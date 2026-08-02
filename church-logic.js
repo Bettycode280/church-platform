@@ -323,6 +323,27 @@ async function saveSermonNotes() {
         alert("Failed to save sermon notes. Check connection.");
     }
 }
+// Paste checkPass right here with your other functions
+function checkPass() {
+    const passwordInput = document.getElementById('admin_password'); 
+    
+    if (!passwordInput) return;
+
+    const correctPassword = "YourSecretPassword"; // Change this to your preferred password
+
+    if (passwordInput.value === correctPassword) {
+        sessionStorage.setItem("isAdminAuthenticated", "true");
+        
+        // This hides your login box and reveals your dashboard
+        const loginContainer = document.getElementById('login-container'); 
+        const adminDashboard = document.getElementById('admin-dashboard'); 
+        
+        if (loginContainer) loginContainer.style.display = 'none';
+        if (adminDashboard) adminDashboard.style.display = 'block';
+    } else {
+        alert("Incorrect password. Please try again.");
+    }
+}
 }
 async function deleteSermon(docId) {
     if (typeof firebase === 'undefined') return;
