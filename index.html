@@ -2,212 +2,159 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DLCC | Mission Control</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DLCC | Official App</title>
     
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Mobile Home Screen Icons -->
+    <link rel="icon" type="image/jpeg" href="logo.jpg">
+    <link rel="apple-touch-icon" href="logo.jpg">
 </head>
-<body style="overflow-y: auto;"> 
+<body>
+    <!-- Background element only (Overlay tint removed) -->
+    <div class="main-bg"></div>
+
+    <img src="logo.jpg" class="app-logo" alt="DLCC Logo">
+
+    <!-- Running Marquee Text at the Bottom in Gold -->
+    <marquee style="color: #D4AF37; font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 1.6rem; position: absolute; bottom: 30px; width: 100%;">
+        Welcome to Divine Life Christian Centre (Bradford & East London) &nbsp;&nbsp;&bull;&nbsp;&nbsp; Living by Faith, Walking in Love & Transforming the World &nbsp;&nbsp;&bull;&nbsp;&nbsp; Sunday Service: 10:30 AM - 12:30 PM &nbsp;&nbsp;&bull;&nbsp;&nbsp; Fridays: 06:30 PM - 08:00 PM &nbsp;&nbsp;&bull;&nbsp;&nbsp; Jesus is Lord!
+    </marquee>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+</body>
+</html>
+
     <div class="main-bg"></div>
     <div class="overlay-tint"></div>
 
-    <!-- ========================================== -->
-    <!-- MISSION CONTROL SECURITY LOGIN OVERLAY     -->
-    <!-- ========================================== -->
-    <div id="login-overlay" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; text-align: center;">
-        <div style="margin-bottom: 20px;">
-            <h1 class="gold-text" style="font-size: 2rem; margin-bottom: 5px;">DIVINE LIFE</h1>
-            <p style="letter-spacing: 2px; opacity: 0.6; font-size: 0.8rem;">MISSION CONTROL LOCK</p>
-        </div>
-        
-        <input type="text" id="pass-input" placeholder="Enter Code..." autocomplete="new-password" name="dlcc-code"
-                style="background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); padding: 12px 20px; border-radius: 5px; color: white; text-align: center; margin-bottom: 15px; font-size: 1rem; width: 250px; -webkit-text-security: disc;">
-        
-        <button onclick="checkPass()" class="premium-gold-btn" style="width: 250px; padding: 12px;">UNLOG & ENTER</button>
+    <img src="logo.jpg" class="app-logo" alt="DLCC Logo">
+    
+   <div class="menu-trigger" onclick="toggleMenu()">
+        <div class="line"></div>
+        <div class="line"></div>
+        <div class="line"></div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- MAIN DASHBOARD CONTENT (Hidden until login) -->
-    <!-- ========================================== -->
-    <div id="admin-ui" style="display: none; padding: 40px 20px; max-width: 600px; margin: 0 auto;">
-        
-        <div style="text-align: center; margin-bottom: 30px;">
-            <h1 class="gold-text" style="font-size: 2.5rem;">MISSION CONTROL</h1>
-            <p style="letter-spacing: 3px; opacity: 0.7;">DIVINE LIFE CHRISTIAN CENTRE</p>
-        </div>
+    <div class="hero-container">
+        <div id="broadcast-tag" class="live-indicator">CONNECTING TO MISSION...</div>
+        <h1 class="main-heading">Divine Life</h1>
+        <p class="church-name">CHRISTIAN CENTRE</p>
+    </div>
 
-        <div class="admin-dashboard-grid">
+    <nav id="side-menu" class="nav-overlay">
+        <div class="close-nav" onclick="toggleMenu()" style="position:absolute; top:40px; right:30px; font-size:2.5rem; color:#D4AF37; cursor:pointer;">&times;</div>
+        
+        <div class="nav-content" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
+            <div class="menu-item" onclick="window.open('https://youtube.com/@DivineLifeChristianCentre/live')">📹 WATCH LIVE</div>
+            <div class="menu-item" onclick="toggleMenu(); openModal('giving-modal')">💰 TITHES & GIVING</div>
+            <div class="menu-item" onclick="toggleMenu(); openModal('prayer-modal')">🕊️ PRAYER REQUEST</div>
+            <div class="menu-item" onclick="toggleMenu(); openModal('booking-modal')">📅 APPOINTMENT</div>
+            <div class="menu-item" onclick="toggleMenu(); openModal('testimony-modal')">✨ TESTIMONY & PRAISE</div>
+            <div class="menu-item" onclick="toggleMenu()" style="margin-top:20px; opacity:0.5; font-size:0.8rem; border:none; background:transparent; cursor:pointer;">CLOSE MENU</div>
+        </div>
+    </nav>
+
+    <!-- Pastor's Live Feed Container -->
+    <div id="pastor-feed-container" class="glass-feed">
+        <!-- Feed items are populated here by JavaScript -->
+    </div>
+
+    <!-- Prayer Modal -->
+    <div id="prayer-modal" class="modal">
+        <div class="glass-card">
+            <h2 class="gold-text">Prayer Line</h2>
+            <p class="form-hint">Direct to the Pastor's Screen</p>
+            <input type="text" id="p_name" placeholder="Your Name" class="sleek-input">
+            <textarea id="p_msg" placeholder="Type your prayer request..." rows="4" class="sleek-input"></textarea>
+            <button class="premium-gold-btn" onclick="submitPrayer()">SEND TO PASTOR</button>
+            <div class="cancel-link" onclick="closeModals()">Cancel</div>
+        </div>
+    </div>
+
+    <!-- Appointment Modal -->
+    <div id="booking-modal" class="modal">
+        <div class="glass-card">
+            <h2 class="gold-text">Appointment</h2>
+            <p class="form-hint">Request a Private Meeting</p>
             
-            <!-- 1. Add New Member Panel -->
-            <div class="admin-panel" style="margin-bottom: 20px;">
-                <h2 class="gold-text" style="font-size: 1.1rem;">Add New Member</h2>
-                <input type="text" id="new_member_name" placeholder="Member Name (e.g. Sister Grace)" class="sleek-input" style="margin-bottom: 10px; width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px;">
-                <input type="text" id="new_member_phone" placeholder="Phone Number (e.g. +1234567890)" class="sleek-input" style="margin-bottom: 10px; width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px;">
-                <button class="premium-gold-btn" onclick="saveNewMember()" style="width: 100%;">SAVE MEMBER</button>
+            <input type="text" id="b_name" placeholder="Full Name" class="sleek-input" oninput="watchMyAppointment(this.value.trim())">
+            <input type="email" id="b_email" placeholder="Email" class="sleek-input">
+            <input type="tel" id="b_phone" placeholder="Phone" class="sleek-input">
+            
+            <label style="color: #D4AF37; font-size: 11px; display: block; text-align: left; margin: 4px 0;">Select Day</label>
+            <div id="day-selector-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-bottom: 10px;">
+                <button type="button" class="day-btn" onclick="selectDay('Monday', this)" style="padding: 8px; background: rgba(212,175,55,0.25); border: 1px solid #D4AF37; color: #fff; border-radius: 6px; cursor: pointer; font-size: 13px;">Monday</button>
+                <button type="button" class="day-btn" onclick="selectDay('Tuesday', this)" style="padding: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px; cursor: pointer; font-size: 13px;">Tuesday</button>
+                <button type="button" class="day-btn" onclick="selectDay('Wednesday', this)" style="padding: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px; cursor: pointer; font-size: 13px;">Wednesday</button>
+                <button type="button" class="day-btn" onclick="selectDay('Thursday', this)" style="padding: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px; cursor: pointer; font-size: 13px;">Thursday</button>
+                <button type="button" class="day-btn" onclick="selectDay('Friday', this)" style="padding: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px; cursor: pointer; font-size: 13px;">Friday</button>
+                <button type="button" class="day-btn" onclick="selectDay('Saturday', this)" style="padding: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px; cursor: pointer; font-size: 13px;">Saturday</button>
+                <button type="button" class="day-btn" onclick="selectDay('Sunday', this)" style="padding: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px; grid-column: span 2; cursor: pointer; font-size: 13px;">Sunday</button>
             </div>
+            <input type="hidden" id="b_day" value="Monday">
 
-            <!-- 2. Member WhatsApp Directory Panel -->
-            <div class="admin-panel" style="margin-bottom: 20px;">
-                <button class="premium-gold-btn" style="width: 100%; margin-bottom: 5px; font-size: 1.1rem; text-align: center; color: #000000; background: linear-gradient(135deg, #d4af37 0%, #aa7c11 100%); padding: 12px; border-radius: 6px; font-weight: bold; border: none; cursor: default;">Member WhatsApp Directory</button>
-                <p class="form-hint" style="font-size: 0.8rem; color: #aaa; margin-bottom: 10px;">Click a member to message them directly on WhatsApp</p>
-                
-                <div style="margin-top: 10px;">
-                    <input type="text" id="wa_quick_message" placeholder="Type message to send to selected member..." class="sleek-input" style="margin-bottom: 15px; width: 100%; padding: 10px; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff;">
-                </div>
+            <label style="color: #D4AF37; font-size: 11px; display: block; text-align: left; margin: 4px 0;">Select Time</label>
+            <input type="time" id="b_time" value="14:00" class="sleek-input" style="cursor: pointer;">
 
-                <div id="member-directory-list" style="display: flex; flex-direction: column; gap: 10px; max-height: 250px; overflow-y: auto;">
-                    <p style="opacity: 0.3; text-align: center; padding: 10px;">Loading members...</p>
-                </div>
-            </div>
+            <button class="premium-gold-btn" onclick="submitBooking()" style="margin-top: 10px;">REQUEST MEETING</button>
+            <div class="cancel-link" onclick="closeModals(); toggleMenu();">Back</div>
 
-           <!-- 3. Modern Biblical Books & Media Panel -->
-           <div class="admin-panel" style="margin-bottom: 20px;">
-               <h2 class="gold-text" style="font-size: 1.2rem;">📖 Biblical Resources & Christian Media</h2>
-               <p class="form-hint" style="font-size: 0.8rem; color: #aaa; margin-bottom: 10px;">Bible commentaries, Christian movies, and kids' animation channels</p>
-               
-               <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                   <button onclick="window.open('https://www.biblestudytools.com/commentaries/', '_blank')" style="flex: 1; min-width: 120px; padding: 10px; background: #27ae60; color: #fff; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.8rem;">📚 Bible Commentaries</button>
-                   <button onclick="window.open('https://www.youtube.com/results?search_query=christian+movies+full+length', '_blank')" style="flex: 1; min-width: 120px; padding: 10px; background: #e74c3c; color: #fff; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.8rem;">🎬 Christian Movies</button>
-                   <button onclick="window.open('https://www.youtube.com/results?search_query=christian+kids+bible+stories+cartoons', '_blank')" style="flex: 1; min-width: 120px; padding: 10px; background: #3498db; color: #fff; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.8rem;">🧸 Kids Bible Cartoons</button>
-               </div>
-           </div>
-
-           <!-- 4. Sermon & Message Notes Panel -->
-           <div class="admin-panel" style="margin-bottom: 20px;">
-               <h2 class="gold-text" style="font-size: 1.2rem;">✍️ Sermon & Message Notes</h2>
-               <p class="form-hint" style="font-size: 0.8rem; color: #aaa; margin-bottom: 10px;">Draft and save your weekly messages</p>
-               
-               <input type="text" id="sermon_title" placeholder="Message Title / Scripture Theme" class="sleek-input" style="margin-bottom: 10px; width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px; box-sizing: border-box;">
-               
-               <textarea id="sermon_content" placeholder="Type your notes, bullet points, or full message here..." class="sleek-input" style="margin-bottom: 10px; width: 100%; height: 180px; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px; resize: vertical; box-sizing: border-box;"></textarea>
-               
-               <button class="premium-gold-btn" onclick="saveSermonNotes()" style="width: 100%; padding: 10px; background: #d4af37; color: #000; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">SAVE SERMON NOTES</button>
-           </div>
-
-           <!-- Saved Messages List -->
-           <div class="admin-panel" style="margin-bottom: 20px;">
-               <h2 class="gold-text" style="font-size: 1.2rem;">📂 Saved Messages</h2>
-               <p class="form-hint" style="font-size: 0.8rem; color: #aaa; margin-bottom: 10px;">Review your previously saved sermons</p>
-               
-               <button onclick="loadSavedSermons()" class="premium-gold-btn" style="width: 100%; margin-bottom: 10px; padding: 8px; background: rgba(212,175,55,0.2); color: #d4af37; border: 1px solid rgba(212,175,55,0.4); border-radius: 6px; cursor: pointer;">🔄 Refresh / Open Saved Messages</button>
-               
-               <div id="saved-sermons-list" style="max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">
-                   <p style="opacity: 0.3; text-align: center; padding: 10px;">Loading saved messages...</p>
-               </div>
-           </div>
-
-           <!-- 5. Worship & Gospel Inspiration Panel -->
-           <div class="admin-panel" style="margin-bottom: 20px;">
-               <h2 class="gold-text" style="font-size: 1.2rem;">🎶 Pastor's Worship & Study Channel</h2>
-               <p class="form-hint" style="font-size: 0.8rem; color: #aaa; margin-bottom: 10px;">Quick links for inspiration and worship during sermon prep</p>
-               
-               <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                   <button onclick="window.open('https://www.youtube.com/results?search_query=gospel+worship+songs', '_blank')" style="flex: 1; min-width: 120px; padding: 10px; background: #FF0000; color: #fff; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.8rem;">🎵 Gospel Worship</button>
-                   <button onclick="window.open('https://www.youtube.com/results?search_query=christian+sermons+word', '_blank')" style="flex: 1; min-width: 120px; padding: 10px; background: #d4af37; color: #000; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.8rem;">📖 Study Sermons</button>
-                   <button onclick="window.open('https://www.youtube.com/results?search_query=instrumental+prayer+music', '_blank')" style="flex: 1; min-width: 120px; padding: 10px; background: #3498db; color: #fff; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.8rem;">🕊️ Prayer & Focus</button>
-               </div>
-           </div>
-
-           <!-- 6. Modern Library & Global Preachers Panel -->
-           <div class="admin-panel" style="margin-bottom: 20px;">
-               <h2 class="gold-text" style="font-size: 1.2rem;">📚 Modern Library & Global Preachers</h2>
-               <p class="form-hint" style="font-size: 0.8rem; color: #aaa; margin-bottom: 10px;">Online Bible, dictionaries, and verified links for global and African ministry leaders</p>
-               
-               <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                   <button onclick="window.open('https://www.biblegateway.com/', '_blank')" style="flex: 1; min-width: 110px; padding: 10px; background: #16a085; color: #fff; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.8rem;">📖 Online Bible</button>
-                   <button onclick="window.open('https://www.biblestudytools.com/dictionary/', '_blank')" style="flex: 1; min-width: 110px; padding: 10px; background: #27ae60; color: #fff; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.8rem;">🔤 Bible Dictionary</button>
-                   <button onclick="window.open('https://www.merriam-webster.com/', '_blank')" style="flex: 1; min-width: 110px; padding: 10px; background: #2980b9; color: #fff; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.8rem;">📖 English Dict</button>
-                   <button onclick="window.open('https://faithtabernacle.org.ng/about', '_blank')" style="flex: 1; min-width: 110px; padding: 10px; background: #d4af37; color: #000; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.8rem;">🔥 Bishop Oyedepo</button>
-                   <button onclick="window.open('https://www.youtube.com/@KoinoniaGlobal', '_blank')" style="flex: 1; min-width: 110px; padding: 10px; background: #8e44ad; color: #fff; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.8rem;">🕊️ Apostle Selman</button>
-                   <button onclick="window.open('https://www.youtube.com/@PastorJerryEze', '_blank')" style="flex: 1; min-width: 110px; padding: 10px; background: #e67e22; color: #fff; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.8rem;">⚡ Pastor Jerry Eze</button>
-               </div>
-           </div>
-
-           <!-- 7. Live Feed Panel -->
-           <div class="admin-panel" style="margin-top: 20px;">
-               <h2 class="gold-text" style="font-size: 1.2rem;">🕊️ LIVE FEED</h2>
-               <div class="scroll-area" id="prayer-list" style="max-height: 250px; overflow-y: auto;">
-                   <p style="opacity: 0.3; margin-top: 20px;">Waiting for mission data...</p>
-               </div>
-           </div>
-
-           <!-- 8. Attendance & Growth Analytics Panel -->
-           <div class="admin-panel" style="margin-top: 20px; margin-bottom: 20px; max-height: 400px; overflow-y: auto; padding-right: 5px;">
-               <button class="premium-gold-btn" style="width: 100%; margin-bottom: 5px; font-size: 1.1rem; text-align: center; color: #000000; background: linear-gradient(135deg, #d4af37 0%, #aa7c11 100%); padding: 12px; border-radius: 6px; font-weight: bold; border: none; cursor: default;">Attendance & Growth Analytics</button>
-               <p class="form-hint" style="font-size: 0.8rem; color: #aaa; margin-bottom: 10px;">Monitor weekly service attendance, first-time visitors, and historical records over time.</p>
-               
-               <div style="background: rgba(255,255,255,0.02); padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 15px;">
-                   <div style="margin-bottom: 10px;">
-                       <label style="font-size: 0.8rem; color: #ccc; display: block; margin-bottom: 4px;">Select Service Date:</label>
-                       <input type="date" id="input-analytics-date" class="sleek-input" style="width: 100%; padding: 10px; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; font-size: 0.85rem;">
-                   </div>
-                   <div style="display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap;">
-                       <input type="number" id="input-sunday-count" placeholder="Attendance" class="sleek-input" style="flex: 1; min-width: 80px; padding: 10px; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; font-size: 0.85rem;">
-                       <input type="number" id="input-visitors-count" placeholder="Visitors" class="sleek-input" style="flex: 1; min-width: 80px; padding: 10px; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; font-size: 0.85rem;">
-                       <input type="number" id="input-members-count" placeholder="Total Members" class="sleek-input" style="flex: 1; min-width: 80px; padding: 10px; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; font-size: 0.85rem;">
-                   </div>
-                   <button onclick="logAnalyticsRecord()" style="width: 100%; padding: 10px; background: #d4af37; color: #000; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.9rem;">💾 Save Log to History</button>
-               </div>
-
-               <h3 style="font-size: 0.9rem; color: #d4af37; margin-bottom: 8px; font-weight: bold;">📜 Historical Log Entries</h3>
-               <div id="analytics-history-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 220px; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px;">
-                   <p style="opacity: 0.3; text-align: center; padding: 10px; font-size: 0.8rem;">No entries recorded yet.</p>
-               </div>
-           </div>
-
-           <!-- 9. Member Testimonies & Praise Reports Panel (Enhanced with Multimedia Support) -->
-           <div class="admin-panel" style="margin-top: 20px; margin-bottom: 20px; max-height: 450px; overflow-y: auto; padding-right: 5px;">
-               <button class="premium-gold-btn" style="width: 100%; margin-bottom: 5px; font-size: 1.1rem; text-align: center; color: #000000; background: linear-gradient(135deg, #d4af37 0%, #aa7c11 100%); padding: 12px; border-radius: 6px; font-weight: bold; border: none; cursor: default;">🙏 Member Testimonies (Text, Audio & Video)</button>
-               <p class="form-hint" style="font-size: 0.8rem; color: #aaa; margin-bottom: 10px;">Submit or review testimonies with written text, voice notes, or recorded video files.</p>
-               
-               <!-- Testimony Input Form Box -->
-               <div style="background: rgba(255,255,255,0.02); padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 15px;">
-                   <div style="display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap;">
-                       <input type="text" id="input-testifier-name" placeholder="Member Name" class="sleek-input" style="flex: 1; min-width: 140px; padding: 10px; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; font-size: 0.85rem;">
-                       <input type="tel" id="input-testifier-phone" placeholder="Phone Number" class="sleek-input" style="flex: 1; min-width: 120px; padding: 10px; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; font-size: 0.85rem;">
-                   </div>
-                   <div style="margin-bottom: 10px;">
-                       <textarea id="input-testimony-text" placeholder="Share written testimony details or praise report..." class="sleek-input" rows="3" style="width: 100%; padding: 10px; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; font-size: 0.85rem; resize: vertical;"></textarea>
-                   </div>
-                   
-                   <!-- Media Upload Fields -->
-                   <div style="display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap;">
-                       <div style="flex: 1; min-width: 140px;">
-                           <label style="font-size: 0.75rem; color: #d4af37; display: block; margin-bottom: 3px;">Attach Audio (Voice/Music):</label>
-                           <input type="file" id="input-testimony-audio" accept="audio/*" style="font-size: 0.75rem; color: #ccc; width: 100%;">
-                       </div>
-                       <div style="flex: 1; min-width: 140px;">
-                           <label style="font-size: 0.75rem; color: #d4af37; display: block; margin-bottom: 3px;">Attach Video Clip:</label>
-                           <input type="file" id="input-testimony-video" accept="video/*" style="font-size: 0.75rem; color: #ccc; width: 100%;">
-                       </div>
-                   </div>
-
-                   <button onclick="logTestimonyRecord()" style="width: 100%; padding: 10px; background: #d4af37; color: #000; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.9rem;">✨ Submit Multimedia Testimony</button>
-               </div>
-
-               <!-- Testimony Records List Area -->
-               <h3 style="font-size: 0.9rem; color: #d4af37; margin-bottom: 8px; font-weight: bold;">📜 Received Testimonies Archive</h3>
-               <div id="testimony-history-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px;">
-                   <p style="opacity: 0.3; text-align: center; padding: 10px; font-size: 0.8rem;">No testimonies recorded yet.</p>
-               </div>
-           </div>
-
-           <!-- Logout Button -->
-           <div style="text-align: center; margin-top: 40px; padding-bottom: 40px;">
-               <button onclick="location.reload()" style="background:none; border:none; color:rgba(255,255,255,0.3); cursor:pointer;">Logout & Lock</button>
-           </div>
-
+            <div id="my-appointment-status"></div>
         </div>
     </div>
 
-    <!-- Firebase Initialization & Combined Functions Script Block -->
+    <!-- Testimony Modal -->
+    <div id="testimony-modal" class="modal">
+        <div class="glass-card">
+            <h2 class="gold-text">Testimony & Praise</h2>
+            <p class="form-hint">Share What God Has Done</p>
+            
+            <label style="color: #D4AF37; font-size: 11px; display: block; text-align: left; margin: 4px 0;">Testimony Format</label>
+            <div id="testimony-type-selector" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 10px;">
+                <button type="button" class="testimony-type-btn" onclick="selectTestimonyType('Text', this)" style="padding: 8px 4px; background: rgba(212,175,55,0.25); border: 1px solid #D4AF37; color: #fff; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold;">📝 Text</button>
+                <button type="button" class="testimony-type-btn" onclick="selectTestimonyType('Audio', this)" style="padding: 8px 4px; background: rgba(255,255,255,0.08); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold;">🎙️ Audio</button>
+                <button type="button" class="testimony-type-btn" onclick="selectTestimonyType('Video', this)" style="padding: 8px 4px; background: rgba(255,255,255,0.08); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold;">📹 Video</button>
+            </div>
+            <input type="hidden" id="t_type" value="Text">
+
+            <input type="text" id="t_name" placeholder="Full Name" class="sleek-input">
+            <input type="tel" id="t_phone" placeholder="Phone Number" class="sleek-input">
+            <input type="email" id="t_email" placeholder="Email Address (Optional)" class="sleek-input">
+            
+            <div id="testimony-input-container">
+                <textarea id="t_msg" placeholder="Write your testimony or praise report here..." rows="4" class="sleek-input"></textarea>
+            </div>
+            
+            <button type="button" class="premium-gold-btn" onclick="submitTestimony()" style="margin-top: 10px;">SUBMIT TESTIMONY</button>
+            <div class="cancel-link" onclick="closeModals()">Cancel</div>
+        </div>
+    </div>
+
+    <!-- Giving Modal -->
+    <div id="giving-modal" class="modal">
+        <div class="glass-card">
+            <h2 class="gold-text">Giving</h2>
+            
+            <div style="text-align: left; margin: 15px 0; color: #fff;">
+                <p style="margin: 5px 0;"><strong>Bank Name:</strong> Dominf Bank</p>
+                <p style="margin: 5px 0;"><strong>Account Name:</strong> Church Account Ministry Account</p>
+                <p style="margin: 5px 0;"><strong>Account Number:</strong> 88577397</p>
+                <p style="margin: 5px 0;"><strong>Sort Code:</strong> 677736</p>
+            </div>
+
+            <button type="button" class="premium-gold-btn" onclick="closeModals()">RETURN</button>
+        </div>
+    </div>
+
+    <audio id="alert-sound" src="alert.mp3" preload="auto"></audio>
+
+    <!-- Firebase Initialization & Core Logic Script -->
     <script>
-        // --- Firebase Config & Initialization ---
         const firebaseConfig = {
             apiKey: "AIzaSyDhLq4p_W0ArYVXYHmOZbsuyyvLqWde6js",
             authDomain: "glorywheels-507df.firebaseapp.com",
@@ -221,235 +168,178 @@
             firebase.initializeApp(firebaseConfig);
         }
 
-        // --- Security Login Check Function ---
-        function checkPass() {
-            const passInput = document.getElementById('pass-input').value.trim();
-            const validCode = 'DLCC2026'; 
-
-            if (passInput === validCode) {
-                document.getElementById('login-overlay').style.display = 'none';
-                document.getElementById('admin-ui').style.display = 'block';
-            } else {
-                alert('Incorrect Mission Code. Please try again.');
-                document.getElementById('pass-input').value = '';
+        function toggleMenu() { 
+            const nav = document.getElementById('side-menu');
+            if (nav) {
+                nav.classList.toggle('open');
             }
         }
 
-        // --- Analytics Functions ---
-        function getAnalyticsHistory() {
-            const data = localStorage.getItem('church_analytics_history');
-            return data ? JSON.parse(data) : [];
-        }
-
-        function saveAnalyticsHistory(history) {
-            localStorage.setItem('church_analytics_history', JSON.stringify(history));
-        }
-
-        function logAnalyticsRecord() {
-            const dateInput = document.getElementById('input-analytics-date').value;
-            const attendanceInput = document.getElementById('input-sunday-count').value;
-            const visitorsInput = document.getElementById('input-visitors-count').value;
-            const membersInput = document.getElementById('input-members-count').value;
-
-            if (!dateInput) {
-                alert('Please select a service date from the calendar.');
-                return;
-            }
-
-            const attendance = parseInt(attendanceInput) || 0;
-            const visitors = parseInt(visitorsInput) || 0;
-            const members = parseInt(membersInput) || 0;
-
-            const history = getAnalyticsHistory();
+        function openModal(id) { 
+            const nav = document.getElementById('side-menu');
+            if (nav) nav.classList.remove('open');
             
-            history.push({
-                date: dateInput,
-                attendance: attendance,
-                visitors: visitors,
-                members: members
+            const modal = document.getElementById(id);
+            if (modal) modal.classList.add('open'); 
+        }
+
+        function closeModals() {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                modal.classList.remove('open');
+            });
+        }
+
+        function selectDay(day, buttonElement) {
+            const dayInput = document.getElementById('b_day');
+            if (dayInput) dayInput.value = day;
+
+            const buttons = document.querySelectorAll('.day-btn');
+            buttons.forEach(btn => {
+                btn.style.background = "rgba(255,255,255,0.08)";
+                btn.style.borderColor = "rgba(212,175,55,0.3)";
             });
 
-            history.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-            saveAnalyticsHistory(history);
-            renderAnalyticsHistory();
-
-            document.getElementById('input-sunday-count').value = '';
-            document.getElementById('input-visitors-count').value = '';
-            document.getElementById('input-members-count').value = '';
+            buttonElement.style.background = "rgba(212, 175, 55, 0.25)";
+            buttonElement.style.borderColor = "#D4AF37";
         }
 
-        function deleteAnalyticsRecord(index) {
-            if (confirm('Are you sure you want to delete this specific log entry?')) {
-                const history = getAnalyticsHistory();
-                history.splice(index, 1);
-                saveAnalyticsHistory(history);
-                renderAnalyticsHistory();
-            }
-        }
+        function selectTestimonyType(type, buttonElement) {
+            const typeInput = document.getElementById('t_type');
+            if (typeInput) typeInput.value = type;
 
-        function renderAnalyticsHistory() {
-            const historyList = document.getElementById('analytics-history-list');
-            if (!historyList) return;
+            const buttons = document.querySelectorAll('.testimony-type-btn');
+            buttons.forEach(btn => {
+                btn.style.background = "rgba(255,255,255,0.08)";
+                btn.style.borderColor = "rgba(212,175,55,0.3)";
+            });
 
-            const history = getAnalyticsHistory();
-            historyList.innerHTML = '';
+            buttonElement.style.background = "rgba(212, 175, 55, 0.25)";
+            buttonElement.style.borderColor = "#D4AF37";
 
-            if (history.length === 0) {
-                historyList.innerHTML = '<p style="opacity: 0.3; text-align: center; padding: 10px; font-size: 0.8rem;">No entries recorded yet.</p>';
-                return;
-            }
+            const container = document.getElementById('testimony-input-container');
+            if (!container) return;
 
-            history.forEach((record, index) => {
-                const div = document.createElement('div');
-                div.style.cssText = "display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 6px; border-left: 3px solid #d4af37; font-size: 0.8rem; color: #fff;";
-                
-                const dateObj = new Date(record.date);
-                const formattedDate = dateObj.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
-
-                div.innerHTML = `
-                    <div>
-                        <strong style="color: #d4af37;">${formattedDate}</strong>
-                        <span style="margin-left: 10px; opacity: 0.9;">📋 Att: ${record.attendance} | 🟢 Vis: ${record.visitors} | 🔵 Mem: ${record.members}</span>
+            if (type === 'Text') {
+                container.innerHTML = `<textarea id="t_msg" placeholder="Write your testimony or praise report here..." rows="4" class="sleek-input"></textarea>`;
+            } else if (type === 'Audio') {
+                container.innerHTML = `
+                    <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 6px; border: 1px dashed rgba(212,175,55,0.4); text-align: center; margin-bottom: 5px;">
+                        <p style="font-size: 0.8rem; color: #ccc; margin-bottom: 8px;">Upload or select your audio testimony file:</p>
+                        <input type="file" id="t_file" accept="audio/*" class="sleek-input" style="font-size: 0.75rem; cursor: pointer;">
                     </div>
-                    <button onclick="deleteAnalyticsRecord(${index})" style="background: none; border: none; color: #ff4d4d; cursor: pointer; font-size: 0.9rem; font-weight: bold; padding: 2px 6px;">✕</button>
                 `;
-                historyList.appendChild(div);
-            });
+            } else if (type === 'Video') {
+                container.innerHTML = `
+                    <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 6px; border: 1px dashed rgba(212,175,55,0.4); text-align: center; margin-bottom: 5px;">
+                        <p style="font-size: 0.8rem; color: #ccc; margin-bottom: 8px;">Upload or select your video testimony file:</p>
+                        <input type="file" id="t_file" accept="video/*" class="sleek-input" style="font-size: 0.75rem; cursor: pointer;">
+                    </div>
+                `;
+            }
         }
 
-        // --- Real-Time Live Testimony Functions (Firestore + Storage Support) ---
-        function initLiveTestimonyListener() {
-            const historyList = document.getElementById('testimony-history-list');
-            if (!historyList) return;
+        async function submitPrayer() {
+            const nameInput = document.getElementById('p_name');
+            const msgInput = document.getElementById('p_msg');
 
-            const db = firebase.firestore();
-
-            db.collection("testimonies").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
-                historyList.innerHTML = '';
-
-                if (snapshot.empty) {
-                    historyList.innerHTML = '<p style="opacity: 0.3; text-align: center; padding: 10px; font-size: 0.8rem;">No testimonies recorded yet.</p>';
-                    return;
-                }
-
-                snapshot.forEach((doc) => {
-                    const record = doc.data();
-                    const id = doc.id;
-
-                    const div = document.createElement('div');
-                    div.style.cssText = "background: rgba(255,255,255,0.05); padding: 10px 12px; border-radius: 6px; border-left: 3px solid #27ae60; font-size: 0.8rem; color: #fff; margin-bottom: 6px;";
-                    
-                    let audioHtml = record.audioUrl ? `<div style="margin-top:6px;"><audio controls style="width:100%; height:32px;"><source src="${record.audioUrl}" type="audio/mpeg">Your browser does not support audio playback.</audio></div>` : '';
-                    let videoHtml = record.videoUrl ? `<div style="margin-top:6px;"><video controls style="width:100%; max-height:160px; border-radius:4px;"><source src="${record.videoUrl}" type="video/mp4">Your browser does not support video playback.</video></div>` : '';
-                    let textHtml = record.testimony ? `<p style="background: rgba(0,0,0,0.15); padding: 8px; border-radius: 4px; margin: 4px 0 0 0; color: #ddd; font-style: italic; font-size: 0.8rem;">"${record.testimony}"</p>` : '';
-
-                    div.innerHTML = `
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px;">
-                            <div>
-                                <strong style="color: #27ae60; font-size: 0.9rem;">${record.name}</strong>
-                                <span style="opacity: 0.5; margin-left: 8px; font-size: 0.75rem;">📅 ${record.date || ''} at ${record.time || ''}</span>
-                            </div>
-                            <button onclick="deleteTestimonyRecord('${id}')" style="background: none; border: none; color: #ff4d4d; cursor: pointer; font-size: 0.9rem; font-weight: bold; padding: 0 4px;">✕</button>
-                        </div>
-                        <div style="opacity: 0.85; margin-bottom: 4px; font-size: 0.78rem;">📞 Phone: ${record.phone || 'N/A'}</div>
-                        ${textHtml}
-                        ${audioHtml}
-                        ${videoHtml}
-                    `;
-                    historyList.appendChild(div);
-                });
-            });
-        }
-
-        function logTestimonyRecord() {
-            const nameInput = document.getElementById('input-testifier-name').value.trim();
-            const phoneInput = document.getElementById('input-testifier-phone').value.trim();
-            const textInput = document.getElementById('input-testimony-text').value.trim();
-            const audioFile = document.getElementById('input-testimony-audio').files[0];
-            const videoFile = document.getElementById('input-testimony-video').files[0];
-
-            if (!nameInput && !textInput && !audioFile && !videoFile) {
-                alert('Please provide at least a name and a testimony (text, audio, or video).');
+            if (!nameInput || !msgInput || !nameInput.value.trim() || !msgInput.value.trim()) {
+                alert("Please fill all fields.");
                 return;
             }
 
-            const now = new Date();
-            const dateStr = now.toISOString().split('T')[0];
-            const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            try {
+                const db = firebase.firestore();
+                await db.collection("churchPrayers").add({ 
+                    type: "PRAYER", 
+                    name: nameInput.value.trim(), 
+                    text: msgInput.value.trim(), 
+                    time: firebase.firestore.FieldValue.serverTimestamp() 
+                });
+                
+                alert("Sent to Pastor."); 
+                closeModals();
+                nameInput.value = "";
+                msgInput.value = "";
+            } catch (error) {
+                console.error("Error submitting prayer: ", error);
+                alert("Failed to send prayer request. Please check your connection.");
+            }
+        }
 
-            const db = firebase.firestore();
-            const storage = firebase.storage();
+        async function submitBooking() {
+            const nameInput = document.getElementById('b_name');
+            const emailInput = document.getElementById('b_email');
+            const phoneInput = document.getElementById('b_phone');
+            const dayInput = document.getElementById('b_day');
+            const timeInput = document.getElementById('b_time');
 
-            const saveToFirestore = (audioUrl, videoUrl) => {
-                db.collection("testimonies").add({
-                    name: nameInput || 'Anonymous',
-                    phone: phoneInput || 'N/A',
-                    testimony: textInput || '',
-                    audioUrl: audioUrl || '',
-                    videoUrl: videoUrl || '',
-                    date: dateStr,
-                    time: timeStr,
+            if (!nameInput || !nameInput.value.trim()) {
+                alert("Please enter your full name for the appointment.");
+                return;
+            }
+
+            try {
+                const db = firebase.firestore();
+                await db.collection("churchBookings").add({
+                    type: "APPOINTMENT",
+                    name: nameInput.value.trim(),
+                    email: emailInput ? emailInput.value.trim() : '',
+                    phone: phoneInput ? phoneInput.value.trim() : '',
+                    day: dayInput ? dayInput.value : 'Monday',
+                    time: timeInput ? timeInput.value : '14:00',
+                    timeCreated: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                alert("Appointment Request Sent.");
+                closeModals();
+                nameInput.value = "";
+                if(emailInput) emailInput.value = "";
+                if(phoneInput) phoneInput.value = "";
+            } catch (error) {
+                console.error("Error submitting booking: ", error);
+                alert("Failed to submit appointment request.");
+            }
+        }
+ async function submitTestimony() {
+            const typeInput = document.getElementById('t_type');
+            const nameInput = document.getElementById('t_name');
+            const phoneInput = document.getElementById('t_phone');
+            const emailInput = document.getElementById('t_email');
+            const msgInput = document.getElementById('t_msg');
+
+            if (!nameInput || !nameInput.value.trim()) {
+                alert("Please enter your full name.");
+                return;
+            }
+
+            try {
+                const db = firebase.firestore();
+                await db.collection("testimonies").add({
+                    type: typeInput ? typeInput.value : 'Text',
+                    name: nameInput.value.trim(),
+                    phone: phoneInput ? phoneInput.value.trim() : '',
+                    email: emailInput ? emailInput.value.trim() : '',
+                    testimony: msgInput ? msgInput.value.trim() : 'Media submission',
+                    date: new Date().toISOString().split('T')[0],
+                    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                }).then(() => {
-                    document.getElementById('input-testifier-name').value = '';
-                    document.getElementById('input-testifier-phone').value = '';
-                    document.getElementById('input-testimony-text').value = '';
-                    document.getElementById('input-testimony-audio').value = '';
-                    document.getElementById('input-testimony-video').value = '';
-                    alert('Multimedia testimony submitted successfully!');
-                }).catch((error) => {
-                    console.error("Error saving testimony:", error);
-                    alert("Failed to save testimony data.");
                 });
-            };
 
-            // Handle file uploads to Firebase Storage if files are chosen
-            let uploadedAudioUrl = '';
-            let uploadedVideoUrl = '';
-
-            const processUploads = async () => {
-                try {
-                    if (audioFile) {
-                        const audioRef = storage.ref().child(`testimonies/audio/${Date.now()}_${audioFile.name}`);
-                        const snapshot = await audioRef.put(audioFile);
-                        uploadedAudioUrl = await snapshot.ref.getDownloadURL();
-                    }
-                    if (videoFile) {
-                        const videoRef = storage.ref().child(`testimonies/video/${Date.now()}_${videoFile.name}`);
-                        const snapshot = await videoRef.put(videoFile);
-                        uploadedVideoUrl = await snapshot.ref.getDownloadURL();
-                    }
-                    saveToFirestore(uploadedAudioUrl, uploadedVideoUrl);
-                } catch (error) {
-                    console.error("Upload error:", error);
-                    alert("Error uploading media files.");
-                }
-            };
-
-            processUploads();
-        }
-
-        function deleteTestimonyRecord(docId) {
-            if (confirm('Are you sure you want to delete this testimony record?')) {
-                firebase.firestore().collection("testimonies").doc(docId).delete().catch((error) => {
-                    alert('Failed to delete testimony.');
-                    console.error(error);
-                });
+                alert("Testimony Submitted Successfully.");
+                closeModals();
+                nameInput.value = "";
+                if(phoneInput) phoneInput.value = "";
+                if(emailInput) emailInput.value = "";
+                if(msgInput) msgInput.value = "";
+            } catch (error) {
+                console.error("Error submitting testimony: ", error);
+                alert("Failed to submit testimony.");
             }
         }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            renderAnalyticsHistory();
-            initLiveTestimonyListener();
-            
-            const dateControl = document.getElementById('input-analytics-date');
-            if (dateControl) {
-                dateControl.value = new Date().toISOString().split('T')[0];
-            }
-        });
     </script>
 
+    <!-- Additional External Logic Script -->
     <script src="church-logic.js"></script>
 </body>
 </html>
