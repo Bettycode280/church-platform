@@ -60,6 +60,7 @@ function checkPass() {
         // Load dashboard data immediately upon login
         loadPrayers();
         loadMemberDirectory();
+        loadSavedSermons(); // Load sermons on unlock
 
         console.log("Mission Control Unlocked.");
     } else { 
@@ -140,6 +141,82 @@ async function updateSermon() {
         alert("Mission Update Failed. Check Connection.");
     }
 }
+
+// --- NEW SERMON & MESSAGE NOTES FUNCTIONS ---
+
+async function saveSermonNotes() {
+    if (typeof firebase === 'undefined') return;
+    const titleInput = document.getElementById('sermon_title');
+    const contentInput = document.getElementById('sermon_content');
+
+    if (!titleInput || !contentInput) return;
+
+    const title = titleInput.value.trim();
+    const content = contentInput.value.trim();
+
+    if (!title || !content) {
+        alert("Please fill in both the title and content.");
+        return;
+    }
+
+    try {
+        await db.collection("sermons").add({
+            title: title,
+            content: content,
+            time: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        alert("Sermon notes saved successfully!");
+        titleInput.value = '';
+        contentInput.value = '';
+        loadSavedSermons();
+    } catch (error) {
+        console.error("Error saving sermon notes: ", error);
+        alert("Failed to save sermon notes. Check connection.");
+    }
+}
+
+function loadSavedSermons() {
+    if (typeof firebase === 'undefined') return;
+    const listDiv = document.getElementById('saved-sermons-list');
+    if (!listDiv) return;
+
+    db.collection("sermons").orderBy("time", "desc").onSnapshot((snapshot) => {
+        listDiv.innerHTML = "";
+
+        if (snapshot.empty) {
+            listDiv.innerHTML = '<p style="opacity: 0.3; text-align: center; padding: 10px;">No saved messages yet.</p>';
+            return;
+        }
+
+        snapshot.forEach((doc) => {
+            const data = doc.data();
+            const docId = doc.id;
+
+            listDiv.innerHTML += `
+                <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; border: 1px solid rgba(212,175,55,0.2); margin-bottom: 8px; text-align: left; color: #fff;">
+                    <strong style="color: #D4AF37; display: block; font-size: 1rem; margin-bottom: 4px;">${data.title}</strong>
+                    <p style="margin: 0 0 8px 0; font-size: 0.9rem; opacity: 0.9; white-space: pre-wrap;">${data.content}</p>
+                    <button onclick="deleteSermon('${docId}')" style="background: #e74c3c; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 11px;">Delete</button>
+                </div>
+            `;
+        });
+    });
+}
+
+async function deleteSermon(docId) {
+    if (typeof firebase === 'undefined') return;
+    if (confirm("Delete this saved message permanently?")) {
+        try {
+            await db.collection("sermons").doc(docId).delete();
+        } catch (error) {
+            console.error("Error deleting sermon: ", error);
+            alert("Failed to delete message.");
+        }
+    }
+}
+
+// --------------------------------------------
 
 async function submitPrayer() {
     if (typeof firebase === 'undefined') return;
@@ -358,6 +435,7 @@ function deleteFeedItem(docId) {
         });
     }
 }
+
 // ==========================================
 // 6. WHATSAPP & MEMBER DIRECTORY
 // ==========================================
@@ -426,7 +504,6 @@ function loadMemberDirectory() {
     
     if (!directoryContainer) return;
 
-    // Set container to support side scrolling or vertical scrolling window
     directoryContainer.style.display = "flex";
     directoryContainer.style.flexDirection = "column";
     directoryContainer.style.maxHeight = "350px";
@@ -449,7 +526,6 @@ function loadMemberDirectory() {
               const docId = doc.id;
               const memberCard = document.createElement('div');
               
-              // Each card uses a side-scrolling inner container for actions if needed
               memberCard.style.cssText = "background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; display: flex; flex-direction: column; gap: 8px; border: 1px solid rgba(212,175,55,0.2); margin-bottom: 8px;";
               
               memberCard.innerHTML = `
