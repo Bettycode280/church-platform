@@ -174,8 +174,8 @@ async function saveSermonNotes() {
         console.error("Error saving sermon notes: ", error);
         alert("Failed to save sermon notes. Check connection.");
     }
-}
-function loadSavedSermons() {
+
+    function loadSavedSermons() {
     if (typeof firebase === 'undefined') return;
     const listDiv = document.getElementById('saved-sermons-list');
     if (!listDiv) return;
@@ -203,7 +203,7 @@ function loadSavedSermons() {
                     <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px;">
                         <a href="https://wa.me/?text=${fullShareText}" target="_blank" style="background: #25D366; color: white; text-decoration: none; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: bold;">WhatsApp</a>
                         <a href="https://www.facebook.com/sharer/sharer.php?u=&quote=${fullShareText}" target="_blank" style="background: #1877F2; color: white; text-decoration: none; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: bold;">Facebook</a>
-                        <a href="https://www.tiktok.com" target="_blank" style="background: #000000; color: white; text-decoration: none; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; border: 1px solid #333;">TikTok</a>
+                        <a href="https://www.tiktok.com" target="_blank" style="background: #000000; color: white; text-decoration: none; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; border: 1px solid #444;">TikTok</a>
                         <a href="https://www.youtube.com" target="_blank" style="background: #FF0000; color: white; text-decoration: none; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: bold;">YouTube</a>
                         <button onclick="deleteSermon('${docId}')" style="background: #e74c3c; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; margin-left: auto;">Delete</button>
                     </div>
@@ -211,6 +211,7 @@ function loadSavedSermons() {
             `;
         });
     });
+}
 }
 async function deleteSermon(docId) {
     if (typeof firebase === 'undefined') return;
