@@ -335,6 +335,8 @@ async function rescheduleAppointment(docId) {
 
 let editingSermonId = null;
 
+let editingSermonId = null;
+
 // 1. Load Saved Sermons & Render Cards
 function loadSavedSermons() {
     if (typeof firebase === 'undefined') return;
@@ -478,12 +480,28 @@ async function saveSermonNotes() {
         alert("Failed to save sermon notes. Check connection.");
     }
 }
+
+// 4. Delete Sermon Function (Newly Added to Fix Reference Errors)
+async function deleteSermon(docId) {
+    if (typeof firebase === 'undefined') return;
+    if (confirm("Are you sure you want to delete this saved message?")) {
+        try {
+            await db.collection("sermons").doc(docId).delete();
+            loadSavedSermons();
+        } catch (error) {
+            console.error("Error deleting sermon: ", error);
+            alert("Failed to delete sermon.");
+        }
+    }
+}
+
+// 5. Member Directory Functions
 function deleteMember(docId, memberName) {
     if (typeof firebase === 'undefined') return;
-    const db = firebase.firestore();
+    const dbInstance = firebase.firestore();
     
     if (confirm(`Are you sure you want to remove ${memberName} from the directory?`)) {
-        db.collection("members").doc(docId).delete()
+        dbInstance.collection("members").doc(docId).delete()
         .then(() => {
             console.log("Member successfully deleted.");
         })
@@ -496,7 +514,7 @@ function deleteMember(docId, memberName) {
 
 function loadMemberDirectory() {
     if (typeof firebase === 'undefined') return;
-    const db = firebase.firestore();
+    const dbInstance = firebase.firestore();
     const directoryContainer = document.getElementById('member-directory-list');
     
     if (!directoryContainer) return;
@@ -508,7 +526,7 @@ function loadMemberDirectory() {
     directoryContainer.style.overflowX = "hidden";
     directoryContainer.style.paddingRight = "5px";
 
-    db.collection("members")
+    dbInstance.collection("members")
       .orderBy("name", "asc")
       .onSnapshot((snapshot) => {
           directoryContainer.innerHTML = "";
