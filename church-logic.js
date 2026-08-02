@@ -176,7 +176,9 @@ async function saveSermonNotes() {
     }
 let editingSermonId = null;
 
-// 1. Load Saved Sermons & Render Cards with Date, Edit, Share, and Delete
+let editingSermonId = null;
+
+// 1. Load Saved Sermons & Render Cards
 function loadSavedSermons() {
     if (typeof firebase === 'undefined') return;
     const listDiv = document.getElementById('saved-sermons-list');
@@ -208,9 +210,9 @@ function loadSavedSermons() {
             const emailSubject = encodeURIComponent(data.title);
             const emailBody = encodeURIComponent(`${data.title}\n\n${data.content}`);
 
-            // Escape strings for safe injection
-            const safeTitle = (data.title || '').replace(/'/g, "\\'");
-            const safeContent = (data.content || '').replace(/'/g, "\\'").replace(/\n/g, '\\n');
+            // Safely encode strings to JSON for the edit function
+            const safeTitleJson = JSON.stringify(data.title || '');
+            const safeContentJson = JSON.stringify(data.content || '');
             const timestampMillis = data.time && data.time.toMillis ? data.time.toMillis() : Date.now();
 
             listDiv.innerHTML += `
@@ -224,15 +226,15 @@ function loadSavedSermons() {
                     <!-- Content -->
                     <p style="margin: 0 0 10px 0; font-size: 0.9rem; opacity: 0.9; white-space: pre-wrap;">${data.content}</p>
                     
-                    <!-- Action Buttons: Edit, Share & Delete -->
+                    <!-- Action Buttons: Properly Arranged (Edit, Share, YouTube, Delete close together) -->
                     <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px;">
-                        <button onclick="editSermon('${docId}', '${safeTitle}', '${safeContent}', ${timestampMillis})" style="background: #f39c12; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold;">Edit</button>
+                        <button onclick='editSermon("${docId}", ${safeTitleJson}, ${safeContentJson}, ${timestampMillis})' style="background: #f39c12; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold;">Edit</button>
                         <a href="https://wa.me/?text=${fullShareText}" target="_blank" style="background: #25D366; color: white; text-decoration: none; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: bold;">WhatsApp</a>
                         <a href="https://www.facebook.com/sharer/sharer.php?u=&quote=${fullShareText}" target="_blank" style="background: #1877F2; color: white; text-decoration: none; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: bold;">Facebook</a>
                         <a href="mailto:?subject=${emailSubject}&body=${emailBody}" style="background: #9b59b6; color: white; text-decoration: none; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: bold;">Email</a>
                         <a href="https://www.tiktok.com" target="_blank" style="background: #000000; color: white; text-decoration: none; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; border: 1px solid #333;">TikTok</a>
                         <a href="https://www.youtube.com" target="_blank" style="background: #FF0000; color: white; text-decoration: none; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: bold;">YouTube</a>
-                        <button onclick="deleteSermon('${docId}')" style="background: #e74c3c; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; margin-left: auto;">Delete</button>
+                        <button onclick="deleteSermon('${docId}')" style="background: #e74c3c; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold;">Delete</button>
                     </div>
                 </div>
             `;
@@ -240,7 +242,7 @@ function loadSavedSermons() {
     });
 }
 
-// 2. Load Sermon Data into Form Inputs for Editing
+// 2. Load Sermon Data into Form Inputs for Live Editing
 function editSermon(docId, title, content, timestampMillis) {
     editingSermonId = docId;
     
