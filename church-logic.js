@@ -433,7 +433,32 @@ async function deleteSermon(docId) {
         }
     }
 }
+function loadPrayers() {
+    if (!db) return;
+    const listDiv = document.getElementById('prayer-requests-list');
+    if (!listDiv) return;
 
+    db.collection("churchPrayers").orderBy("time", "desc").onSnapshot((snapshot) => {
+        listDiv.innerHTML = "";
+
+        if (snapshot.empty) {
+            listDiv.innerHTML = '<p style="opacity: 0.3; text-align: center; padding: 10px;">No prayer requests or bookings yet.</p>';
+            return;
+        }
+
+        snapshot.forEach((doc) => {
+            const data = doc.data();
+            
+            listDiv.innerHTML += `
+                <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; border: 1px solid rgba(212,175,55,0.2); margin-bottom: 8px; text-align: left; color: #fff;">
+                    <strong style="color: #D4AF37;">${data.type || 'PRAYER'}: ${data.name}</strong>
+                    <p style="margin: 4px 0; font-size: 0.9rem;">${data.text}</p>
+                    <p style="margin: 0; font-size: 0.8rem; opacity: 0.7;">Status: ${data.status || 'N/A'}</p>
+                </div>
+            `;
+        });
+    });
+}
 // 5. Member Directory Functions
 function deleteMember(docId, memberName) {
     if (!db) return;
