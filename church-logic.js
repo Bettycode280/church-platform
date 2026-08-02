@@ -57,9 +57,9 @@ function checkPass() {
         const adminUI = document.getElementById('admin-ui');
         if (adminUI) adminUI.style.display = 'block';
 
+        // Load dashboard data immediately upon login
         loadPrayers();
         loadMemberDirectory();
-        loadSavedSermons();
 
         console.log("Mission Control Unlocked.");
     } else { 
@@ -74,6 +74,7 @@ const broadcastTag = document.getElementById('broadcast-tag');
 const alertSound = document.getElementById('alert-sound');
 
 if (broadcastTag && typeof firebase !== 'undefined') {
+    const db = firebase.firestore();
     db.collection("churchSettings").doc("live_topic").onSnapshot(doc => {
         if (doc.exists && doc.data().title && doc.data().title.trim() !== "") { 
             const sermonTitle = doc.data().title.trim();
@@ -117,43 +118,9 @@ function selectDay(day, buttonElement) {
     buttonElement.style.borderColor = "#D4AF37";
 }
 
-function selectTestimonyType(type, buttonElement) {
-    const typeInput = document.getElementById('t_type');
-    if (typeInput) typeInput.value = type;
-
-    const buttons = document.querySelectorAll('.testimony-type-btn');
-    buttons.forEach(btn => {
-        btn.style.background = "rgba(255,255,255,0.08)";
-        btn.style.borderColor = "rgba(212,175,55,0.3)";
-    });
-
-    buttonElement.style.background = "rgba(212, 175, 55, 0.25)";
-    buttonElement.style.borderColor = "#D4AF37";
-
-    const container = document.getElementById('testimony-input-container');
-    if (!container) return;
-
-    if (type === 'Text') {
-        container.innerHTML = `<textarea id="t_msg" placeholder="Write your testimony or praise report here..." rows="4" class="sleek-input"></textarea>`;
-    } else if (type === 'Audio') {
-        container.innerHTML = `
-            <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 6px; border: 1px dashed rgba(212,175,55,0.4); text-align: center; margin-bottom: 5px;">
-                <p style="font-size: 0.8rem; color: #ccc; margin-bottom: 8px;">Select your audio testimony file:</p>
-                <input type="file" id="t_file" accept="audio/*" class="sleek-input" style="font-size: 0.75rem; cursor: pointer;">
-            </div>
-        `;
-    } else if (type === 'Video') {
-        container.innerHTML = `
-            <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 6px; border: 1px dashed rgba(212,175,55,0.4); text-align: center; margin-bottom: 5px;">
-                <p style="font-size: 0.8rem; color: #ccc; margin-bottom: 8px;">Select your video testimony file:</p>
-                <input type="file" id="t_file" accept="video/*" class="sleek-input" style="font-size: 0.75rem; cursor: pointer;">
-            </div>
-        `;
-    }
-}
-
 async function updateSermon() {
     if (typeof firebase === 'undefined') return;
+    const db = firebase.firestore();
     const topic = document.getElementById('sermon-input').value;
     const titleToSend = topic ? topic : ""; 
 
@@ -176,6 +143,7 @@ async function updateSermon() {
 
 async function submitPrayer() {
     if (typeof firebase === 'undefined') return;
+    const db = firebase.firestore();
     const nameInput = document.getElementById('p_name');
     const msgInput = document.getElementById('p_msg');
 
@@ -205,6 +173,7 @@ async function submitPrayer() {
 
 async function submitBooking() {
     if (typeof firebase === 'undefined') return;
+    const db = firebase.firestore();
     const nameInput = document.getElementById('b_name');
     const emailInput = document.getElementById('b_email');
     const phoneInput = document.getElementById('b_phone');
@@ -240,81 +209,9 @@ async function submitBooking() {
     }
 }
 
-async function submitTestimony() {
-    if (typeof firebase === 'undefined') return;
-    
-    const nameInput = document.getElementById('t_name');
-    const phoneInput = document.getElementById('t_phone');
-    const emailInput = document.getElementById('t_email');
-    const typeInput = document.getElementById('t_type');
-
-    if (!nameInput || !nameInput.value.trim()) {
-        alert("Please provide your name.");
-        return;
-    }
-
-    const testimonyType = typeInput ? typeInput.value : 'Text';
-    let mediaUrl = '';
-    let testimonyText = '';
-
-    if (testimonyType === 'Text') {
-        const msgEl = document.getElementById('t_msg');
-        testimonyText = msgEl ? msgEl.value.trim() : '';
-        if (!testimonyText) {
-            alert("Please write your testimony.");
-            return;
-        }
-    } else {
-        if (!window.liveRecordedBlob) {
-            alert(`Please record your ${testimonyType.toLowerCase()} testimony before submitting.`);
-            return;
-        }
-        testimonyText = 'Media submission';
-    }
-
-    try {
-        if (window.liveRecordedBlob && (testimonyType === 'Audio' || testimonyType === 'Video')) {
-            const storageRef = firebase.storage().ref();
-            const fileName = `testimonies/${Date.now()}_recording.webm`;
-            const mediaRef = storageRef.child(fileName);
-
-            const snapshot = await mediaRef.put(window.liveRecordedBlob);
-            mediaUrl = await snapshot.ref.getDownloadURL();
-        }
-
-        await db.collection("testimonies").add({
-            type: testimonyType,
-            mediaType: testimonyType.toLowerCase(),
-            name: nameInput.value.trim(),
-            phone: phoneInput ? phoneInput.value.trim() : 'N/A',
-            email: emailInput ? emailInput.value.trim() : 'N/A',
-            testimony: testimonyText,
-            mediaUrl: mediaUrl,
-            status: 'Pending',
-            approved: false,
-            archived: false,
-            date: new Date().toISOString().split('T')[0],
-            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        });
-
-        alert("Praise God! Your testimony has been successfully submitted.");
-        closeModals();
-
-        nameInput.value = "";
-        if (phoneInput) phoneInput.value = "";
-        if (emailInput) emailInput.value = "";
-        if (document.getElementById('t_msg')) document.getElementById('t_msg').value = "";
-        window.liveRecordedBlob = null;
-
-    } catch (error) {
-        console.error("Error submitting testimony: ", error);
-        alert("Failed to submit testimony. Check your connection or storage rules.");
-    }
-}
-
 function watchMyAppointment(userName) {
     if (!userName || typeof firebase === 'undefined') return;
+    const db = firebase.firestore();
 
     db.collection("churchPrayers")
         .where("name", "==", userName)
@@ -331,7 +228,7 @@ function watchMyAppointment(userName) {
             snapshot.forEach((doc) => {
                 const data = doc.data();
                 let statusColor = "#f39c12"; 
-                if (data.status === "Accepted" || data.status === "Approved") statusColor = "#2ecc71"; 
+                if (data.status === "Accepted") statusColor = "#2ecc71"; 
                 if (data.status === "Rejected") statusColor = "#e74c3c"; 
                 if (data.status === "Rescheduled") statusColor = "#3498db"; 
 
@@ -354,6 +251,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 async function updateAppointmentStatus(docId, newStatus) {
     if (typeof firebase === 'undefined') return;
+    const db = firebase.firestore();
     try {
         await db.collection("churchPrayers").doc(docId).update({
             status: newStatus
@@ -366,6 +264,7 @@ async function updateAppointmentStatus(docId, newStatus) {
 
 async function rescheduleAppointment(docId) {
     if (typeof firebase === 'undefined') return;
+    const db = firebase.firestore();
     const newDay = prompt("Enter new day (e.g., Tuesday):");
     const newTime = prompt("Enter new time (e.g., 15:30):");
     
@@ -385,14 +284,15 @@ async function rescheduleAppointment(docId) {
 
 function loadPrayers() {
     if (typeof firebase === 'undefined') return;
-    const list = document.getElementById('pastor-feed-container');
+    const db = firebase.firestore();
+    const list = document.getElementById('prayer-list');
     if (!list) return;
 
     db.collection("churchPrayers").orderBy("time", "desc").onSnapshot(snap => {
-        list.innerHTML = '<h3 style="color: #D4AF37; text-align: center; margin-bottom: 15px;">MISSION CONTROL FEED</h3>';
+        list.innerHTML = "";
         
         if (snap.empty) {
-            list.innerHTML += '<p style="opacity: 0.3; text-align: center; margin-top: 20px;">Waiting for mission data...</p>';
+            list.innerHTML = '<p style="opacity: 0.3; margin-top: 20px;">Waiting for mission data...</p>';
             return;
         }
 
@@ -406,7 +306,7 @@ function loadPrayers() {
             if (data.type === "APPOINTMENT") {
                 const currentStatus = data.status || "Pending";
                 let statusColor = "#f39c12"; 
-                if (currentStatus === "Accepted" || currentStatus === "Approved") statusColor = "#2ecc71"; 
+                if (currentStatus === "Accepted") statusColor = "#2ecc71"; 
                 if (currentStatus === "Rejected") statusColor = "#e74c3c"; 
                 if (currentStatus === "Rescheduled") statusColor = "#3498db"; 
 
@@ -414,14 +314,13 @@ function loadPrayers() {
                     <p style="margin: 4px 0;"><strong>Name:</strong> ${data.name}</p>
                     <p style="margin: 2px 0; font-size: 13px; color: #D4AF37;">📧 <strong>Email:</strong> ${data.email || 'N/A'}</p>
                     <p style="margin: 2px 0; font-size: 13px; color: #D4AF37;">☎️ <strong>Phone:</strong> ${data.phone || 'N/A'}</p>
-                    <p style="margin: 4px 0; opacity: 0.9;">📅 <strong>Requested:</strong> ${data.text || (data.day + ' at ' + data.time)}</p>
+                    <p style="margin: 4px 0; opacity: 0.9;">📅 <strong>Requested:</strong> ${data.text}</p>
                     <p style="margin: 4px 0 8px 0; font-size: 12px;">Status: <span style="color: ${statusColor}; font-weight: bold;">${currentStatus}</span></p>
                 `;
 
                 actionButtons = `
                     <div style="display: flex; gap: 6px; flex-wrap: wrap;">
                         <button onclick="updateAppointmentStatus('${docId}', 'Accepted')" style="background: #2ecc71; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 650;">Accept</button>
-                        <button onclick="updateAppointmentStatus('${docId}', 'Approved')" style="background: #27ae60; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 650;">Approve</button>
                         <button onclick="updateAppointmentStatus('${docId}', 'Rejected')" style="background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 650;">Reject</button>
                         <button onclick="rescheduleAppointment('${docId}')" style="background: #3498db; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 650;">Reschedule</button>
                         <button onclick="deleteFeedItem('${docId}')" style="background: #555; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 650;">Delete</button>
@@ -438,7 +337,7 @@ function loadPrayers() {
             }
 
             list.innerHTML += `
-                <div class="request-card" style="margin-bottom: 12px; padding: 15px; background: rgba(0,0,0,0.7); border: 1px solid rgba(212,175,55,0.4); border-radius: 8px; color: #fff;">
+                <div class="request-card" style="margin-bottom: 12px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 6px;">
                     <div style="margin-bottom: 8px;">
                         <small style="color:#D4AF37; font-weight:bold;">${data.type}</small>
                         ${detailsContent}
@@ -451,6 +350,7 @@ function loadPrayers() {
 
 function deleteFeedItem(docId) {
     if (typeof firebase === 'undefined') return;
+    const db = firebase.firestore();
     if (confirm("Remove this item from the Mission Control feed permanently?")) {
         db.collection("churchPrayers").doc(docId).delete().catch((error) => {
             console.error("Error removing document: ", error);
@@ -458,7 +358,6 @@ function deleteFeedItem(docId) {
         });
     }
 }
-
 // ==========================================
 // 6. WHATSAPP & MEMBER DIRECTORY
 // ==========================================
@@ -475,6 +374,7 @@ function messageIndividualWhatsApp(phoneNumber, memberName) {
 
 function saveNewMember() {
     if (typeof firebase === 'undefined') return;
+    const db = firebase.firestore();
     const nameInput = document.getElementById('new_member_name');
     const phoneInput = document.getElementById('new_member_phone');
 
@@ -505,8 +405,13 @@ function saveNewMember() {
 
 function deleteMember(docId, memberName) {
     if (typeof firebase === 'undefined') return;
+    const db = firebase.firestore();
+    
     if (confirm(`Are you sure you want to remove ${memberName} from the directory?`)) {
         db.collection("members").doc(docId).delete()
+        .then(() => {
+            console.log("Member successfully deleted.");
+        })
         .catch((error) => {
             console.error("Error removing member: ", error);
             alert("Failed to delete member. Check connection.");
@@ -516,13 +421,66 @@ function deleteMember(docId, memberName) {
 
 function loadMemberDirectory() {
     if (typeof firebase === 'undefined') return;
+    const db = firebase.firestore();
     const directoryContainer = document.getElementById('member-directory-list');
+    
+    if (!directoryContainer) return;
+
+    // Set container to support side scrolling or vertical scrolling window
+    directoryContainer.style.display = "flex";
+    directoryContainer.style.flexDirection = "column";
+    directoryContainer.style.maxHeight = "350px";
+    directoryContainer.style.overflowY = "auto";
+    directoryContainer.style.overflowX = "hidden";
+    directoryContainer.style.paddingRight = "5px";
+
+    db.collection("members")
+      .orderBy("name", "asc")
+      .onSnapshot((snapshot) => {
+          directoryContainer.innerHTML = "";
+
+          if (snapshot.empty) {
+              directoryContainer.innerHTML = '<p style="opacity: 0.3; text-align: center; padding: 10px;">No members saved yet.</p>';
+              return;
+          }
+
+          snapshot.forEach((doc) => {
+              const data = doc.data();
+              const docId = doc.id;
+              const memberCard = document.createElement('div');
+              
+              // Each card uses a side-scrolling inner container for actions if needed
+              memberCard.style.cssText = "background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; display: flex; flex-direction: column; gap: 8px; border: 1px solid rgba(212,175,55,0.2); margin-bottom: 8px;";
+              
+              memberCard.innerHTML = `
+                  <div style="color: #fff; text-align: left;">
+                      <strong style="display: block; font-size: 0.95rem;">${data.name}</strong>
+                      <span style="font-size: 0.75rem; color: #aaa;">${data.phone}</span>
+                  </div>
+                  <div style="display: flex; gap: 6px; overflow-x: auto; white-space: nowrap; padding-bottom: 4px; scrollbar-width: thin;">
+                      <button class="premium-gold-btn" onclick="messageIndividualWhatsApp('${data.phone}', '${data.name}')" style="margin: 0; padding: 6px 12px; font-size: 0.65rem; background: #25D366; color: #fff; border: none; border-radius: 4px; cursor: pointer; flex-shrink: 0;">WhatsApp</button>
+                      <button onclick="window.location.href='tel:${data.phone}'" style="margin: 0; padding: 6px 12px; font-size: 0.65rem; background: #3498db; color: #fff; border: none; border-radius: 4px; cursor: pointer; flex-shrink: 0;">Call</button>
+                      <button onclick="deleteMember('${docId}', '${data.name}')" style="margin: 0; padding: 6px 12px; font-size: 0.65rem; background: #e74c3c; color: #fff; border: none; border-radius: 4px; cursor: pointer; flex-shrink: 0;">Delete</button>
+                  </div>
+              `;
+              
+              directoryContainer.appendChild(memberCard);
+          });
+      });
+}
+function loadMemberDirectory() {
+    if (typeof firebase === 'undefined') return;
+    const db = firebase.firestore();
+    const directoryContainer = document.getElementById('member-directory-list');
+    
     if (!directoryContainer) return;
 
     directoryContainer.style.display = "flex";
     directoryContainer.style.flexDirection = "column";
     directoryContainer.style.maxHeight = "350px";
     directoryContainer.style.overflowY = "auto";
+    directoryContainer.style.overflowX = "hidden";
+    directoryContainer.style.paddingRight = "5px";
 
     db.collection("members")
       .orderBy("name", "asc")
@@ -546,26 +504,29 @@ function loadMemberDirectory() {
                       <strong style="display: block; font-size: 0.95rem;">${data.name}</strong>
                       <span style="font-size: 0.75rem; color: #aaa;">${data.phone}</span>
                   </div>
-                  <div style="display: flex; gap: 6px; overflow-x: auto; white-space: nowrap; padding-bottom: 4px;">
-                      <button onclick="messageIndividualWhatsApp('${data.phone}', '${data.name}')" style="margin: 0; padding: 6px 12px; font-size: 0.65rem; background: #25D366; color: #fff; border: none; border-radius: 4px; cursor: pointer; flex-shrink: 0;">WhatsApp</button>
+                  <div style="display: flex; gap: 6px; overflow-x: auto; white-space: nowrap; padding-bottom: 4px; scrollbar-width: thin;">
+                      <button class="premium-gold-btn" onclick="messageIndividualWhatsApp('${data.phone}', '${data.name}')" style="margin: 0; padding: 6px 12px; font-size: 0.65rem; background: #25D366; color: #fff; border: none; border-radius: 4px; cursor: pointer; flex-shrink: 0;">WhatsApp</button>
                       <button onclick="window.location.href='tel:${data.phone}'" style="margin: 0; padding: 6px 12px; font-size: 0.65rem; background: #3498db; color: #fff; border: none; border-radius: 4px; cursor: pointer; flex-shrink: 0;">Call</button>
                       <button onclick="deleteMember('${docId}', '${data.name}')" style="margin: 0; padding: 6px 12px; font-size: 0.65rem; background: #e74c3c; color: #fff; border: none; border-radius: 4px; cursor: pointer; flex-shrink: 0;">Delete</button>
                   </div>
               `;
+              
               directoryContainer.appendChild(memberCard);
           });
       });
 }
-
 // ==========================================
 // SAVED MESSAGES & SERMONS MANAGEMENT
 // ==========================================
 function saveSermonNotes() {
     if (typeof firebase === 'undefined') return;
+    const db = firebase.firestore();
+    
     const titleInput = document.getElementById('sermon_title');
     const contentInput = document.getElementById('sermon_content');
     
     if (!titleInput || !contentInput) return;
+    
     const title = titleInput.value.trim();
     const content = contentInput.value.trim();
     
@@ -592,7 +553,9 @@ function saveSermonNotes() {
 
 function loadSavedSermons() {
     if (typeof firebase === 'undefined') return;
+    const db = firebase.firestore();
     const sermonsContainer = document.getElementById('saved-sermons-list');
+    
     if (!sermonsContainer) return;
 
     db.collection("sermons")
@@ -612,11 +575,18 @@ function loadSavedSermons() {
               
               sermonCard.style.cssText = "background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; border: 1px solid rgba(212,175,55,0.2); text-align: left; margin-bottom: 8px;";
               
-              let dateString = "Just now";
+              // Format the Firestore timestamp safely
+              let dateString = "";
               if (data.createdAt && typeof data.createdAt.toDate === 'function') {
                   dateString = data.createdAt.toDate().toLocaleDateString(undefined, {
-                      year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
                   });
+              } else {
+                  dateString = "Just now";
               }
 
               const encodedTitle = encodeURIComponent(data.title || "Sermon");
@@ -631,11 +601,14 @@ function loadSavedSermons() {
                       <div style="display: flex; gap: 4px; flex-wrap: wrap;">
                           <button onclick="shareToWhatsApp('${encodedTitle}', '${encodedContent}')" style="background: #25D366; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; font-size: 0.6rem; cursor: pointer;">WhatsApp</button>
                           <button onclick="shareToFacebook('${encodedTitle}', '${encodedContent}')" style="background: #1877F2; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; font-size: 0.6rem; cursor: pointer;">Facebook</button>
+                          <button onclick="shareToYouTube()" style="background: #FF0000; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; font-size: 0.6rem; cursor: pointer;">YouTube</button>
+                          <button onclick="downloadSermonFile('${encodedTitle}', '${encodedContent}')" style="background: #3498db; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; font-size: 0.6rem; cursor: pointer;">Download</button>
                           <button onclick="deleteSermon('${docId}')" style="background: #e74c3c; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; font-size: 0.6rem; cursor: pointer;">Delete</button>
                       </div>
                   </div>
                   <p style="color: #ddd; font-size: 0.8rem; white-space: pre-wrap; margin: 0; opacity: 0.9;">${data.content}</p>
               `;
+              
               sermonsContainer.appendChild(sermonCard);
           });
       });
@@ -659,8 +632,32 @@ function shareToFacebook(encodedTitle, encodedContent) {
     });
 }
 
+function shareToYouTube() {
+    alert("Opening YouTube Studio so you can use these notes for your video description or community post.");
+    window.open('https://studio.youtube.com/', '_blank');
+}
+
+function downloadSermonFile(encodedTitle, encodedContent) {
+    const title = decodeURIComponent(encodedTitle);
+    const content = decodeURIComponent(encodedContent);
+    
+    const fileContent = `TITLE: ${title}\n\n${content}`;
+    const blob = new Blob([fileContent], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${title.replace(/[^a-zA-Z0-9]/g, '_')}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
 function deleteSermon(docId) {
     if (typeof firebase === 'undefined') return;
+    const db = firebase.firestore();
+    
     if (confirm("Are you sure you want to delete these sermon notes?")) {
         db.collection("sermons").doc(docId).delete()
         .catch((error) => {
