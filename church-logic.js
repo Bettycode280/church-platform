@@ -9,11 +9,15 @@ const firebaseConfig = {
     messagingSenderId: "369831733781",
     appId: "1:369831733781:web:a7402fd123de519d7e3c1c"
 };
-// Initialize Firebase
-if (!firebase.apps.length) { 
-    firebase.initializeApp(firebaseConfig); 
-}
-const db = firebase.firestore();
+
+    if (!firebase.apps.length) { 
+        firebase.initializeApp(firebaseConfig); 
+    }
+    
+    // Only declare 'db' globally if it hasn't been declared yet
+    if (typeof window.db === 'undefined') {
+        window.db = firebase.firestore();
+    }
 
 // Initialize Firebase
 if (!firebase.apps.length) { 
