@@ -20,7 +20,44 @@
 <body style="overflow-y: auto;"> 
     <div class="main-bg"></div>
     <div class="overlay-tint"></div>
+    <!-- Admin Login & Dashboard Logic -->
+    <script>
+        function checkPass() {
+            const passwordInput = document.getElementById('admin_password'); 
+            
+            if (!passwordInput) return;
 
+            // Change 'YourSecretPassword' to whatever password you want pastors to use
+            const correctPassword = "DLCC2026"; 
+
+            if (passwordInput.value === correctPassword) {
+                sessionStorage.setItem("isAdminAuthenticated", "true");
+                
+                const loginContainer = document.getElementById('login-container'); 
+                const adminDashboard = document.getElementById('admin-dashboard'); 
+                
+                if (loginContainer) loginContainer.style.display = 'none';
+                if (adminDashboard) adminDashboard.style.display = 'block';
+
+                // Load data if functions are available
+                if (typeof loadSavedSermons === 'function') loadSavedSermons();
+                if (typeof loadMemberDirectory === 'function') loadMemberDirectory();
+            } else {
+                alert("Incorrect password. Please try again.");
+            }
+        }
+
+        // Auto-unlock if already authenticated in session
+        window.addEventListener('DOMContentLoaded', () => {
+            if (sessionStorage.getItem("isAdminAuthenticated") === "true") {
+                const loginContainer = document.getElementById('login-container'); 
+                const adminDashboard = document.getElementById('admin-dashboard'); 
+                
+                if (loginContainer) loginContainer.style.display = 'none';
+                if (adminDashboard) adminDashboard.style.display = 'block';
+            }
+        });
+    </script>
     <!-- ========================================== -->
     <!-- MISSION CONTROL SECURITY LOGIN OVERLAY     -->
     <!-- ========================================== -->
