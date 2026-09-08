@@ -456,7 +456,34 @@ async function deleteSermon(docId) {
         }
     }
 }
-// --- NEW ACTION HELPERS ---
+// --- NEW ACTION HELPERS (DELETE & WHATSAPP SHARE) ---
+async function deleteRequest(docId) {
+    if (!db) {
+        alert("Database connection not found.");
+        return;
+    }
+    
+    if (!confirm("Are you sure you want to delete this request?")) return;
+
+    try {
+        await db.collection("churchPrayers").doc(docId).delete();
+        console.log("Successfully deleted document:", docId);
+    } catch (error) {
+        console.error("Error deleting document: ", error);
+        alert("Failed to delete request. Check console for permissions.");
+    }
+}
+
+function shareRequest(name, text, phone) {
+    const cleanName = name || 'Anonymous';
+    const cleanText = text || 'No details provided.';
+    const shareMessage = `Church Mission Request from ${cleanName}:\n"${cleanText}"\nPhone: ${phone || 'N/A'}`;
+    
+    // Opens WhatsApp directly with pre-filled request details
+    const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareMessage)}`;
+    window.open(whatsappUrl, '_blank');
+}
+
 async function markAsRead(docId) {
     if (!db) return;
     try {
@@ -464,28 +491,6 @@ async function markAsRead(docId) {
     } catch (e) {
         console.error("Error marking as read:", e);
     }
-}
-
-function shareRequest(name, text) {
-    if (navigator.share) {
-        navigator.share({
-            title: 'Church Mission Request',
-            text: `Request from ${name}: "${text}"`
-        }).catch(err => console.log('Error sharing:', err));
-    } else {
-        navigator.clipboard.writeText(`Request from ${name}: "${text}"`);
-        alert("Request details copied to clipboard!");
-    }
-}
-
-function openWhatsApp(phone, name) {
-    if (!phone) {
-        alert("No phone number provided for this request.");
-        return;
-    }
-    const cleanPhone = phone.replace(/[^0-9]/g, '');
-    const message = encodeURIComponent(`Hello ${name}, regarding your submission on the Church Mission Control app: `);
-    window.open(`https://wa.me/${cleanPhone}?text=${message}`, '_blank');
 }
 
 function openEmail(email, name) {
@@ -497,6 +502,7 @@ function openEmail(email, name) {
     const body = encodeURIComponent(`Hello ${name},\n\nRegarding your request on the church app...`);
     window.open(`mailto:${email}?subject=${subject}&body=${body}`, '_blank');
 }
+
 // --- ADMIN: LOAD LIVE FEED WITH RED LIVE PULSE & FULL BUTTONS ---
 function loadPrayers() {
     if (!db) return;
@@ -519,11 +525,13 @@ function loadPrayers() {
             const typeStr = data.type ? data.type.toUpperCase() : "";
             const isAppointment = typeStr === "APPOINTMENT" || data.status || (data.phone && data.phone.trim() !== "");
             
+            // Robust name resolution
+            const personName = data.name || data.fullName || data.userName || data.clientName || 'Anonymous';
             const badgeColor = isAppointment ? "#3498db" : "#D4AF37"; 
             const titlePrefix = isAppointment ? "APPOINTMENT REQUEST" : "PRAYER REQUEST";
             const isRead = data.read ? "opacity: 0.6;" : "";
 
-            // Action buttons configuration
+            // Action buttons configuration (WhatsApp button removed, share routes to WhatsApp)
             let actionButtons = "";
             if (isAppointment) {
                 actionButtons = `
@@ -532,9 +540,8 @@ function loadPrayers() {
                         <button onclick="updateAppointmentStatus('${docId}', 'Rejected')" style="background: #e74c3c; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Reject</button>
                         <button onclick="rescheduleAppointment('${docId}')" style="background: #3498db; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Reschedule</button>
                         <button onclick="markAsRead('${docId}')" style="background: #f39c12; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Read</button>
-                        <button onclick="openWhatsApp('${data.phone || ''}', '${data.name || ''}')" style="background: #25D366; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">WhatsApp</button>
-                        <button onclick="openEmail('${data.email || ''}', '${data.name || ''}')" style="background: #e67e22; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Email</button>
-                        <button onclick="shareRequest('${data.name || 'Anonymous'}', '${data.text || ''}')" style="background: #9b59b6; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Share</button>
+                        <button onclick="openEmail('${data.email || ''}', '${personName}')" style="background: #e67e22; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Email</button>
+                        <button onclick="shareRequest('${personName}', '${data.text || ''}', '${data.phone || ''}')" style="background: #25D366; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Share (WhatsApp)</button>
                         <button onclick="deleteRequest('${docId}')" style="background: #555; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Delete</button>
                     </div>
                 `;
@@ -542,9 +549,8 @@ function loadPrayers() {
                 actionButtons = `
                     <div style="margin-top: 10px; display: flex; gap: 6px; flex-wrap: wrap;">
                         <button onclick="markAsRead('${docId}')" style="background: #f39c12; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Read</button>
-                        <button onclick="openWhatsApp('${data.phone || ''}', '${data.name || ''}')" style="background: #25D366; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">WhatsApp</button>
-                        <button onclick="openEmail('${data.email || ''}', '${data.name || ''}')" style="background: #e67e22; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Email</button>
-                        <button onclick="shareRequest('${data.name || 'Anonymous'}', '${data.text || ''}')" style="background: #9b59b6; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Share</button>
+                        <button onclick="openEmail('${data.email || ''}', '${personName}')" style="background: #e67e22; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Email</button>
+                        <button onclick="shareRequest('${personName}', '${data.text || ''}', '${data.phone || ''}')" style="background: #25D366; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Share (WhatsApp)</button>
                         <button onclick="deleteRequest('${docId}')" style="background: #555; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Delete</button>
                     </div>
                 `;
@@ -553,7 +559,7 @@ function loadPrayers() {
             listDiv.innerHTML += `
                 <div style="background: rgba(255,255,255,0.05); padding: 14px; border-radius: 8px; border: 1px solid rgba(212,175,55,0.2); margin-bottom: 12px; text-align: left; color: #fff; ${isRead}">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <strong style="color: ${badgeColor}; font-size: 1rem;">${titlePrefix}: ${data.name || 'Anonymous'}</strong>
+                        <strong style="color: ${badgeColor}; font-size: 1rem;">${titlePrefix}: ${personName}</strong>
                         <span style="font-size: 0.75rem; background: ${badgeColor}; color: #000; padding: 3px 6px; border-radius: 4px; font-weight: bold;">${data.status || 'Pending'}</span>
                     </div>
                     <p style="margin: 8px 0; font-size: 0.9rem; line-height: 1.4;">${data.text || 'No details provided.'}</p>
