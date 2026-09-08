@@ -487,12 +487,11 @@ function shareRequest(name, text, phone) {
 async function markAsRead(docId) {
     if (!db) return;
     try {
-        await db.collection("churchPrayers").doc(docId).update({ read: true, status: "Read" });
+        await db.collection("churchPrayers").doc(docId).update({ read: true });
     } catch (e) {
         console.error("Error marking as read:", e);
     }
 }
-
 function openEmail(email, name) {
     if (!email) {
         alert("No email address provided for this request.");
@@ -503,7 +502,7 @@ function openEmail(email, name) {
     window.open(`mailto:${email}?subject=${subject}&body=${body}`, '_blank');
 }
 
-// --- ADMIN: LOAD LIVE FEED WITH RED LIVE PULSE & FULL BUTTONS ---
+// --- ADMIN: LOAD LIVE FEED (STRICTLY SEPARATED) ---
 function loadPrayers() {
     if (!db) return;
     const listDiv = document.getElementById('prayer-list');
@@ -521,19 +520,19 @@ function loadPrayers() {
             const data = doc.data();
             const docId = doc.id;
             
-            // Robust detection for both appointments and prayers
+            // STRICT CHECK: Only an appointment if type is explicitly APPOINTMENT
             const typeStr = data.type ? data.type.toUpperCase() : "";
-            const isAppointment = typeStr === "APPOINTMENT" || data.status || (data.phone && data.phone.trim() !== "");
+            const isAppointment = typeStr === "APPOINTMENT";
             
-            // Robust name resolution
             const personName = data.name || data.fullName || data.userName || data.clientName || 'Anonymous';
             const badgeColor = isAppointment ? "#3498db" : "#D4AF37"; 
             const titlePrefix = isAppointment ? "APPOINTMENT REQUEST" : "PRAYER REQUEST";
-            const isRead = data.read ? "opacity: 0.6;" : "";
+            const currentStatus = data.status || (isAppointment ? "Pending" : "Active");
+            const isReadStyle = data.read ? "opacity: 0.6;" : "";
 
-            // Action buttons configuration (WhatsApp button removed, share routes to WhatsApp)
             let actionButtons = "";
             if (isAppointment) {
+                // Appointment-specific buttons (Accept, Reject, Reschedule, Read, Share, Delete)
                 actionButtons = `
                     <div style="margin-top: 10px; display: flex; gap: 6px; flex-wrap: wrap;">
                         <button onclick="updateAppointmentStatus('${docId}', 'Accepted')" style="background: #2ecc71; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Accept</button>
@@ -546,6 +545,7 @@ function loadPrayers() {
                     </div>
                 `;
             } else {
+                // Prayer-specific buttons (Read, Email, Share, Delete - NO Accept/Reject/Reschedule)
                 actionButtons = `
                     <div style="margin-top: 10px; display: flex; gap: 6px; flex-wrap: wrap;">
                         <button onclick="markAsRead('${docId}')" style="background: #f39c12; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Read</button>
@@ -557,10 +557,10 @@ function loadPrayers() {
             }
 
             listDiv.innerHTML += `
-                <div style="background: rgba(255,255,255,0.05); padding: 14px; border-radius: 8px; border: 1px solid rgba(212,175,55,0.2); margin-bottom: 12px; text-align: left; color: #fff; ${isRead}">
+                <div style="background: rgba(255,255,255,0.05); padding: 14px; border-radius: 8px; border: 1px solid rgba(212,175,55,0.2); margin-bottom: 12px; text-align: left; color: #fff; ${isReadStyle}">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <strong style="color: ${badgeColor}; font-size: 1rem;">${titlePrefix}: ${personName}</strong>
-                        <span style="font-size: 0.75rem; background: ${badgeColor}; color: #000; padding: 3px 6px; border-radius: 4px; font-weight: bold;">${data.status || 'Pending'}</span>
+                        <span style="font-size: 0.75rem; background: ${badgeColor}; color: #000; padding: 3px 6px; border-radius: 4px; font-weight: bold;">${currentStatus}</span>
                     </div>
                     <p style="margin: 8px 0; font-size: 0.9rem; line-height: 1.4;">${data.text || 'No details provided.'}</p>
                     <p style="margin: 0; font-size: 0.75rem; opacity: 0.7;">Phone: ${data.phone || 'N/A'} | Email: ${data.email || 'N/A'}</p>
