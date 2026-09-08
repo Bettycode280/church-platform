@@ -281,13 +281,15 @@
 
             try {
                 const db = firebase.firestore();
-                await db.collection("churchBookings").add({
+                // Hypothesis: Unifying database collections ensures both prayers and appointments feed into the same listener UI.
+                await db.collection("churchPrayers").add({
                     type: "APPOINTMENT",
                     name: nameInput.value.trim(),
                     email: emailInput ? emailInput.value.trim() : '',
                     phone: phoneInput ? phoneInput.value.trim() : '',
                     day: dayInput ? dayInput.value : 'Monday',
                     time: timeInput ? timeInput.value : '14:00',
+                    text: `Appointment requested for ${dayInput ? dayInput.value : 'Monday'} at ${timeInput ? timeInput.value : '14:00'}`,
                     timeCreated: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
