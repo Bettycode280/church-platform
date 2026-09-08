@@ -209,33 +209,52 @@ async function submitBooking() {
 
 function watchMyAppointment(userName) {
     if (!userName || !db) return;
+    const cleanName = userName.trim();
 
     db.collection("churchPrayers")
-        .where("name", "==", userName)
+        .where("name", "==", cleanName)
         .where("type", "==", "APPOINTMENT")
         .onSnapshot((snapshot) => {
             const statusElement = document.getElementById("my-appointment-status");
             if (!statusElement) return;
 
             if (snapshot.empty) {
-                statusElement.innerHTML = `<p style="color: #aaa; font-size: 13px;">No active appointment found.</p>`;
+                statusElement.innerHTML = `<p style="color: #aaa; font-size: 13px;">No active appointment found for "${cleanName}".</p>`;
                 return;
             }
 
+            // Grab the most recent appointment if there are multiple
+            let latestDoc = null;
+            let latestTime = 0;
+
             snapshot.forEach((doc) => {
                 const data = doc.data();
-                let statusColor = "#f39c12"; 
-                if (data.status === "Accepted") statusColor = "#2ecc71"; 
-                if (data.status === "Rejected") statusColor = "#e74c3c"; 
-                if (data.status === "Rescheduled") statusColor = "#3498db"; 
-
-                statusElement.innerHTML = `
-                    <div style="border: 1.5px solid ${statusColor}; background: rgba(212, 175, 55, 0.08); padding: 12px; border-radius: 8px; margin-top: 15px; color: #fff; text-align: left;">
-                        <p style="margin: 0 0 4px 0;"><strong>Requested Time:</strong> ${data.text}</p>
-                        <p style="margin: 0;"><strong>Status:</strong> <span style="color: ${statusColor}; font-weight: bold;">${data.status}</span></p>
-                    </div>
-                `;
+                const docTime = data.time ? data.time.toMillis ? data.time.toMillis() : 0 : 0;
+                if (docTime >= latestTime) {
+                    latestTime = docTime;
+                    latestDoc = data;
+                }
             });
+
+            if (!latestDoc) return;
+
+            let statusColor = "#f39c12"; // Pending
+            if (latestDoc.status === "Accepted") statusColor = "#2ecc71"; 
+            if (latestDoc.status === "Rejected") statusColor = "#e74c3c"; 
+            if (latestDoc.status === "Rescheduled") statusColor = "#3498db"; 
+
+            statusElement.innerHTML = `
+                <div style="border: 1.5px solid ${statusColor}; background: rgba(212, 175, 55, 0.08); padding: 12px; border-radius: 8px; margin-top: 15px; color: #fff; text-align: left;">
+                    <p style="margin: 0 0 4px 0;"><strong>Requested Time:</strong> ${latestDoc.text}</p>
+                    <p style="margin: 0;"><strong>Status:</strong> <span style="color: ${statusColor}; font-weight: bold;">${latestDoc.status || 'Pending'}</span></p>
+                </div>
+            `;
+        }, (error) => {
+            console.error("Error watching appointment:", error);
+            const statusElement = document.getElementById("my-appointment-status");
+            if (statusElement) {
+                statusElement.innerHTML = `<p style="color: #e74c3c; font-size: 13px;">Check console: Firestore index required for this query.</p>`;
+            }
         });
 }
 
