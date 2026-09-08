@@ -456,7 +456,26 @@ async function deleteSermon(docId) {
         }
     }
 }
-// --- NEW ACTION HELPERS (DELETE & WHATSAPP SHARE) ---
+// --- ACTION HELPERS ---
+async function markAsRead(docId) {
+    if (!db) return;
+    try {
+        await db.collection("churchPrayers").doc(docId).update({ read: true });
+    } catch (e) {
+        console.error("Error marking as read:", e);
+    }
+}
+
+async function archiveRequest(docId) {
+    if (!db) return;
+    try {
+        await db.collection("churchPrayers").doc(docId).update({ status: "Archived", archived: true });
+        alert("Request archived.");
+    } catch (e) {
+        console.error("Error archiving:", e);
+    }
+}
+
 async function deleteRequest(docId) {
     if (!db) {
         alert("Database connection not found.");
@@ -474,103 +493,109 @@ async function deleteRequest(docId) {
     }
 }
 
-function shareRequest(name, text, phone) {
+function shareRequest(name, text, phone, email) {
     const cleanName = name || 'Anonymous';
     const cleanText = text || 'No details provided.';
-    const shareMessage = `Church Mission Request from ${cleanName}:\n"${cleanText}"\nPhone: ${phone || 'N/A'}`;
+    const shareMessage = `Church Mission Request from ${cleanName}:\n"${cleanText}"\nPhone: ${phone || 'N/A'}\nEmail: ${email || 'N/A'}`;
     
-    // Opens WhatsApp directly with pre-filled request details
-    const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareMessage)}`;
-    window.open(whatsappUrl, '_blank');
-}
-
-async function markAsRead(docId) {
-    if (!db) return;
-    try {
-        await db.collection("churchPrayers").doc(docId).update({ read: true });
-    } catch (e) {
-        console.error("Error marking as read:", e);
+    const choice = prompt("Choose sharing method:\nEnter 1 for WhatsApp\nEnter 2 for Email", "1");
+    if (choice === "1") {
+        const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareMessage)}`;
+        window.open(whatsappUrl, '_blank');
+    } else if (choice === "2") {
+        const mailtoUrl = `mailto:${email || ''}?subject=${encodeURIComponent("Church Mission Request: " + cleanName)}&body=${encodeURIComponent(shareMessage)}`;
+        window.open(mailtoUrl, '_blank');
     }
 }
-function openEmail(email, name) {
-    if (!email) {
-        alert("No email address provided for this request.");
-        return;
-    }
-    const subject = encodeURIComponent("Church Mission Control - Follow Up");
-    const body = encodeURIComponent(`Hello ${name},\n\nRegarding your request on the church app...`);
-    window.open(`mailto:${email}?subject=${subject}&body=${body}`, '_blank');
-}
 
-// --- ADMIN: LOAD LIVE FEED (STRICTLY SEPARATED) ---
+// --- 1. ADMIN: LOAD PRAYER REQUESTS LIVE FEED ---
 function loadPrayers() {
     if (!db) return;
     const listDiv = document.getElementById('prayer-list');
     if (!listDiv) return;
 
-    db.collection("churchPrayers").onSnapshot((snapshot) => {
+    db.collection("churchPrayers")
+      .where("type", "==", "PRAYER")
+      .onSnapshot((snapshot) => {
         listDiv.innerHTML = "";
 
         if (snapshot.empty) {
-            listDiv.innerHTML = '<p style="opacity: 0.3; margin-top: 20px;">Waiting for mission data...</p>';
+            listDiv.innerHTML = '<p style="opacity: 0.3; margin-top: 20px;">Waiting for prayer requests...</p>';
             return;
         }
 
         snapshot.forEach((doc) => {
             const data = doc.data();
             const docId = doc.id;
-            
-            // STRICT CHECK: Only an appointment if type is explicitly APPOINTMENT
-            const typeStr = data.type ? data.type.toUpperCase() : "";
-            const isAppointment = typeStr === "APPOINTMENT";
-            
-            const personName = data.name || data.fullName || data.userName || data.clientName || 'Anonymous';
-            const badgeColor = isAppointment ? "#3498db" : "#D4AF37"; 
-            const titlePrefix = isAppointment ? "APPOINTMENT REQUEST" : "PRAYER REQUEST";
-            const currentStatus = data.status || (isAppointment ? "Pending" : "Active");
-            const isReadStyle = data.read ? "opacity: 0.6;" : "";
-
-            let actionButtons = "";
-            if (isAppointment) {
-                // Appointment-specific buttons (Accept, Reject, Reschedule, Read, Share, Delete)
-                actionButtons = `
-                    <div style="margin-top: 10px; display: flex; gap: 6px; flex-wrap: wrap;">
-                        <button onclick="updateAppointmentStatus('${docId}', 'Accepted')" style="background: #2ecc71; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Accept</button>
-                        <button onclick="updateAppointmentStatus('${docId}', 'Rejected')" style="background: #e74c3c; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Reject</button>
-                        <button onclick="rescheduleAppointment('${docId}')" style="background: #3498db; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Reschedule</button>
-                        <button onclick="markAsRead('${docId}')" style="background: #f39c12; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Read</button>
-                        <button onclick="openEmail('${data.email || ''}', '${personName}')" style="background: #e67e22; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Email</button>
-                        <button onclick="shareRequest('${personName}', '${data.text || ''}', '${data.phone || ''}')" style="background: #25D366; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Share (WhatsApp)</button>
-                        <button onclick="deleteRequest('${docId}')" style="background: #555; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Delete</button>
-                    </div>
-                `;
-            } else {
-                // Prayer-specific buttons (Read, Email, Share, Delete - NO Accept/Reject/Reschedule)
-                actionButtons = `
-                    <div style="margin-top: 10px; display: flex; gap: 6px; flex-wrap: wrap;">
-                        <button onclick="markAsRead('${docId}')" style="background: #f39c12; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Read</button>
-                        <button onclick="openEmail('${data.email || ''}', '${personName}')" style="background: #e67e22; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Email</button>
-                        <button onclick="shareRequest('${personName}', '${data.text || ''}', '${data.phone || ''}')" style="background: #25D366; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Share (WhatsApp)</button>
-                        <button onclick="deleteRequest('${docId}')" style="background: #555; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Delete</button>
-                    </div>
-                `;
-            }
+            const personName = data.name || data.fullName || data.userName || 'Anonymous';
+            const isReadStyle = data.read ? "opacity: 0.5;" : "";
 
             listDiv.innerHTML += `
                 <div style="background: rgba(255,255,255,0.05); padding: 14px; border-radius: 8px; border: 1px solid rgba(212,175,55,0.2); margin-bottom: 12px; text-align: left; color: #fff; ${isReadStyle}">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <strong style="color: ${badgeColor}; font-size: 1rem;">${titlePrefix}: ${personName}</strong>
-                        <span style="font-size: 0.75rem; background: ${badgeColor}; color: #000; padding: 3px 6px; border-radius: 4px; font-weight: bold;">${currentStatus}</span>
+                        <strong style="color: #D4AF37; font-size: 1rem;">PRAYER REQUEST: ${personName}</strong>
+                        <span style="font-size: 0.75rem; background: #D4AF37; color: #000; padding: 3px 6px; border-radius: 4px; font-weight: bold;">${data.status || 'Active'}</span>
                     </div>
                     <p style="margin: 8px 0; font-size: 0.9rem; line-height: 1.4;">${data.text || 'No details provided.'}</p>
                     <p style="margin: 0; font-size: 0.75rem; opacity: 0.7;">Phone: ${data.phone || 'N/A'} | Email: ${data.email || 'N/A'}</p>
-                    ${actionButtons}
+                    <div style="margin-top: 10px; display: flex; gap: 6px; flex-wrap: wrap;">
+                        <button onclick="markAsRead('${docId}')" style="background: #27ae60; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Read</button>
+                        <button onclick="shareRequest('${personName}', '${data.text || ''}', '${data.phone || ''}', '${data.email || ''}')" style="background: #25D366; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Share</button>
+                        <button onclick="archiveRequest('${docId}')" style="background: #f39c12; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Archive</button>
+                        <button onclick="deleteRequest('${docId}')" style="background: #555; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Delete</button>
+                    </div>
                 </div>
             `;
         });
     }, (error) => {
-        console.error("Error loading live feed:", error);
-        listDiv.innerHTML = `<p style="color: #e74c3c; margin-top: 20px;">Error loading live feed.</p>`;
+        console.error("Error loading prayers:", error);
+    });
+}
+
+// --- 2. ADMIN: LOAD APPOINTMENTS PANEL ---
+function loadAppointments() {
+    if (!db) return;
+    const apptListDiv = document.getElementById('appointment-list');
+    if (!apptListDiv) return;
+
+    db.collection("churchPrayers")
+      .where("type", "==", "APPOINTMENT")
+      .onSnapshot((snapshot) => {
+        apptListDiv.innerHTML = "";
+
+        if (snapshot.empty) {
+            apptListDiv.innerHTML = '<p style="opacity: 0.3; margin-top: 20px;">Waiting for appointments...</p>';
+            return;
+        }
+
+        snapshot.forEach((doc) => {
+            const data = doc.data();
+            const docId = doc.id;
+            const personName = data.name || data.fullName || data.userName || 'Anonymous';
+            const isReadStyle = data.read ? "opacity: 0.5;" : "";
+
+            apptListDiv.innerHTML += `
+                <div style="background: rgba(255,255,255,0.05); padding: 14px; border-radius: 8px; border: 1px solid rgba(52,152,219,0.3); margin-bottom: 12px; text-align: left; color: #fff; ${isReadStyle}">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <strong style="color: #3498db; font-size: 1rem;">APPOINTMENT: ${personName}</strong>
+                        <span style="font-size: 0.75rem; background: #3498db; color: #fff; padding: 3px 6px; border-radius: 4px; font-weight: bold;">${data.status || 'Pending'}</span>
+                    </div>
+                    <p style="margin: 8px 0; font-size: 0.9rem; line-height: 1.4;"><strong>Time/Details:</strong> ${data.text || 'No details provided.'}</p>
+                    <p style="margin: 0; font-size: 0.75rem; opacity: 0.7;">Phone: ${data.phone || 'N/A'} | Email: ${data.email || 'N/A'}</p>
+                    <div style="margin-top: 10px; display: flex; gap: 6px; flex-wrap: wrap;">
+                        <button onclick="updateAppointmentStatus('${docId}', 'Accepted')" style="background: #2ecc71; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Accept</button>
+                        <button onclick="updateAppointmentStatus('${docId}', 'Rejected')" style="background: #e74c3c; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Reject</button>
+                        <button onclick="rescheduleAppointment('${docId}')" style="background: #3498db; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Reschedule</button>
+                        <button onclick="markAsRead('${docId}')" style="background: #27ae60; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Read</button>
+                        <button onclick="shareRequest('${personName}', '${data.text || ''}', '${data.phone || ''}', '${data.email || ''}')" style="background: #25D366; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Share</button>
+                        <button onclick="archiveRequest('${docId}')" style="background: #f39c12; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Archive</button>
+                        <button onclick="deleteRequest('${docId}')" style="background: #555; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Delete</button>
+                    </div>
+                </div>
+            `;
+        });
+    }, (error) => {
+        console.error("Error loading appointments:", error);
     });
 }
 async function saveNewMember() {
