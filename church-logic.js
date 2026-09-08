@@ -456,8 +456,48 @@ async function deleteSermon(docId) {
         }
     }
 }
+// --- NEW ACTION HELPERS ---
+async function markAsRead(docId) {
+    if (!db) return;
+    try {
+        await db.collection("churchPrayers").doc(docId).update({ read: true, status: "Read" });
+    } catch (e) {
+        console.error("Error marking as read:", e);
+    }
+}
 
-// --- ADMIN: LOAD LIVE FEED (Prayers & Appointments) ---
+function shareRequest(name, text) {
+    if (navigator.share) {
+        navigator.share({
+            title: 'Church Mission Request',
+            text: `Request from ${name}: "${text}"`
+        }).catch(err => console.log('Error sharing:', err));
+    } else {
+        navigator.clipboard.writeText(`Request from ${name}: "${text}"`);
+        alert("Request details copied to clipboard!");
+    }
+}
+
+function openWhatsApp(phone, name) {
+    if (!phone) {
+        alert("No phone number provided for this request.");
+        return;
+    }
+    const cleanPhone = phone.replace(/[^0-9]/g, '');
+    const message = encodeURIComponent(`Hello ${name}, regarding your submission on the Church Mission Control app: `);
+    window.open(`https://wa.me/${cleanPhone}?text=${message}`, '_blank');
+}
+
+function openEmail(email, name) {
+    if (!email) {
+        alert("No email address provided for this request.");
+        return;
+    }
+    const subject = encodeURIComponent("Church Mission Control - Follow Up");
+    const body = encodeURIComponent(`Hello ${name},\n\nRegarding your request on the church app...`);
+    window.open(`mailto:${email}?subject=${subject}&body=${body}`, '_blank');
+}
+// --- ADMIN: LOAD LIVE FEED WITH RED LIVE PULSE & FULL BUTTONS ---
 function loadPrayers() {
     if (!db) return;
     const listDiv = document.getElementById('prayer-list');
@@ -475,39 +515,46 @@ function loadPrayers() {
             const data = doc.data();
             const docId = doc.id;
             
-            // Bulletproof check: Identify appointment by explicit type OR presence of status/phone/email
+            // Robust detection for both appointments and prayers
             const typeStr = data.type ? data.type.toUpperCase() : "";
             const isAppointment = typeStr === "APPOINTMENT" || data.status || (data.phone && data.phone.trim() !== "");
             
-            const badgeColor = isAppointment ? "#3498db" : "#D4AF37"; // Blue for Appt, Gold for Prayer
+            const badgeColor = isAppointment ? "#3498db" : "#D4AF37"; 
             const titlePrefix = isAppointment ? "APPOINTMENT REQUEST" : "PRAYER REQUEST";
-            const currentStatus = data.status || (isAppointment ? "Pending" : "Active");
+            const isRead = data.read ? "opacity: 0.6;" : "";
 
+            // Action buttons configuration
             let actionButtons = "";
             if (isAppointment) {
-                // Appointments get Accept, Reject, Reschedule, and Delete
                 actionButtons = `
-                    <div style="margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap;">
-                        <button onclick="updateAppointmentStatus('${docId}', 'Accepted')" style="background: #2ecc71; color: #fff; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Accept</button>
-                        <button onclick="updateAppointmentStatus('${docId}', 'Rejected')" style="background: #e74c3c; color: #fff; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Reject</button>
-                        <button onclick="rescheduleAppointment('${docId}')" style="background: #3498db; color: #fff; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Reschedule</button>
-                        <button onclick="deleteRequest('${docId}')" style="background: #555; color: #fff; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Delete</button>
+                    <div style="margin-top: 10px; display: flex; gap: 6px; flex-wrap: wrap;">
+                        <button onclick="updateAppointmentStatus('${docId}', 'Accepted')" style="background: #2ecc71; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Accept</button>
+                        <button onclick="updateAppointmentStatus('${docId}', 'Rejected')" style="background: #e74c3c; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Reject</button>
+                        <button onclick="rescheduleAppointment('${docId}')" style="background: #3498db; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Reschedule</button>
+                        <button onclick="markAsRead('${docId}')" style="background: #f39c12; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Read</button>
+                        <button onclick="openWhatsApp('${data.phone || ''}', '${data.name || ''}')" style="background: #25D366; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">WhatsApp</button>
+                        <button onclick="openEmail('${data.email || ''}', '${data.name || ''}')" style="background: #e67e22; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Email</button>
+                        <button onclick="shareRequest('${data.name || 'Anonymous'}', '${data.text || ''}')" style="background: #9b59b6; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Share</button>
+                        <button onclick="deleteRequest('${docId}')" style="background: #555; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Delete</button>
                     </div>
                 `;
             } else {
-                // Prayers get a Delete / Complete button
                 actionButtons = `
-                    <div style="margin-top: 12px; display: flex; gap: 8px;">
-                        <button onclick="deleteRequest('${docId}')" style="background: #555; color: #fff; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Delete / Mark Prayed</button>
+                    <div style="margin-top: 10px; display: flex; gap: 6px; flex-wrap: wrap;">
+                        <button onclick="markAsRead('${docId}')" style="background: #f39c12; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Read</button>
+                        <button onclick="openWhatsApp('${data.phone || ''}', '${data.name || ''}')" style="background: #25D366; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">WhatsApp</button>
+                        <button onclick="openEmail('${data.email || ''}', '${data.name || ''}')" style="background: #e67e22; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Email</button>
+                        <button onclick="shareRequest('${data.name || 'Anonymous'}', '${data.text || ''}')" style="background: #9b59b6; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Share</button>
+                        <button onclick="deleteRequest('${docId}')" style="background: #555; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Delete</button>
                     </div>
                 `;
             }
 
             listDiv.innerHTML += `
-                <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; border: 1px solid rgba(212,175,55,0.2); margin-bottom: 12px; text-align: left; color: #fff;">
+                <div style="background: rgba(255,255,255,0.05); padding: 14px; border-radius: 8px; border: 1px solid rgba(212,175,55,0.2); margin-bottom: 12px; text-align: left; color: #fff; ${isRead}">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <strong style="color: ${badgeColor}; font-size: 1rem;">${titlePrefix}: ${data.name || 'Anonymous'}</strong>
-                        <span style="font-size: 0.75rem; background: ${badgeColor}; color: #000; padding: 4px 8px; border-radius: 4px; font-weight: bold;">${currentStatus}</span>
+                        <span style="font-size: 0.75rem; background: ${badgeColor}; color: #000; padding: 3px 6px; border-radius: 4px; font-weight: bold;">${data.status || 'Pending'}</span>
                     </div>
                     <p style="margin: 8px 0; font-size: 0.9rem; line-height: 1.4;">${data.text || 'No details provided.'}</p>
                     <p style="margin: 0; font-size: 0.75rem; opacity: 0.7;">Phone: ${data.phone || 'N/A'} | Email: ${data.email || 'N/A'}</p>
