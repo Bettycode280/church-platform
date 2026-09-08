@@ -456,56 +456,69 @@ async function deleteSermon(docId) {
         }
     }
 }
+
+// --- ADMIN: LOAD LIVE FEED (Prayers & Appointments) ---
 function loadPrayers() {
     if (!db) return;
-    const listDiv = document.getElementById('prayer-list'); // <-- Target matches admin.html
+    const listDiv = document.getElementById('prayer-list');
     if (!listDiv) return;
 
-    db.collection("churchPrayers")
-        .orderBy("time", "desc")
-        .onSnapshot((snapshot) => {
-            listDiv.innerHTML = "";
+    db.collection("churchPrayers").onSnapshot((snapshot) => {
+        listDiv.innerHTML = "";
 
-            if (snapshot.empty) {
-                listDiv.innerHTML = '<p style="opacity: 0.3; margin-top: 20px;">Waiting for mission data...</p>';
-                return;
-            }
+        if (snapshot.empty) {
+            listDiv.innerHTML = '<p style="opacity: 0.3; margin-top: 20px;">Waiting for mission data...</p>';
+            return;
+        }
 
-            snapshot.forEach((doc) => {
-                const data = doc.data();
-                const docId = doc.id;
-                
-                const isAppointment = data.type && data.type.toUpperCase() === "APPOINTMENT";
-                const badgeColor = isAppointment ? "#3498db" : "#D4AF37";
-                const titlePrefix = isAppointment ? "APPOINTMENT" : "PRAYER";
+        snapshot.forEach((doc) => {
+            const data = doc.data();
+            const docId = doc.id;
+            
+            // Bulletproof check: Identify appointment by explicit type OR presence of status/phone/email
+            const typeStr = data.type ? data.type.toUpperCase() : "";
+            const isAppointment = typeStr === "APPOINTMENT" || data.status || (data.phone && data.phone.trim() !== "");
+            
+            const badgeColor = isAppointment ? "#3498db" : "#D4AF37"; // Blue for Appt, Gold for Prayer
+            const titlePrefix = isAppointment ? "APPOINTMENT REQUEST" : "PRAYER REQUEST";
+            const currentStatus = data.status || (isAppointment ? "Pending" : "Active");
 
-                let actionButtons = "";
-                if (isAppointment) {
-                    actionButtons = `
-                        <div style="margin-top: 8px; display: flex; gap: 6px;">
-                            <button onclick="updateAppointmentStatus('${docId}', 'Accepted')" style="background: #2ecc71; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">Accept</button>
-                            <button onclick="updateAppointmentStatus('${docId}', 'Rejected')" style="background: #e74c3c; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">Reject</button>
-                            <button onclick="rescheduleAppointment('${docId}')" style="background: #3498db; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">Reschedule</button>
-                        </div>
-                    `;
-                }
-
-                listDiv.innerHTML += `
-                    <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; border: 1px solid rgba(212,175,55,0.2); margin-bottom: 10px; text-align: left; color: #fff;">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <strong style="color: ${badgeColor};">${titlePrefix}: ${data.name || 'Anonymous'}</strong>
-                            <span style="font-size: 0.75rem; background: ${badgeColor}; color: #000; padding: 2px 6px; border-radius: 4px; font-weight: bold;">${data.status || 'Pending'}</span>
-                        </div>
-                        <p style="margin: 6px 0; font-size: 0.9rem;">${data.text || 'No message provided.'}</p>
-                        <p style="margin: 0; font-size: 0.75rem; opacity: 0.7;">Phone: ${data.phone || 'N/A'}</p>
-                        ${actionButtons}
+            let actionButtons = "";
+            if (isAppointment) {
+                // Appointments get Accept, Reject, Reschedule, and Delete
+                actionButtons = `
+                    <div style="margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button onclick="updateAppointmentStatus('${docId}', 'Accepted')" style="background: #2ecc71; color: #fff; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Accept</button>
+                        <button onclick="updateAppointmentStatus('${docId}', 'Rejected')" style="background: #e74c3c; color: #fff; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Reject</button>
+                        <button onclick="rescheduleAppointment('${docId}')" style="background: #3498db; color: #fff; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Reschedule</button>
+                        <button onclick="deleteRequest('${docId}')" style="background: #555; color: #fff; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Delete</button>
                     </div>
                 `;
-            });
-        }, (error) => {
-            console.error("Error loading live feed:", error);
-            listDiv.innerHTML = `<p style="color: #e74c3c; margin-top: 20px;">Error loading live feed.</p>`;
+            } else {
+                // Prayers get a Delete / Complete button
+                actionButtons = `
+                    <div style="margin-top: 12px; display: flex; gap: 8px;">
+                        <button onclick="deleteRequest('${docId}')" style="background: #555; color: #fff; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Delete / Mark Prayed</button>
+                    </div>
+                `;
+            }
+
+            listDiv.innerHTML += `
+                <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; border: 1px solid rgba(212,175,55,0.2); margin-bottom: 12px; text-align: left; color: #fff;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <strong style="color: ${badgeColor}; font-size: 1rem;">${titlePrefix}: ${data.name || 'Anonymous'}</strong>
+                        <span style="font-size: 0.75rem; background: ${badgeColor}; color: #000; padding: 4px 8px; border-radius: 4px; font-weight: bold;">${currentStatus}</span>
+                    </div>
+                    <p style="margin: 8px 0; font-size: 0.9rem; line-height: 1.4;">${data.text || 'No details provided.'}</p>
+                    <p style="margin: 0; font-size: 0.75rem; opacity: 0.7;">Phone: ${data.phone || 'N/A'} | Email: ${data.email || 'N/A'}</p>
+                    ${actionButtons}
+                </div>
+            `;
         });
+    }, (error) => {
+        console.error("Error loading live feed:", error);
+        listDiv.innerHTML = `<p style="color: #e74c3c; margin-top: 20px;">Error loading live feed.</p>`;
+    });
 }
 async function saveNewMember() {
     if (!db) return;
