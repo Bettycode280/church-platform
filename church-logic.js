@@ -62,7 +62,7 @@ function checkPass() {
         loadPrayers();
         loadMemberDirectory();
         loadSavedSermons(); 
-        loadLiveFeed(); // Added to trigger live feed upon successful unlock
+        loadLiveFeed(); 
 
         console.log("Mission Control Unlocked.");
     } else { 
@@ -141,6 +141,7 @@ async function updateSermon() {
         alert("Mission Update Failed. Check Connection.");
     }
 }
+
 async function submitPrayer() {
     const nameInput = document.getElementById('p_name');
     const phoneInput = document.getElementById('p_phone');
@@ -196,8 +197,8 @@ async function submitBooking() {
             name: userName, 
             email: emailInput ? emailInput.value.trim() : "",
             phone: phoneInput ? phoneInput.value.trim() : "",
-            day: dayInput ? dayInput.value : "Monday", // Explicitly saved for targeted extraction
-            timeSlot: timeInput ? timeInput.value : "14:00", // Saved cleanly
+            day: dayInput ? dayInput.value : "Monday",
+            timeSlot: timeInput ? timeInput.value : "14:00",
             text: `${dayInput ? dayInput.value : "Monday"} at ${timeInput ? timeInput.value : "14:00"}`, 
             status: "Pending", 
             time: firebase.firestore.FieldValue.serverTimestamp() 
@@ -244,7 +245,7 @@ function watchMyAppointment(userName) {
 
             if (!latestDoc) return;
 
-            let statusColor = "#f39c12"; // Pending
+            let statusColor = "#f39c12"; 
             if (latestDoc.status === "Accepted") statusColor = "#2ecc71"; 
             if (latestDoc.status === "Rejected") statusColor = "#e74c3c"; 
             if (latestDoc.status === "Rescheduled") statusColor = "#3498db"; 
@@ -276,6 +277,9 @@ window.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('pastor-feed-container')) {
         loadLiveFeed();
     }
+    if (document.getElementById('member-directory-list')) {
+        loadMemberDirectory();
+    }
 });
 
 async function updateAppointmentStatus(docId, newStatus) {
@@ -287,27 +291,6 @@ async function updateAppointmentStatus(docId, newStatus) {
     } catch (error) {
         console.error("Error updating status: ", error);
         alert("Failed to update status.");
-    }
-}
-
-async function rescheduleAppointment(docId) {
-    if (!db) return;
-    const newDay = prompt("Enter new day (e.g., Tuesday):");
-    const newTime = prompt("Enter new time (e.g., 15:30):");
-    
-    if (!newDay || !newTime) return;
-
-    try {
-        await db.collection("churchPrayers").doc(docId).update({
-            day: newDay,
-            timeSlot: newTime,
-            text: `${newDay} at ${newTime}`,
-            status: "Rescheduled"
-        });
-        alert("Appointment rescheduled successfully.");
-    } catch (error) {
-        console.error("Error rescheduling: ", error);
-        alert("Failed to reschedule.");
     }
 }
 
@@ -464,7 +447,6 @@ async function deleteSermon(docId) {
     }
 }
 
-// --- ACTION HELPERS ---
 async function markAsRead(docId) {
     if (!db) return;
     try {
@@ -516,7 +498,6 @@ function shareRequest(name, text, phone, email) {
     }
 }
 
-// --- 1. ADMIN: LOAD PRAYER REQUESTS LIVE FEED ---
 function loadPrayers() {
     if (!db) return;
     const listDiv = document.getElementById('prayer-list');
@@ -560,14 +541,13 @@ function loadPrayers() {
     });
 }
 
-// --- FULLY WRAPPED LIVE FEED LISTENER FUNCTION ---
 function loadLiveFeed() {
     if (!db) return;
     const feedContainer = document.getElementById('pastor-feed-container');
     if (!feedContainer) return;
 
     db.collection("churchPrayers").orderBy("time", "desc").onSnapshot((snapshot) => {
-        feedContainer.innerHTML = ""; // Clear current feed
+        feedContainer.innerHTML = ""; 
 
         if (snapshot.empty) {
             feedContainer.innerHTML = '<p style="opacity: 0.3; margin-top: 20px; text-align: center; color: #fff;">No live feed items yet...</p>';
@@ -579,75 +559,115 @@ function loadLiveFeed() {
             const docId = doc.id;
             const item = document.createElement('div');
             item.className = 'feed-item';
-            // Common Date/Time formatting helper
+            
             let formattedDate = 'Just now';
             if (data.time && typeof data.time.toDate === 'function') {
                 formattedDate = data.time.toDate().toLocaleString();
             } else if (data.time) {
                 formattedDate = new Date(data.time).toLocaleString();
             }
-// ==========================================
-// LIVE FEED & APPOINTMENT RENDERING
-// ==========================================
-// (Assuming this sits inside your real-time listener loop where 'docId' and 'formattedDate' are defined)
 
-// Conditional Check for APPOINTMENT versus standard Prayer Request
-if (data.type === "APPOINTMENT") {
-    item.style.cssText = "background: rgba(212,175,55,0.08); padding: 14px; border-radius: 8px; border: 1px solid rgba(212,175,55,0.4); margin-bottom: 12px; text-align: left; color: #fff;";
-    item.innerHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-            <span style="background:#D4AF37; color:#000; padding:2px 6px; font-size:10px; font-weight: bold; border-radius:4px;">APPOINTMENT</span>
-            <span style="font-size: 0.75rem; opacity: 0.7;">📅 ${formattedDate}</span>
-        </div>
-        <h3 style="margin: 0 0 4px 0; color: #D4AF37;">${data.name || 'Anonymous'}</h3>
-        <p style="margin: 0 0 6px 0; font-size: 0.85rem; opacity: 0.8;">📧 ${data.email || 'N/A'} | 📞 ${data.phone || 'N/A'}</p>
-        <p style="margin: 0 0 6px 0; font-size: 0.95rem;"><strong>Meeting Requested:</strong> ${data.day || 'N/A'} at ${data.timeSlot || data.time || 'N/A'}</p>
-        <p style="margin: 0 0 6px 0; font-size: 0.85rem; color: #f1c40f;"><strong>Current Status:</strong> ${data.status || 'Pending ⏳'} ${data.rescheduledTime ? `<br><em>Proposed Time: ${data.rescheduledTime}</em>` : ''}</p>
-        <p style="margin: 0 0 10px 0; font-size: 0.9rem;">${data.text || 'No message provided.'}</p>
-        <div style="display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end;">
-            <button onclick="updateAppointmentStatus('${docId}', 'Accepted')" style="background: #2ecc71; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Accept</button>
-            <button onclick="rescheduleAppointment('${docId}')" style="background: #e67e22; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Reschedule</button>
-            <button onclick="updateAppointmentStatus('${docId}', 'Rejected')" style="background: #e74c3c; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Reject</button>
-            <button onclick="deleteFeedItem('${docId}')" style="background: #555; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">Delete</button>
-        </div>
-    `;
-} else {
-    // Standard Prayer Request Layout
-    item.style.cssText = "background: rgba(255,255,255,0.05); padding: 14px; border-radius: 8px; border: 1px solid rgba(52,152,219,0.3); margin-bottom: 12px; text-align: left; color: #fff;";
-    item.innerHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-            <span style="background:#007BFF; color:#fff; padding:2px 6px; font-size:10px; font-weight: bold; border-radius:4px;">PRAYER</span>
-            <span style="font-size: 0.75rem; opacity: 0.7;">📅 ${formattedDate}</span>
-        </div>
-        <h3 style="margin: 0 0 4px 0; color: #3498db;">${data.name || 'Anonymous'}</h3>
-        <p style="margin: 0 0 6px 0; font-size: 0.85rem; opacity: 0.8;">📧 ${data.email || 'N/A'} | 📞 ${data.phone || 'N/A'}</p>
-        <p style="margin: 0 0 10px 0; font-size: 0.9rem;">${data.text || 'No message provided.'}</p>
-        <div style="display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end;">
-            <button onclick="shareFeedItem('${docId}')" style="background: #3498db; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">Share</button>
-            <button onclick="archiveFeedItem('${docId}')" style="background: #e67e22; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">Archive</button>
-            <button onclick="deleteFeedItem('${docId}')" style="background: #e74c3c; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">Delete</button>
-        </div>
-    `;
+            if (data.type === "APPOINTMENT") {
+                item.style.cssText = "background: rgba(212,175,55,0.08); padding: 14px; border-radius: 8px; border: 1px solid rgba(212,175,55,0.4); margin-bottom: 12px; text-align: left; color: #fff;";
+                item.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <span style="background:#D4AF37; color:#000; padding:2px 6px; font-size:10px; font-weight: bold; border-radius:4px;">APPOINTMENT</span>
+                        <span style="font-size: 0.75rem; opacity: 0.7;">📅 ${formattedDate}</span>
+                    </div>
+                    <h3 style="margin: 0 0 4px 0; color: #D4AF37;">${data.name || 'Anonymous'}</h3>
+                    <p style="margin: 0 0 6px 0; font-size: 0.85rem; opacity: 0.8;">📧 ${data.email || 'N/A'} | 📞 ${data.phone || 'N/A'}</p>
+                    <p style="margin: 0 0 6px 0; font-size: 0.95rem;"><strong>Meeting Requested:</strong> ${data.day || 'N/A'} at ${data.timeSlot || data.time || 'N/A'}</p>
+                    <p style="margin: 0 0 6px 0; font-size: 0.85rem; color: #f1c40f;"><strong>Current Status:</strong> ${data.status || 'Pending ⏳'} ${data.rescheduledTime ? `<br><em>Proposed Time: ${data.rescheduledTime}</em>` : ''}</p>
+                    <p style="margin: 0 0 10px 0; font-size: 0.9rem;">${data.text || 'No message provided.'}</p>
+                    <div style="display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end;">
+                        <button onclick="updateAppointmentStatus('${docId}', 'Accepted')" style="background: #2ecc71; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Accept</button>
+                        <button onclick="rescheduleAppointment('${docId}')" style="background: #e67e22; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Reschedule</button>
+                        <button onclick="updateAppointmentStatus('${docId}', 'Rejected')" style="background: #e74c3c; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Reject</button>
+                        <button onclick="deleteFeedItem('${docId}')" style="background: #555; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">Delete</button>
+                    </div>
+                `;
+            } else {
+                item.style.cssText = "background: rgba(255,255,255,0.05); padding: 14px; border-radius: 8px; border: 1px solid rgba(52,152,219,0.3); margin-bottom: 12px; text-align: left; color: #fff;";
+                item.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <span style="background:#007BFF; color:#fff; padding:2px 6px; font-size:10px; font-weight: bold; border-radius:4px;">PRAYER</span>
+                        <span style="font-size: 0.75rem; opacity: 0.7;">📅 ${formattedDate}</span>
+                    </div>
+                    <h3 style="margin: 0 0 4px 0; color: #3498db;">${data.name || 'Anonymous'}</h3>
+                    <p style="margin: 0 0 6px 0; font-size: 0.85rem; opacity: 0.8;">📧 ${data.email || 'N/A'} | 📞 ${data.phone || 'N/A'}</p>
+                    <p style="margin: 0 0 10px 0; font-size: 0.9rem;">${data.text || 'No message provided.'}</p>
+                    <div style="display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end;">
+                        <button onclick="shareFeedItem('${docId}')" style="background: #3498db; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">Share</button>
+                        <button onclick="archiveFeedItem('${docId}')" style="background: #e67e22; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">Archive</button>
+                        <button onclick="deleteFeedItem('${docId}')" style="background: #e74c3c; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">Delete</button>
+                    </div>
+                `;
+            }
+            feedContainer.appendChild(item);
+        });
+    });
+}
+
+function loadMemberDirectory() {
+    if (!db) return;
+    const directoryContainer = document.getElementById('member-directory-list');
+    if (!directoryContainer) return;
+
+    db.collection("churchMembers").orderBy("name", "asc").onSnapshot((snapshot) => {
+        directoryContainer.innerHTML = "";
+
+        if (snapshot.empty) {
+            directoryContainer.innerHTML = '<p style="opacity: 0.3; text-align: center; padding: 10px;">No members found in directory.</p>';
+            return;
+        }
+
+        snapshot.forEach((doc) => {
+            const data = doc.data();
+            const docId = doc.id;
+
+            directoryContainer.innerHTML += `
+                <div style="background: rgba(255,255,255,0.05); padding: 10px 14px; border-radius: 6px; border: 1px solid rgba(212,175,55,0.2); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; color: #fff;">
+                    <div>
+                        <strong style="color: #D4AF37;">${data.name || 'Unnamed'}</strong>
+                        <p style="margin: 2px 0 0 0; font-size: 0.8rem; opacity: 0.7;">📞 ${data.phone || 'N/A'} | 📧 ${data.email || 'N/A'}</p>
+                    </div>
+                    <button onclick="deleteMember('${docId}')" style="background: #e74c3c; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">Delete</button>
+                </div>
+            `;
+        });
+    }, (error) => {
+        console.error("Error loading member directory:", error);
+    });
+}
+
+async function deleteMember(id) {
+    if (!db) return;
+    if (confirm("Are you sure you want to remove this member?")) {
+        try {
+            await db.collection("churchMembers").doc(id).delete();
+        } catch (error) {
+            console.error("Error deleting member:", error);
+            alert("Failed to delete member.");
+        }
+    }
 }
 
 // ==========================================
 // HELPER FUNCTIONS & CONTROLS
 // ==========================================
 
-// Update Appointment Status (Accepted / Rejected)
-async function updateAppointmentStatus(id, statusVal) {
-    try {
-        await firebase.firestore().collection("churchPrayers").doc(id).update({
-            status: statusVal
-        });
-        alert(`Appointment status updated to: ${statusVal}`);
-    } catch (error) {
-        console.error("Error updating appointment status: ", error);
-        alert("Failed to update status.");
+// Delete function to remove items from Firestore
+async function deleteFeedItem(id) {
+    if (confirm("Are you sure you want to remove this from the live feed?")) {
+        try {
+            await firebase.firestore().collection("churchPrayers").doc(id).delete();
+        } catch (error) {
+            console.error("Error deleting document: ", error);
+        }
     }
 }
 
-// Reschedule Appointment
+// Reschedule appointment function
 async function rescheduleAppointment(id) {
     const newDateTime = prompt("Enter the new proposed date and time for this appointment:");
     if (!newDateTime) return;
@@ -664,18 +684,18 @@ async function rescheduleAppointment(id) {
     }
 }
 
-// Delete function to remove items from Firestore
-async function deleteFeedItem(id) {
-    if (confirm("Are you sure you want to remove this from the live feed?")) {
-        try {
-            await firebase.firestore().collection("churchPrayers").doc(id).delete();
-        } catch (error) {
-            console.error("Error deleting document: ", error);
-        }
+async function updateAppointmentStatusDirect(id, statusVal) {
+    try {
+        await firebase.firestore().collection("churchPrayers").doc(id).update({
+            status: statusVal
+        });
+        alert(`Appointment status updated to: ${statusVal}`);
+    } catch (error) {
+        console.error("Error updating appointment status: ", error);
+        alert("Failed to update status.");
     }
 }
 
-// Share function
 async function shareFeedItem(id) {
     try {
         const docRef = await firebase.firestore().collection("churchPrayers").doc(id).get();
@@ -698,7 +718,6 @@ async function shareFeedItem(id) {
     }
 }
 
-// Archive function
 async function archiveFeedItem(id) {
     if (confirm("Move this item to the archive?")) {
         try {
@@ -721,7 +740,6 @@ async function archiveFeedItem(id) {
     }
 }
 
-// Archive Modal Controls
 function openArchiveModal() {
     const modal = document.getElementById('archive-modal');
     if (modal) modal.style.display = 'flex';
@@ -733,7 +751,6 @@ function closeArchiveModal() {
     if (modal) modal.style.display = 'none';
 }
 
-// Scrollable archive loader with individual deletion support
 async function loadArchivedFeed() {
     const container = document.getElementById('archive-feed-container');
     if (!container) return;
@@ -771,7 +788,7 @@ async function loadArchivedFeed() {
         container.innerHTML = "<p style='color:red;'>Failed to load archive.</p>";
     }
 }
-// Permanent deletion function for archived items
+
 async function deleteArchivedItem(id) {
     if (confirm("Are you sure you want to permanently delete this archived item?")) {
         try {
@@ -781,30 +798,5 @@ async function deleteArchivedItem(id) {
             console.error("Error deleting archived document: ", error);
             alert("Failed to delete item from archive.");
         }
-    }
-}
-// Delete function to remove items from live feed
-async function deleteFeedItem(id) {
-    if (confirm("Are you sure you want to remove this from the live feed?")) {
-        try {
-            await firebase.firestore().collection("churchPrayers").doc(id).delete();
-        } catch (error) {
-            console.error("Error deleting document: ", error);
-        }
-    }
-}// Reschedule appointment function
-async function rescheduleAppointment(id) {
-    const newDateTime = prompt("Enter the new proposed date and time for this appointment:");
-    if (!newDateTime) return;
-
-    try {
-        await firebase.firestore().collection("churchPrayers").doc(id).update({
-            status: "Rescheduled",
-            rescheduledTime: newDateTime
-        });
-        alert("Appointment marked as rescheduled.");
-    } catch (error) {
-        console.error("Error rescheduling appointment: ", error);
-        alert("Failed to update appointment status.");
     }
 }
