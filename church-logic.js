@@ -62,6 +62,7 @@ function checkPass() {
         loadPrayers();
         loadMemberDirectory();
         loadSavedSermons(); 
+        loadLiveFeed(); // Added to trigger live feed upon successful unlock
 
         console.log("Mission Control Unlocked.");
     } else { 
@@ -191,6 +192,8 @@ async function submitBooking() {
             name: userName, 
             email: emailInput ? emailInput.value.trim() : "",
             phone: phoneInput ? phoneInput.value.trim() : "",
+            day: dayInput ? dayInput.value : "Monday", // Explicitly saved for targeted extraction
+            timeSlot: timeInput ? timeInput.value : "14:00", // Saved cleanly
             text: `${dayInput ? dayInput.value : "Monday"} at ${timeInput ? timeInput.value : "14:00"}`, 
             status: "Pending", 
             time: firebase.firestore.FieldValue.serverTimestamp() 
@@ -223,7 +226,6 @@ function watchMyAppointment(userName) {
                 return;
             }
 
-            // Grab the most recent appointment if there are multiple
             let latestDoc = null;
             let latestTime = 0;
 
@@ -257,18 +259,21 @@ function watchMyAppointment(userName) {
             }
         });
 }
+
 window.addEventListener('DOMContentLoaded', () => {
-    // 1. For the Member App: Check appointment status if the user's name is saved
     const savedName = localStorage.getItem('church_user_name');
     if (savedName) {
         watchMyAppointment(savedName);
     }
 
-    // 2. For the Pastor Mission Control (Admin Dashboard): Start the live feed automatically
     if (document.getElementById('prayer-list')) {
         loadPrayers();
     }
+    if (document.getElementById('pastor-feed-container')) {
+        loadLiveFeed();
+    }
 });
+
 async function updateAppointmentStatus(docId, newStatus) {
     if (!db) return;
     try {
@@ -290,6 +295,8 @@ async function rescheduleAppointment(docId) {
 
     try {
         await db.collection("churchPrayers").doc(docId).update({
+            day: newDay,
+            timeSlot: newTime,
             text: `${newDay} at ${newTime}`,
             status: "Rescheduled"
         });
@@ -302,7 +309,6 @@ async function rescheduleAppointment(docId) {
 
 let editingSermonId = null;
 
-// 1. Load Saved Sermons & Render Cards
 function loadSavedSermons() {
     if (!db) return;
     const listDiv = document.getElementById('saved-sermons-list');
@@ -361,7 +367,6 @@ function loadSavedSermons() {
     });
 }
 
-// 2. Load Sermon Data into Form Inputs for Editing
 function editSermon(docId, title, content, timestampMillis) {
     editingSermonId = docId;
     
@@ -388,7 +393,6 @@ function editSermon(docId, title, content, timestampMillis) {
     }
 }
 
-// 3. Save or Update Sermon Notes in Firebase
 async function saveSermonNotes() {
     if (!db) return;
     const titleInput = document.getElementById('sermon_title');
@@ -443,7 +447,6 @@ async function saveSermonNotes() {
     }
 }
 
-// 4. Delete Sermon Function
 async function deleteSermon(docId) {
     if (!db) return;
     if (confirm("Are you sure you want to delete this saved message?")) {
@@ -456,6 +459,7 @@ async function deleteSermon(docId) {
         }
     }
 }
+
 // --- ACTION HELPERS ---
 async function markAsRead(docId) {
     if (!db) return;
@@ -552,125 +556,70 @@ function loadPrayers() {
     });
 }
 
-// --- 2. ADMIN: LOAD APPOINTMENTS PANEL ---
-function loadAppointments() {
+// --- FULLY WRAPPED LIVE FEED LISTENER FUNCTION ---
+function loadLiveFeed() {
     if (!db) return;
-    const apptListDiv = document.getElementById('appointment-list');
-    if (!apptListDiv) return;
+    const feedContainer = document.getElementById('pastor-feed-container');
+    if (!feedContainer) return;
 
-    db.collection("churchPrayers")
-      .where("type", "==", "APPOINTMENT")
-      .onSnapshot((snapshot) => {
-        apptListDiv.innerHTML = "";
+    db.collection("churchPrayers").orderBy("time", "desc").onSnapshot((snapshot) => {
+        feedContainer.innerHTML = ""; // Clear current feed
 
         if (snapshot.empty) {
-            apptListDiv.innerHTML = '<p style="opacity: 0.3; margin-top: 20px;">Waiting for appointments...</p>';
+            feedContainer.innerHTML = '<p style="opacity: 0.3; margin-top: 20px; text-align: center; color: #fff;">No live feed items yet...</p>';
             return;
         }
 
         snapshot.forEach((doc) => {
             const data = doc.data();
             const docId = doc.id;
-            const personName = data.name || data.fullName || data.userName || 'Anonymous';
-            const isReadStyle = data.read ? "opacity: 0.5;" : "";
+            const item = document.createElement('div');
+            item.className = 'feed-item';
 
-            apptListDiv.innerHTML += `
-                <div style="background: rgba(255,255,255,0.05); padding: 14px; border-radius: 8px; border: 1px solid rgba(52,152,219,0.3); margin-bottom: 12px; text-align: left; color: #fff; ${isReadStyle}">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <strong style="color: #3498db; font-size: 1rem;">APPOINTMENT: ${personName}</strong>
-                        <span style="font-size: 0.75rem; background: #3498db; color: #fff; padding: 3px 6px; border-radius: 4px; font-weight: bold;">${data.status || 'Pending'}</span>
+            // Conditional Check for APPOINTMENT versus standard Prayer Request
+            if (data.type === "APPOINTMENT") {
+                item.style.cssText = "background: rgba(212,175,55,0.08); padding: 14px; border-radius: 8px; border: 1px solid rgba(212,175,55,0.4); margin-bottom: 12px; text-align: left; color: #fff;";
+                item.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <span style="background:#D4AF37; color:#000; padding:2px 6px; font-size:10px; font-weight: bold; border-radius:4px;">APPOINTMENT</span>
+                        <button class="delete-btn" onclick="deleteFeedItem('${docId}')" style="background: #555; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 10px;">Delete</button>
                     </div>
-                    <p style="margin: 8px 0; font-size: 0.9rem; line-height: 1.4;"><strong>Time/Details:</strong> ${data.text || 'No details provided.'}</p>
-                    <p style="margin: 0; font-size: 0.75rem; opacity: 0.7;">Phone: ${data.phone || 'N/A'} | Email: ${data.email || 'N/A'}</p>
-                    <div style="margin-top: 10px; display: flex; gap: 6px; flex-wrap: wrap;">
+                    <h3 style="margin: 0 0 4px 0; color: #D4AF37;">${data.name || 'Anonymous'}</h3>
+                    <p style="margin: 0 0 6px 0; font-size: 0.85rem; opacity: 0.8;">📧 ${data.email || 'N/A'} | 📞 ${data.phone || 'N/A'}</p>
+                    <p style="margin: 0 0 10px 0; font-size: 0.95rem;"><strong>Meeting Requested:</strong> ${data.day || 'N/A'} at ${data.timeSlot || data.time || 'N/A'}</p>
+                    <div style="display: flex; gap: 6px; flex-wrap: wrap;">
                         <button onclick="updateAppointmentStatus('${docId}', 'Accepted')" style="background: #2ecc71; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Accept</button>
                         <button onclick="updateAppointmentStatus('${docId}', 'Rejected')" style="background: #e74c3c; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Reject</button>
-                        <button onclick="rescheduleAppointment('${docId}')" style="background: #3498db; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Reschedule</button>
-                        <button onclick="markAsRead('${docId}')" style="background: #27ae60; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Read</button>
-                        <button onclick="shareRequest('${personName}', '${data.text || ''}', '${data.phone || ''}', '${data.email || ''}')" style="background: #25D366; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Share</button>
-                        <button onclick="archiveRequest('${docId}')" style="background: #f39c12; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Archive</button>
-                        <button onclick="deleteRequest('${docId}')" style="background: #555; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Delete</button>
                     </div>
-                </div>
-            `;
+                `;
+            } else {
+                // Standard Prayer Request Layout
+                item.style.cssText = "background: rgba(255,255,255,0.05); padding: 14px; border-radius: 8px; border: 1px solid rgba(52,152,219,0.3); margin-bottom: 12px; text-align: left; color: #fff;";
+                item.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <span style="background:#007BFF; color:#fff; padding:2px 6px; font-size:10px; font-weight: bold; border-radius:4px;">PRAYER</span>
+                        <button class="delete-btn" onclick="deleteFeedItem('${docId}')" style="background: #555; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 10px;">Delete</button>
+                    </div>
+                    <h3 style="margin: 0 0 4px 0; color: #3498db;">${data.name || 'Anonymous'}</h3>
+                    <p style="margin: 0 0 6px 0; font-size: 0.85rem; opacity: 0.8;">📧 ${data.email || 'N/A'} | 📞 ${data.phone || 'N/A'}</p>
+                    <p style="margin: 0; font-size: 0.9rem;">${data.text || 'No message provided.'}</p>
+                `;
+            }
+
+            feedContainer.appendChild(item);
         });
     }, (error) => {
-        console.error("Error loading appointments:", error);
+        console.error("Error loading live feed:", error);
     });
 }
-async function saveNewMember() {
-    if (!db) return;
-    
-    const nameInput = document.getElementById('new_member_name');
-    const phoneInput = document.getElementById('new_member_phone');
 
-    if (!nameInput || !nameInput.value.trim()) {
-        alert("Member name is required.");
-        return;
+// Delete function to remove items from Firestore
+async function deleteFeedItem(id) {
+    if (confirm("Are you sure you want to remove this from the live feed?")) {
+        try {
+            await firebase.firestore().collection("churchPrayers").doc(id).delete();
+        } catch (error) {
+            console.error("Error deleting document: ", error);
+        }
     }
-
-    try {
-        await db.collection("members").add({
-            name: nameInput.value.trim(),
-            phone: phoneInput ? phoneInput.value.trim() : "",
-            time: firebase.firestore.FieldValue.serverTimestamp()
-        });
-
-        alert("New member successfully added!");
-        
-        nameInput.value = "";
-        if (phoneInput) phoneInput.value = "";
-
-        closeModals();
-    } catch (error) {
-        console.error("Error adding member: ", error);
-        alert("Failed to save new member. Check connection.");
-    }
-}
-function loadMemberDirectory() {
-    if (typeof firebase === 'undefined') return;
-    const dbInstance = firebase.firestore();
-    const directoryContainer = document.getElementById('member-directory-list');
-    
-    if (!directoryContainer) return;
-
-    directoryContainer.style.display = "flex";
-    directoryContainer.style.flexDirection = "column";
-    directoryContainer.style.maxHeight = "350px";
-    directoryContainer.style.overflowY = "auto";
-    directoryContainer.style.overflowX = "hidden";
-    directoryContainer.style.paddingRight = "5px";
-
-    dbInstance.collection("members")
-      .orderBy("name", "asc")
-      .onSnapshot((snapshot) => {
-          directoryContainer.innerHTML = "";
-
-          if (snapshot.empty) {
-              directoryContainer.innerHTML = '<p style="opacity: 0.3; text-align: center; padding: 10px;">No members saved yet.</p>';
-              return;
-          }
-
-          snapshot.forEach((doc) => {
-              const data = doc.data();
-              const docId = doc.id;
-              const memberCard = document.createElement('div');
-              
-              memberCard.style.cssText = "background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; display: flex; flex-direction: column; gap: 8px; border: 1px solid rgba(212,175,55,0.2); margin-bottom: 8px;";
-              
-              memberCard.innerHTML = `
-                  <div style="color: #fff; text-align: left;">
-                      <strong style="display: block; font-size: 0.95rem;">${data.name}</strong>
-                      <span style="font-size: 0.75rem; color: #aaa;">${data.phone}</span>
-                  </div>
-                  <div style="display: flex; gap: 6px; overflow-x: auto; white-space: nowrap; padding-bottom: 4px; scrollbar-width: thin;">
-                      <button class="premium-gold-btn" onclick="messageIndividualWhatsApp('${data.phone}', '${data.name}')" style="margin: 0; padding: 6px 12px; font-size: 0.65rem; background: #25D366; color: #fff; border: none; border-radius: 4px; cursor: pointer; flex-shrink: 0;">WhatsApp</button>
-                      <button onclick="window.location.href='tel:${data.phone}'" style="margin: 0; padding: 6px 12px; font-size: 0.65rem; background: #3498db; color: #fff; border: none; border-radius: 4px; cursor: pointer; flex-shrink: 0;">Call</button>
-                      <button onclick="deleteMember('${docId}', '${data.name}')" style="margin: 0; padding: 6px 12px; font-size: 0.65rem; background: #e74c3c; color: #fff; border: none; border-radius: 4px; cursor: pointer; flex-shrink: 0;">Delete</button>
-                  </div>
-              `;
-              
-              directoryContainer.appendChild(memberCard);
-          });
-      });
 }
