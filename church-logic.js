@@ -630,6 +630,108 @@ function loadLiveFeed() {
         console.error("Error loading live feed:", error);
     });
 }
+// ==========================================
+// HELPER FUNCTIONS
+// ==========================================
+
+// Delete function to remove items from Firestore
+async function deleteFeedItem(id) {
+    if (confirm("Are you sure you want to remove this from the live feed?")) {
+        try {
+            await firebase.firestore().collection("churchPrayers").doc(id).delete();
+        } catch (error) {
+            console.error("Error deleting document: ", error);
+        }
+    }
+}
+
+// Share function
+async function shareFeedItem(id) {
+    try {
+        const docRef = await firebase.firestore().collection("churchPrayers").doc(id).get();
+        if (!docRef.exists) return;
+        const data = docRef.data();
+
+        const shareText = `🕊️ Prayer Request from ${data.name || 'Anonymous'}:\n"${data.text || ''}"\nContact: ${data.email || 'N/A'} | ${data.phone || 'N/A'}`;
+
+        if (navigator.share) {
+            await navigator.share({
+                title: 'Church Prayer Request',
+                text: shareText
+            });
+        } else {
+            await navigator.clipboard.writeText(shareText);
+            alert("Prayer request copied to clipboard!");
+        }
+    } catch (error) {
+        console.error("Error sharing item: ", error);
+    }
+}
+
+// Archive function
+async function archiveFeedItem(id) {
+    if (confirm("Move this item to the archive?")) {
+        try {
+            const db = firebase.firestore();
+            const docRef = db.collection("churchPrayers").doc(id);
+            const docSnap = await docRef.get();
+            
+            if (docSnap.exists) {
+                await db.collection("churchArchive").add({
+                    ...docSnap.data(),
+                    archivedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                await docRef.delete();
+                alert("Item moved to archive.");
+            }
+        } catch (error) {
+            console.error("Error archiving document: ", error);
+            alert("Failed to archive item.");
+        }
+    }
+}
+
+// Archive Modal Controls
+function openArchiveModal() {
+    const modal = document.getElementById('archive-modal');
+    if (modal) modal.style.display = 'flex';
+    loadArchivedFeed();
+}
+
+function closeArchiveModal() {
+    const modal = document.getElementById('archive-modal');
+    if (modal) modal.style.display = 'none';
+}
+
+async function loadArchivedFeed() {
+    const container = document.getElementById('archive-feed-container');
+    if (!container) return;
+    container.innerHTML = "<p>Loading archive...</p>";
+
+    try {
+        const snapshot = await firebase.firestore().collection("churchArchive").orderBy("archivedAt", "desc").get();
+        if (snapshot.empty) {
+            container.innerHTML = "<p style='opacity:0.5;'>No archived items found.</p>";
+            return;
+        }
+
+        container.innerHTML = "";
+        snapshot.forEach((doc) => {
+            const data = doc.data();
+            const item = document.createElement('div');
+            item.style.cssText = "background: rgba(255,255,255,0.03); padding: 10px; border-radius: 6px; margin-bottom: 8px; border: 1px solid rgba(230,126,34,0.2);";
+            item.innerHTML = `
+                <h4 style="margin:0 0 4px 0; color:#e67e22;">${data.name || 'Anonymous'}</h4>
+                <p style="margin:0 0 4px 0; font-size:0.8rem; opacity:0.8;">📧 ${data.email || 'N/A'} | 📞 ${data.phone || 'N/A'}</p>
+                <p style="margin:0; font-size:0.85rem;">${data.text || ''}</p>
+            `;
+            container.appendChild(item);
+        });
+    } catch (error) {
+        console.error("Error loading archive: ", error);
+        container.innerHTML = "<p style='color:red;'>Failed to load archive.</p>";
+    }
+}
 // Delete function to remove items from Firestore
 async function deleteFeedItem(id) {
     if (confirm("Are you sure you want to remove this from the live feed?")) {
