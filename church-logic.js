@@ -141,29 +141,33 @@ async function updateSermon() {
         alert("Mission Update Failed. Check Connection.");
     }
 }
-
 async function submitPrayer() {
-    if (!db) return;
     const nameInput = document.getElementById('p_name');
+    const phoneInput = document.getElementById('p_phone');
+    const emailInput = document.getElementById('p_email');
     const msgInput = document.getElementById('p_msg');
 
     if (!nameInput || !msgInput || !nameInput.value.trim() || !msgInput.value.trim()) {
-        alert("Please fill all fields.");
+        alert("Please fill in your name and prayer message.");
         return;
     }
 
     try {
+        const db = firebase.firestore();
         await db.collection("churchPrayers").add({ 
             type: "PRAYER", 
             name: nameInput.value.trim(), 
+            phone: phoneInput ? phoneInput.value.trim() : '',
+            email: emailInput ? emailInput.value.trim() : '',
             text: msgInput.value.trim(), 
             time: firebase.firestore.FieldValue.serverTimestamp() 
         });
         
         alert("Sent to Pastor."); 
         closeModals();
-        
         nameInput.value = "";
+        if(phoneInput) phoneInput.value = "";
+        if(emailInput) emailInput.value = "";
         msgInput.value = "";
     } catch (error) {
         console.error("Error submitting prayer: ", error);
