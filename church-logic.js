@@ -586,53 +586,83 @@ function loadLiveFeed() {
             } else if (data.time) {
                 formattedDate = new Date(data.time).toLocaleString();
             }
+// ==========================================
+// LIVE FEED & APPOINTMENT RENDERING
+// ==========================================
+// (Assuming this sits inside your real-time listener loop where 'docId' and 'formattedDate' are defined)
 
-            // Conditional Check for APPOINTMENT versus standard Prayer Request
-            if (data.type === "APPOINTMENT") {
-                item.style.cssText = "background: rgba(212,175,55,0.08); padding: 14px; border-radius: 8px; border: 1px solid rgba(212,175,55,0.4); margin-bottom: 12px; text-align: left; color: #fff;";
-                item.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                        <span style="background:#D4AF37; color:#000; padding:2px 6px; font-size:10px; font-weight: bold; border-radius:4px;">APPOINTMENT</span>
-                        <span style="font-size: 0.75rem; opacity: 0.7;">📅 ${formattedDate}</span>
-                    </div>
-                    <h3 style="margin: 0 0 4px 0; color: #D4AF37;">${data.name || 'Anonymous'}</h3>
-                    <p style="margin: 0 0 6px 0; font-size: 0.85rem; opacity: 0.8;">📧 ${data.email || 'N/A'} | 📞 ${data.phone || 'N/A'}</p>
-                    <p style="margin: 0 0 6px 0; font-size: 0.95rem;"><strong>Meeting Requested:</strong> ${data.day || 'N/A'} at ${data.timeSlot || data.time || 'N/A'}</p>
-                    <p style="margin: 0 0 10px 0; font-size: 0.9rem;">${data.text || 'No message provided.'}</p>
-                    <div style="display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end;">
-                        <button onclick="updateAppointmentStatus('${docId}', 'Accepted')" style="background: #2ecc71; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Accept</button>
-                        <button onclick="updateAppointmentStatus('${docId}', 'Rejected')" style="background: #e74c3c; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Reject</button>
-                        <button onclick="deleteFeedItem('${docId}')" style="background: #555; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">Delete</button>
-                    </div>
-                `;
-            } else {
-                // Standard Prayer Request Layout (No Read button, includes Date & Action buttons)
-                item.style.cssText = "background: rgba(255,255,255,0.05); padding: 14px; border-radius: 8px; border: 1px solid rgba(52,152,219,0.3); margin-bottom: 12px; text-align: left; color: #fff;";
-                item.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                        <span style="background:#007BFF; color:#fff; padding:2px 6px; font-size:10px; font-weight: bold; border-radius:4px;">PRAYER</span>
-                        <span style="font-size: 0.75rem; opacity: 0.7;">📅 ${formattedDate}</span>
-                    </div>
-                    <h3 style="margin: 0 0 4px 0; color: #3498db;">${data.name || 'Anonymous'}</h3>
-                    <p style="margin: 0 0 6px 0; font-size: 0.85rem; opacity: 0.8;">📧 ${data.email || 'N/A'} | 📞 ${data.phone || 'N/A'}</p>
-                    <p style="margin: 0 0 10px 0; font-size: 0.9rem;">${data.text || 'No message provided.'}</p>
-                    <div style="display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end;">
-                        <button onclick="shareFeedItem('${docId}')" style="background: #3498db; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">Share</button>
-                        <button onclick="archiveFeedItem('${docId}')" style="background: #e67e22; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">Archive</button>
-                        <button onclick="deleteFeedItem('${docId}')" style="background: #e74c3c; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">Delete</button>
-                    </div>
-                `;
-            }
-
-            feedContainer.appendChild(item);
-        });
-    }, (error) => {
-        console.error("Error loading live feed:", error);
-    });
+// Conditional Check for APPOINTMENT versus standard Prayer Request
+if (data.type === "APPOINTMENT") {
+    item.style.cssText = "background: rgba(212,175,55,0.08); padding: 14px; border-radius: 8px; border: 1px solid rgba(212,175,55,0.4); margin-bottom: 12px; text-align: left; color: #fff;";
+    item.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <span style="background:#D4AF37; color:#000; padding:2px 6px; font-size:10px; font-weight: bold; border-radius:4px;">APPOINTMENT</span>
+            <span style="font-size: 0.75rem; opacity: 0.7;">📅 ${formattedDate}</span>
+        </div>
+        <h3 style="margin: 0 0 4px 0; color: #D4AF37;">${data.name || 'Anonymous'}</h3>
+        <p style="margin: 0 0 6px 0; font-size: 0.85rem; opacity: 0.8;">📧 ${data.email || 'N/A'} | 📞 ${data.phone || 'N/A'}</p>
+        <p style="margin: 0 0 6px 0; font-size: 0.95rem;"><strong>Meeting Requested:</strong> ${data.day || 'N/A'} at ${data.timeSlot || data.time || 'N/A'}</p>
+        <p style="margin: 0 0 6px 0; font-size: 0.85rem; color: #f1c40f;"><strong>Current Status:</strong> ${data.status || 'Pending ⏳'} ${data.rescheduledTime ? `<br><em>Proposed Time: ${data.rescheduledTime}</em>` : ''}</p>
+        <p style="margin: 0 0 10px 0; font-size: 0.9rem;">${data.text || 'No message provided.'}</p>
+        <div style="display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end;">
+            <button onclick="updateAppointmentStatus('${docId}', 'Accepted')" style="background: #2ecc71; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Accept</button>
+            <button onclick="rescheduleAppointment('${docId}')" style="background: #e67e22; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Reschedule</button>
+            <button onclick="updateAppointmentStatus('${docId}', 'Rejected')" style="background: #e74c3c; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Reject</button>
+            <button onclick="deleteFeedItem('${docId}')" style="background: #555; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">Delete</button>
+        </div>
+    `;
+} else {
+    // Standard Prayer Request Layout
+    item.style.cssText = "background: rgba(255,255,255,0.05); padding: 14px; border-radius: 8px; border: 1px solid rgba(52,152,219,0.3); margin-bottom: 12px; text-align: left; color: #fff;";
+    item.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <span style="background:#007BFF; color:#fff; padding:2px 6px; font-size:10px; font-weight: bold; border-radius:4px;">PRAYER</span>
+            <span style="font-size: 0.75rem; opacity: 0.7;">📅 ${formattedDate}</span>
+        </div>
+        <h3 style="margin: 0 0 4px 0; color: #3498db;">${data.name || 'Anonymous'}</h3>
+        <p style="margin: 0 0 6px 0; font-size: 0.85rem; opacity: 0.8;">📧 ${data.email || 'N/A'} | 📞 ${data.phone || 'N/A'}</p>
+        <p style="margin: 0 0 10px 0; font-size: 0.9rem;">${data.text || 'No message provided.'}</p>
+        <div style="display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end;">
+            <button onclick="shareFeedItem('${docId}')" style="background: #3498db; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">Share</button>
+            <button onclick="archiveFeedItem('${docId}')" style="background: #e67e22; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">Archive</button>
+            <button onclick="deleteFeedItem('${docId}')" style="background: #e74c3c; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">Delete</button>
+        </div>
+    `;
 }
+
 // ==========================================
-// HELPER FUNCTIONS
+// HELPER FUNCTIONS & CONTROLS
 // ==========================================
+
+// Update Appointment Status (Accepted / Rejected)
+async function updateAppointmentStatus(id, statusVal) {
+    try {
+        await firebase.firestore().collection("churchPrayers").doc(id).update({
+            status: statusVal
+        });
+        alert(`Appointment status updated to: ${statusVal}`);
+    } catch (error) {
+        console.error("Error updating appointment status: ", error);
+        alert("Failed to update status.");
+    }
+}
+
+// Reschedule Appointment
+async function rescheduleAppointment(id) {
+    const newDateTime = prompt("Enter the new proposed date and time for this appointment:");
+    if (!newDateTime) return;
+
+    try {
+        await firebase.firestore().collection("churchPrayers").doc(id).update({
+            status: "Rescheduled",
+            rescheduledTime: newDateTime
+        });
+        alert("Appointment marked as rescheduled.");
+    } catch (error) {
+        console.error("Error rescheduling appointment: ", error);
+        alert("Failed to update appointment status.");
+    }
+}
 
 // Delete function to remove items from Firestore
 async function deleteFeedItem(id) {
@@ -690,6 +720,7 @@ async function archiveFeedItem(id) {
         }
     }
 }
+
 // Archive Modal Controls
 function openArchiveModal() {
     const modal = document.getElementById('archive-modal');
@@ -707,7 +738,6 @@ async function loadArchivedFeed() {
     const container = document.getElementById('archive-feed-container');
     if (!container) return;
     
-    // Enforce scrollability so it never becomes a long continuous wall of text
     container.style.maxHeight = "50vh";
     container.style.overflowY = "auto";
     container.style.paddingRight = "5px";
@@ -741,20 +771,18 @@ async function loadArchivedFeed() {
         container.innerHTML = "<p style='color:red;'>Failed to load archive.</p>";
     }
 }
-
 // Permanent deletion function for archived items
 async function deleteArchivedItem(id) {
     if (confirm("Are you sure you want to permanently delete this archived item?")) {
         try {
             await firebase.firestore().collection("churchArchive").doc(id).delete();
-            loadArchivedFeed(); // Refresh the modal view automatically
+            loadArchivedFeed(); 
         } catch (error) {
             console.error("Error deleting archived document: ", error);
             alert("Failed to delete item from archive.");
         }
     }
 }
-
 // Delete function to remove items from live feed
 async function deleteFeedItem(id) {
     if (confirm("Are you sure you want to remove this from the live feed?")) {
@@ -763,5 +791,20 @@ async function deleteFeedItem(id) {
         } catch (error) {
             console.error("Error deleting document: ", error);
         }
+    }
+}// Reschedule appointment function
+async function rescheduleAppointment(id) {
+    const newDateTime = prompt("Enter the new proposed date and time for this appointment:");
+    if (!newDateTime) return;
+
+    try {
+        await firebase.firestore().collection("churchPrayers").doc(id).update({
+            status: "Rescheduled",
+            rescheduledTime: newDateTime
+        });
+        alert("Appointment marked as rescheduled.");
+    } catch (error) {
+        console.error("Error rescheduling appointment: ", error);
+        alert("Failed to update appointment status.");
     }
 }

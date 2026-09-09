@@ -79,36 +79,46 @@
 </div>
 
     <!-- Appointment Modal -->
-    <div id="booking-modal" class="modal">
-        <div class="glass-card">
-            <h2 class="gold-text">Appointment</h2>
-            <p class="form-hint">Request a Private Meeting</p>
-            
-            <input type="text" id="b_name" placeholder="Full Name" class="sleek-input" oninput="watchMyAppointment(this.value.trim())">
-            <input type="email" id="b_email" placeholder="Email" class="sleek-input">
-            <input type="tel" id="b_phone" placeholder="Phone" class="sleek-input">
-            
-            <label style="color: #D4AF37; font-size: 11px; display: block; text-align: left; margin: 4px 0;">Select Day</label>
-            <div id="day-selector-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-bottom: 10px;">
-                <button type="button" class="day-btn" onclick="selectDay('Monday', this)" style="padding: 8px; background: rgba(212,175,55,0.25); border: 1px solid #D4AF37; color: #fff; border-radius: 6px; cursor: pointer; font-size: 13px;">Monday</button>
-                <button type="button" class="day-btn" onclick="selectDay('Tuesday', this)" style="padding: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px; cursor: pointer; font-size: 13px;">Tuesday</button>
-                <button type="button" class="day-btn" onclick="selectDay('Wednesday', this)" style="padding: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px; cursor: pointer; font-size: 13px;">Wednesday</button>
-                <button type="button" class="day-btn" onclick="selectDay('Thursday', this)" style="padding: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px; cursor: pointer; font-size: 13px;">Thursday</button>
-                <button type="button" class="day-btn" onclick="selectDay('Friday', this)" style="padding: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px; cursor: pointer; font-size: 13px;">Friday</button>
-                <button type="button" class="day-btn" onclick="selectDay('Saturday', this)" style="padding: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px; cursor: pointer; font-size: 13px;">Saturday</button>
-                <button type="button" class="day-btn" onclick="selectDay('Sunday', this)" style="padding: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px; grid-column: span 2; cursor: pointer; font-size: 13px;">Sunday</button>
+<div id="booking-modal" class="modal">
+    <div class="glass-card">
+        <h2 class="gold-text">Appointment</h2>
+        <p class="form-hint">Request a Private Meeting</p>
+        
+        <input type="text" id="b_name" placeholder="Full Name" class="sleek-input" oninput="watchMyAppointment(this.value.trim())">
+        <input type="email" id="b_email" placeholder="Email" class="sleek-input">
+        <input type="tel" id="b_phone" placeholder="Phone" class="sleek-input">
+        
+        <label style="color: #D4AF37; font-size: 11px; display: block; text-align: left; margin: 4px 0;">Select Day</label>
+        <div id="day-selector-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-bottom: 10px;">
+            <button type="button" class="day-btn" onclick="selectDay('Monday', this)" style="padding: 8px; background: rgba(212,175,55,0.25); border: 1px solid #D4AF37; color: #fff; border-radius: 6px; cursor: pointer; font-size: 13px;">Monday</button>
+            <button type="button" class="day-btn" onclick="selectDay('Tuesday', this)" style="padding: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px; cursor: pointer; font-size: 13px;">Tuesday</button>
+            <button type="button" class="day-btn" onclick="selectDay('Wednesday', this)" style="padding: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px; cursor: pointer; font-size: 13px;">Wednesday</button>
+            <button type="button" class="day-btn" onclick="selectDay('Thursday', this)" style="padding: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px; cursor: pointer; font-size: 13px;">Thursday</button>
+            <button type="button" class="day-btn" onclick="selectDay('Friday', this)" style="padding: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px; cursor: pointer; font-size: 13px;">Friday</button>
+            <button type="button" class="day-btn" onclick="selectDay('Saturday', this)" style="padding: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px; cursor: pointer; font-size: 13px;">Saturday</button>
+            <button type="button" class="day-btn" onclick="selectDay('Sunday', this)" style="padding: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px; grid-column: span 2; cursor: pointer; font-size: 13px;">Sunday</button>
+        </div>
+        <input type="hidden" id="b_day" value="Monday">
+
+        <label style="color: #D4AF37; font-size: 11px; display: block; text-align: left; margin: 4px 0;">Select Time</label>
+        <input type="time" id="b_time" value="14:00" class="sleek-input" style="cursor: pointer;">
+
+        <button class="premium-gold-btn" onclick="submitBooking()" style="margin-top: 10px;">REQUEST MEETING</button>
+        <div class="cancel-link" onclick="closeModals(); toggleMenu();">Back</div>
+
+        <div id="my-appointment-status"></div>
+
+        <!-- Built-in Status Checker for Congregants -->
+        <div style="margin-top: 15px; border-top: 1px solid rgba(212,175,55,0.2); padding-top: 12px; text-align: left;">
+            <h3 class="gold-text" style="font-size: 1rem; margin-bottom: 6px;">Check Status by Email</h3>
+            <div style="display: flex; gap: 6px;">
+                <input type="email" id="check-email" placeholder="Your Email Address" class="sleek-input" style="flex: 1; margin: 0; font-size: 12px; padding: 6px;">
+                <button class="premium-gold-btn" onclick="checkAppointmentStatus()" style="width: auto; padding: 0 12px; font-size: 12px;">CHECK</button>
             </div>
-            <input type="hidden" id="b_day" value="Monday">
-
-            <label style="color: #D4AF37; font-size: 11px; display: block; text-align: left; margin: 4px 0;">Select Time</label>
-            <input type="time" id="b_time" value="14:00" class="sleek-input" style="cursor: pointer;">
-
-            <button class="premium-gold-btn" onclick="submitBooking()" style="margin-top: 10px;">REQUEST MEETING</button>
-            <div class="cancel-link" onclick="closeModals(); toggleMenu();">Back</div>
-
-            <div id="my-appointment-status"></div>
+            <div id="status-result" style="margin-top: 8px; font-size: 0.85rem; color: #fff;"></div>
         </div>
     </div>
+</div>
 
     <!-- Testimony Modal -->
     <div id="testimony-modal" class="modal">
