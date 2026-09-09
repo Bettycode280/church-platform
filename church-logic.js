@@ -597,16 +597,29 @@ function loadLiveFeed() {
                     </div>
                 `;
             } else {
-                // Standard Prayer Request Layout
+    
+                // Standard Prayer Request Layout with Date, Share, Archive, and Delete
+                let formattedDate = 'N/A';
+                if (data.time && typeof data.time.toDate === 'function') {
+                    formattedDate = data.time.toDate().toLocaleString();
+                } else if (data.time) {
+                    formattedDate = new Date(data.time).toLocaleString();
+                }
+
                 item.style.cssText = "background: rgba(255,255,255,0.05); padding: 14px; border-radius: 8px; border: 1px solid rgba(52,152,219,0.3); margin-bottom: 12px; text-align: left; color: #fff;";
                 item.innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                         <span style="background:#007BFF; color:#fff; padding:2px 6px; font-size:10px; font-weight: bold; border-radius:4px;">PRAYER</span>
-                        <button class="delete-btn" onclick="deleteFeedItem('${docId}')" style="background: #555; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 10px;">Delete</button>
+                        <span style="font-size: 0.75rem; opacity: 0.7;">📅 ${formattedDate}</span>
                     </div>
                     <h3 style="margin: 0 0 4px 0; color: #3498db;">${data.name || 'Anonymous'}</h3>
                     <p style="margin: 0 0 6px 0; font-size: 0.85rem; opacity: 0.8;">📧 ${data.email || 'N/A'} | 📞 ${data.phone || 'N/A'}</p>
-                    <p style="margin: 0; font-size: 0.9rem;">${data.text || 'No message provided.'}</p>
+                    <p style="margin: 0 0 10px 0; font-size: 0.9rem;">${data.text || 'No message provided.'}</p>
+                    <div style="display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end;">
+                        <button onclick="shareFeedItem('${docId}')" style="background: #3498db; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">Share</button>
+                        <button onclick="archiveFeedItem('${docId}')" style="background: #e67e22; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">Archive</button>
+                        <button onclick="deleteFeedItem('${docId}')" style="background: #e74c3c; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">Delete</button>
+                    </div>
                 `;
             }
 
@@ -616,7 +629,6 @@ function loadLiveFeed() {
         console.error("Error loading live feed:", error);
     });
 }
-
 // Delete function to remove items from Firestore
 async function deleteFeedItem(id) {
     if (confirm("Are you sure you want to remove this from the live feed?")) {
