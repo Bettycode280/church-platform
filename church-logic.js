@@ -579,6 +579,13 @@ function loadLiveFeed() {
             const docId = doc.id;
             const item = document.createElement('div');
             item.className = 'feed-item';
+            // Common Date/Time formatting helper
+            let formattedDate = 'Just now';
+            if (data.time && typeof data.time.toDate === 'function') {
+                formattedDate = data.time.toDate().toLocaleString();
+            } else if (data.time) {
+                formattedDate = new Date(data.time).toLocaleString();
+            }
 
             // Conditional Check for APPOINTMENT versus standard Prayer Request
             if (data.type === "APPOINTMENT") {
@@ -586,26 +593,20 @@ function loadLiveFeed() {
                 item.innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                         <span style="background:#D4AF37; color:#000; padding:2px 6px; font-size:10px; font-weight: bold; border-radius:4px;">APPOINTMENT</span>
-                        <button class="delete-btn" onclick="deleteFeedItem('${docId}')" style="background: #555; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 10px;">Delete</button>
+                        <span style="font-size: 0.75rem; opacity: 0.7;">📅 ${formattedDate}</span>
                     </div>
                     <h3 style="margin: 0 0 4px 0; color: #D4AF37;">${data.name || 'Anonymous'}</h3>
                     <p style="margin: 0 0 6px 0; font-size: 0.85rem; opacity: 0.8;">📧 ${data.email || 'N/A'} | 📞 ${data.phone || 'N/A'}</p>
-                    <p style="margin: 0 0 10px 0; font-size: 0.95rem;"><strong>Meeting Requested:</strong> ${data.day || 'N/A'} at ${data.timeSlot || data.time || 'N/A'}</p>
-                    <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                    <p style="margin: 0 0 6px 0; font-size: 0.95rem;"><strong>Meeting Requested:</strong> ${data.day || 'N/A'} at ${data.timeSlot || data.time || 'N/A'}</p>
+                    <p style="margin: 0 0 10px 0; font-size: 0.9rem;">${data.text || 'No message provided.'}</p>
+                    <div style="display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end;">
                         <button onclick="updateAppointmentStatus('${docId}', 'Accepted')" style="background: #2ecc71; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Accept</button>
                         <button onclick="updateAppointmentStatus('${docId}', 'Rejected')" style="background: #e74c3c; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Reject</button>
+                        <button onclick="deleteFeedItem('${docId}')" style="background: #555; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">Delete</button>
                     </div>
                 `;
             } else {
-
-                // Standard Prayer Request Layout with Date, Contact Info, and Action Buttons (No Read button)
-                let formattedDate = 'Just now';
-                if (data.time && typeof data.time.toDate === 'function') {
-                    formattedDate = data.time.toDate().toLocaleString();
-                } else if (data.time) {
-                    formattedDate = new Date(data.time).toLocaleString();
-                }
-
+                // Standard Prayer Request Layout (No Read button, includes Date & Action buttons)
                 item.style.cssText = "background: rgba(255,255,255,0.05); padding: 14px; border-radius: 8px; border: 1px solid rgba(52,152,219,0.3); margin-bottom: 12px; text-align: left; color: #fff;";
                 item.innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
