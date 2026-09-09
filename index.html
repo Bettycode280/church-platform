@@ -281,16 +281,17 @@
 
             try {
                 const db = firebase.firestore();
-                // Hypothesis: Unifying database collections ensures both prayers and appointments feed into the same listener UI.
+                // FIX: Changed 'timeCreated' to 'time' so loadLiveFeed() can successfully order and display it
                 await db.collection("churchPrayers").add({
                     type: "APPOINTMENT",
                     name: nameInput.value.trim(),
                     email: emailInput ? emailInput.value.trim() : '',
                     phone: phoneInput ? phoneInput.value.trim() : '',
                     day: dayInput ? dayInput.value : 'Monday',
-                    time: timeInput ? timeInput.value : '14:00',
+                    timeSlot: timeInput ? timeInput.value : '14:00',
                     text: `Appointment requested for ${dayInput ? dayInput.value : 'Monday'} at ${timeInput ? timeInput.value : '14:00'}`,
-                    timeCreated: firebase.firestore.FieldValue.serverTimestamp()
+                    status: "Pending",
+                    time: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
                 alert("Appointment Request Sent.");
