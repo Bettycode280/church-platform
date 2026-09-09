@@ -690,7 +690,6 @@ async function archiveFeedItem(id) {
         }
     }
 }
-
 // Archive Modal Controls
 function openArchiveModal() {
     const modal = document.getElementById('archive-modal');
@@ -703,9 +702,15 @@ function closeArchiveModal() {
     if (modal) modal.style.display = 'none';
 }
 
+// Scrollable archive loader with individual deletion support
 async function loadArchivedFeed() {
     const container = document.getElementById('archive-feed-container');
     if (!container) return;
+    
+    // Enforce scrollability so it never becomes a long continuous wall of text
+    container.style.maxHeight = "50vh";
+    container.style.overflowY = "auto";
+    container.style.paddingRight = "5px";
     container.innerHTML = "<p>Loading archive...</p>";
 
     try {
@@ -718,10 +723,14 @@ async function loadArchivedFeed() {
         container.innerHTML = "";
         snapshot.forEach((doc) => {
             const data = doc.data();
+            const id = doc.id;
             const item = document.createElement('div');
             item.style.cssText = "background: rgba(255,255,255,0.03); padding: 10px; border-radius: 6px; margin-bottom: 8px; border: 1px solid rgba(230,126,34,0.2);";
             item.innerHTML = `
-                <h4 style="margin:0 0 4px 0; color:#e67e22;">${data.name || 'Anonymous'}</h4>
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px;">
+                    <h4 style="margin:0; color:#e67e22;">${data.name || 'Anonymous'}</h4>
+                    <button type="button" onclick="deleteArchivedItem('${id}')" style="background: #e74c3c; color: #fff; border: none; padding: 3px 6px; border-radius: 3px; cursor: pointer; font-size: 0.7rem;">🗑 Delete</button>
+                </div>
                 <p style="margin:0 0 4px 0; font-size:0.8rem; opacity:0.8;">📧 ${data.email || 'N/A'} | 📞 ${data.phone || 'N/A'}</p>
                 <p style="margin:0; font-size:0.85rem;">${data.text || ''}</p>
             `;
@@ -732,7 +741,21 @@ async function loadArchivedFeed() {
         container.innerHTML = "<p style='color:red;'>Failed to load archive.</p>";
     }
 }
-// Delete function to remove items from Firestore
+
+// Permanent deletion function for archived items
+async function deleteArchivedItem(id) {
+    if (confirm("Are you sure you want to permanently delete this archived item?")) {
+        try {
+            await firebase.firestore().collection("churchArchive").doc(id).delete();
+            loadArchivedFeed(); // Refresh the modal view automatically
+        } catch (error) {
+            console.error("Error deleting archived document: ", error);
+            alert("Failed to delete item from archive.");
+        }
+    }
+}
+
+// Delete function to remove items from live feed
 async function deleteFeedItem(id) {
     if (confirm("Are you sure you want to remove this from the live feed?")) {
         try {
