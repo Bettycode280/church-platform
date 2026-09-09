@@ -597,9 +597,9 @@ function loadLiveFeed() {
                     </div>
                 `;
             } else {
-    
-                // Standard Prayer Request Layout with Date, Share, Archive, and Delete
-                let formattedDate = 'N/A';
+
+                // Standard Prayer Request Layout with Date, Contact Info, and Action Buttons (No Read button)
+                let formattedDate = 'Just now';
                 if (data.time && typeof data.time.toDate === 'function') {
                     formattedDate = data.time.toDate().toLocaleString();
                 } else if (data.time) {
