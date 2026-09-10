@@ -690,6 +690,17 @@ function sendWhatsApp(phone) {
     window.open(url, '_blank');
 }
 
+function sendEmail(email) {
+    const msgInput = document.getElementById('wa_quick_message');
+    const customMsg = msgInput ? msgInput.value.trim() : '';
+    
+    let url = `mailto:${email}`;
+    if (customMsg) {
+        url += `?subject=Message from Church&body=${encodeURIComponent(customMsg)}`;
+    }
+    window.location.href = url;
+}
+
 function loadMemberDirectory() {
     if (!db) return;
     const directoryContainer = document.getElementById('member-directory-list');
@@ -710,18 +721,18 @@ function loadMemberDirectory() {
             const email = data.email || '';
 
             directoryContainer.innerHTML += `
-                <div style="background: rgba(255,255,255,0.05); padding: 10px 14px; border-radius: 6px; border: 1px solid rgba(212,175,55,0.2); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; color: #fff;">
+                <div style="background: rgba(255,255,255,0.05); padding: 12px 14px; border-radius: 6px; border: 1px solid rgba(212,175,55,0.2); margin-bottom: 10px; display: flex; flex-direction: column; gap: 8px; color: #fff;">
                     <div>
-                        <strong style="color: #D4AF37;">${data.name || 'Unnamed'}</strong>
-                        <p style="margin: 2px 0 0 0; font-size: 0.8rem; opacity: 0.7;">
-                            📞 <a href="tel:${phone}" style="color: #fff; text-decoration: none;">${phone || 'N/A'}</a> | 
+                        <strong style="color: #D4AF37; font-size: 0.95rem;">${data.name || 'Unnamed'}</strong>
+                        <p style="margin: 4px 0 0 0; font-size: 0.8rem; opacity: 0.8; line-height: 1.4;">
+                            📞 <a href="tel:${phone}" style="color: #fff; text-decoration: none;">${phone || 'N/A'}</a><br>
                             📧 <a href="mailto:${email}" style="color: #fff; text-decoration: none;">${email || 'N/A'}</a>
                         </p>
                     </div>
-                    <div style="display: flex; gap: 6px; align-items: center;">
-                        ${phone ? `<button onclick="sendWhatsApp('${phone}')" style="background: #25D366; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">WhatsApp</button>` : ''}
-                        ${email ? `<a href="mailto:${email}" style="background: #3498db; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; text-decoration: none;">Email</a>` : ''}
-                        <button onclick="deleteMember('${docId}')" style="background: #e74c3c; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">Delete</button>
+                    <div style="display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px;">
+                        ${phone ? `<button onclick="sendWhatsApp('${phone}')" style="background: #25D366; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">WhatsApp</button>` : ''}
+                        ${email ? `<button onclick="sendEmail('${email}')" style="background: #3498db; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Email</button>` : ''}
+                        <button onclick="deleteMember('${docId}')" style="background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Delete</button>
                     </div>
                 </div>
             `;
