@@ -701,6 +701,22 @@ function sendEmail(email) {
     window.location.href = url;
 }
 
+// ==========================================
+// PASTE updateCharCount RIGHT HERE:
+// ==========================================
+function updateCharCount(input) {
+    const maxLength = 1000;
+    const currentLength = input.value.length;
+    const counter = document.getElementById('char-count');
+    if (counter) {
+        counter.innerText = `${currentLength} / ${maxLength} chars`;
+        if (currentLength > maxLength) {
+            counter.style.color = '#e74c3c'; // Turns red if past limit
+        } else {
+            counter.style.color = '#aaa';
+        }
+    }
+}
 function loadMemberDirectory() {
     if (!db) return;
     const directoryContainer = document.getElementById('member-directory-list');

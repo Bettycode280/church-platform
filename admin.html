@@ -88,15 +88,23 @@
 
         <div class="admin-dashboard-grid">
             
-      <!-- 1. Add New Member Panel -->
+     <!-- 2. Member WhatsApp Directory Panel -->
 <div class="admin-panel" style="margin-bottom: 20px;">
-    <h2 class="gold-text" style="font-size: 1.1rem;">Add New Member</h2>
-    <input type="text" id="new-member-name" placeholder="Member Name (e.g. Sister Grace)" class="sleek-input" style="margin-bottom: 10px; width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px;">
-    <input type="text" id="new-member-phone" placeholder="Phone Number (e.g. +1234567890)" class="sleek-input" style="margin-bottom: 10px; width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px;">
-    <input type="email" id="new-member-email" placeholder="Email Address (e.g. grace@example.com)" class="sleek-input" style="margin-bottom: 10px; width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px;">
-    <button type="button" class="premium-gold-btn" onclick="saveNewMember()" style="width: 100%;">SAVE MEMBER</button>
-</div>
+    <button class="premium-gold-btn" style="width: 100%; margin-bottom: 5px; font-size: 1.1rem; text-align: center; color: #000000; background: linear-gradient(135deg, #d4af37 0%, #aa7c11 100%); padding: 12px; border-radius: 6px; font-weight: bold; border: none; cursor: default;">Member WhatsApp Directory</button>
+    <p class="form-hint" style="font-size: 0.8rem; color: #aaa; margin-bottom: 10px;">Click a member to message them directly on WhatsApp or Email</p>
+    
+    <div style="margin-top: 10px;">
+        <input type="text" id="wa_quick_message" placeholder="Type message to send to selected member..." class="sleek-input" style="margin-bottom: 5px; width: 100%; padding: 10px; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff;" oninput="updateCharCount(this)">
+        <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #aaa; margin-bottom: 15px;">
+            <span>URL-safe quick message</span>
+            <span id="char-count">0 / 1000 chars</span>
+        </div>
+    </div>
 
+    <div id="member-directory-list" style="display: flex; flex-direction: column; gap: 10px; max-height: 250px; overflow-y: auto;">
+        <p style="opacity: 0.3; text-align: center; padding: 10px;">Loading members...</p>
+    </div>
+</div>
             <!-- 2. Member WhatsApp Directory Panel -->
             <div class="admin-panel" style="margin-bottom: 20px;">
                 <button class="premium-gold-btn" style="width: 100%; margin-bottom: 5px; font-size: 1.1rem; text-align: center; color: #000000; background: linear-gradient(135deg, #d4af37 0%, #aa7c11 100%); padding: 12px; border-radius: 6px; font-weight: bold; border: none; cursor: default;">Member WhatsApp Directory</button>
