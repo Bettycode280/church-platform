@@ -505,7 +505,6 @@ async function deleteRequest(docId) {
         alert("Failed to delete request. Check console for permissions.");
     }
 }
-
 function shareRequest(name, text, phone, email) {
     const cleanName = name || 'Anonymous';
     const cleanText = text || 'No details provided.';
