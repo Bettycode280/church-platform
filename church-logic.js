@@ -969,4 +969,23 @@ async function deleteArchivedItem(id) {
             alert("Failed to delete item from archive.");
         }
     }
+}function polishMessage() {
+    const input = document.getElementById('wa_quick_message');
+    if (!input || !input.value.trim()) return;
+
+    let text = input.value.trim();
+
+    // 1. Capitalize the very first letter
+    text = text.charAt(0).toUpperCase() + text.slice(1);
+
+    // 2. Remove extra spaces
+    text = text.replace(/\s+/g, ' ');
+
+    // 3. Ensure it ends with a period or appropriate punctuation if missing
+    if (!/[.!?]$/.test(text)) {
+        text += '.';
+    }
+
+    input.value = text;
+    updateCharCount(input);
 }

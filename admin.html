@@ -94,12 +94,13 @@
     <p class="form-hint" style="font-size: 0.8rem; color: #aaa; margin-bottom: 10px;">Click a member to message them directly on WhatsApp or Email</p>
     
     <div style="margin-top: 10px;">
-        <input type="text" id="wa_quick_message" placeholder="Type message to send to selected member..." class="sleek-input" style="margin-bottom: 5px; width: 100%; padding: 10px; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff;" oninput="updateCharCount(this)">
-        <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #aaa; margin-bottom: 15px;">
-            <span>URL-safe quick message</span>
-            <span id="char-count">0 / 1000 chars</span>
-        </div>
+    <textarea id="wa_quick_message" placeholder="Type message to send to selected member..." rows="3" spellcheck="true" class="sleek-input" style="margin-bottom: 5px; width: 100%; padding: 10px; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; resize: vertical;" oninput="updateCharCount(this)"></textarea>
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: #aaa; margin-bottom: 15px;">
+        <span id="char-count">0 / 1000 chars</span>
+        <button type="button" onclick="polishMessage()" style="background: rgba(212,175,55,0.2); color: #D4AF37; border: 1px solid rgba(212,175,55,0.4); padding: 3px 8px; border-radius: 4px; cursor: pointer; font-size: 0.7rem;">✨ Polish Grammar</button>
     </div>
+</div>
 
     <div id="member-directory-list" style="display: flex; flex-direction: column; gap: 10px; max-height: 250px; overflow-y: auto;">
         <p style="opacity: 0.3; text-align: center; padding: 10px;">Loading members...</p>
