@@ -677,6 +677,7 @@ async function deleteMember(id) {
         }
     }
 }
+
 function sendWhatsApp(phone) {
     const msgInput = document.getElementById('wa_quick_message');
     const customMsg = msgInput ? msgInput.value.trim() : '';
@@ -706,6 +707,7 @@ function loadMemberDirectory() {
             const data = doc.data();
             const docId = doc.id;
             const phone = data.phone || '';
+            const email = data.email || '';
 
             directoryContainer.innerHTML += `
                 <div style="background: rgba(255,255,255,0.05); padding: 10px 14px; border-radius: 6px; border: 1px solid rgba(212,175,55,0.2); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; color: #fff;">
@@ -713,11 +715,12 @@ function loadMemberDirectory() {
                         <strong style="color: #D4AF37;">${data.name || 'Unnamed'}</strong>
                         <p style="margin: 2px 0 0 0; font-size: 0.8rem; opacity: 0.7;">
                             📞 <a href="tel:${phone}" style="color: #fff; text-decoration: none;">${phone || 'N/A'}</a> | 
-                            📧 ${data.email || 'N/A'}
+                            📧 <a href="mailto:${email}" style="color: #fff; text-decoration: none;">${email || 'N/A'}</a>
                         </p>
                     </div>
                     <div style="display: flex; gap: 6px; align-items: center;">
                         ${phone ? `<button onclick="sendWhatsApp('${phone}')" style="background: #25D366; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">WhatsApp</button>` : ''}
+                        ${email ? `<a href="mailto:${email}" style="background: #3498db; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; text-decoration: none;">Email</a>` : ''}
                         <button onclick="deleteMember('${docId}')" style="background: #e74c3c; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">Delete</button>
                     </div>
                 </div>
@@ -727,7 +730,7 @@ function loadMemberDirectory() {
         console.error("Error loading member directory:", error);
     });
 }
-// Automatically load directory when admin page opens
+
 window.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('member-directory-list')) {
         loadMemberDirectory();
