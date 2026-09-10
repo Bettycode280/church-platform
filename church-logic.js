@@ -988,4 +988,22 @@ async function deleteArchivedItem(id) {
 
     input.value = text;
     updateCharCount(input);
+}function copyAndOpenFacebook() {
+    const input = document.getElementById('wa_quick_message');
+    if (!input || !input.value.trim()) {
+        alert("Please type a Bible tip first!");
+        return;
+    }
+
+    const textToCopy = input.value.trim();
+
+    // Copy to clipboard securely
+    navigator.clipboard.writeText(textToCopy).then(() => {
+        alert("Tip copied to clipboard! Opening Facebook. Just tap and paste into your daily post.");
+        window.open('https://www.facebook.com', '_blank');
+    }).catch(err => {
+        console.error('Failed to copy text:', err);
+        // Fallback if clipboard permissions are restricted
+        window.open('https://www.facebook.com', '_blank');
+    });
 }
