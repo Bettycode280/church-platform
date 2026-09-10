@@ -214,7 +214,30 @@ async function submitBooking() {
         alert("Failed to send request. Please try again.");
     }
 }
+// ==========================================
+// FIX & ENHANCE: Check Appointment Status Function
+// ==========================================
 
+// Add this function to handle manual clicks from members checking their status
+function checkMyAppointmentStatus() {
+    const inputField = document.getElementById('check-name-input'); // Make sure your input field has this ID, or adjust to match your HTML
+    let userName = "";
+
+    if (inputField && inputField.value.trim() !== "") {
+        userName = inputField.value.trim();
+        localStorage.setItem('church_user_name', userName);
+    } else {
+        userName = localStorage.getItem('church_user_name');
+    }
+
+    if (!userName) {
+        alert("Please enter your name to check your appointment status.");
+        return;
+    }
+
+    watchMyAppointment(userName);
+    alert(`Checking status for: ${userName}`);
+}
 function watchMyAppointment(userName) {
     if (!userName || !db) return;
     const cleanName = userName.trim();
@@ -695,7 +718,70 @@ async function updateAppointmentStatusDirect(id, statusVal) {
         alert("Failed to update status.");
     }
 }
+// === PASTE IT RIGHT HERE ===
+async function checkAppointmentStatus() {
+    if (!db) {
+        alert("Database connection not found.");
+        return;
+    }
 
+    const emailInput = document.getElementById('check-email');
+    const resultDiv = document.getElementById('status-result');
+
+    if (!emailInput || !emailInput.value.trim()) {
+        alert("Please enter your email address.");
+        return;
+    }
+
+    const cleanEmail = emailInput.value.trim().toLowerCase();
+    resultDiv.innerHTML = "Searching records...";
+
+    try {
+        const snapshot = await db.collection("churchPrayers")
+            .where("type", "==", "APPOINTMENT")
+            .where("email", "==", cleanEmail)
+            .get();
+
+        if (snapshot.empty) {
+            resultDiv.innerHTML = `<p style="color: #f39c12;">No appointments found for "${cleanEmail}".</p>`;
+            return;
+        }
+
+        let latestDoc = null;
+        let latestTime = 0;
+
+        snapshot.forEach((doc) => {
+            const data = doc.data();
+            const docTime = data.time && data.time.toMillis ? data.time.toMillis() : 0;
+            if (docTime >= latestTime) {
+                latestTime = docTime;
+                latestDoc = data;
+            }
+        });
+
+        if (!latestDoc) {
+            resultDiv.innerHTML = "<p style='color: #f39c12;'>No appointment data found.</p>";
+            return;
+        }
+
+        let statusColor = "#f39c12"; 
+        if (latestDoc.status === "Accepted") statusColor = "#2ecc71"; 
+        if (latestDoc.status === "Rejected") statusColor = "#e74c3c"; 
+        if (latestDoc.status === "Rescheduled") statusColor = "#3498db"; 
+
+        resultDiv.innerHTML = `
+            <div style="border: 1px solid ${statusColor}; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px; margin-top: 6px; text-align: left;">
+                <p style="margin: 0 0 2px 0;"><strong>Name:</strong> ${latestDoc.name}</p>
+                <p style="margin: 0 0 2px 0;"><strong>Time:</strong> ${latestDoc.text}</p>
+                <p style="margin: 0;"><strong>Status:</strong> <span style="color: ${statusColor}; font-weight: bold;">${latestDoc.status || 'Pending'}</span></p>
+                ${latestDoc.rescheduledTime ? `<p style="margin: 2px 0 0 0; color: #3498db;"><strong>Proposed:</strong> ${latestDoc.rescheduledTime}</p>` : ''}
+            </div>
+        `;
+    } catch (error) {
+        console.error("Error checking appointment status by email:", error);
+        resultDiv.innerHTML = "<p style='color: #e74c3c;'>Error checking status. Ensure your Firestore index is set up for queries by type and email.</p>";
+    }
+}
 async function shareFeedItem(id) {
     try {
         const docRef = await firebase.firestore().collection("churchPrayers").doc(id).get();
