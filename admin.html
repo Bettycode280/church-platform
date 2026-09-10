@@ -88,38 +88,33 @@
 
         <div class="admin-dashboard-grid">
             
-     <!-- 2. Member WhatsApp Directory Panel -->
+     <!-- 1. Add New Member Panel -->
 <div class="admin-panel" style="margin-bottom: 20px;">
-    <button class="premium-gold-btn" style="width: 100%; margin-bottom: 5px; font-size: 1.1rem; text-align: center; color: #000000; background: linear-gradient(135deg, #d4af37 0%, #aa7c11 100%); padding: 12px; border-radius: 6px; font-weight: bold; border: none; cursor: default;">Member WhatsApp Directory</button>
-    <p class="form-hint" style="font-size: 0.8rem; color: #aaa; margin-bottom: 10px;">Click a member to message them directly on WhatsApp or Email</p>
+    <h2 class="gold-text" style="font-size: 1.1rem; margin-bottom: 10px;">Add New Member</h2>
+    <input type="text" id="new-member-name" placeholder="Member Name (e.g. Sister Grace)" class="sleek-input" style="margin-bottom: 10px; width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px;">
+    <input type="text" id="new-member-phone" placeholder="Phone Number (e.g. +1234567890)" class="sleek-input" style="margin-bottom: 10px; width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px;">
+    <input type="email" id="new-member-email" placeholder="Email Address (e.g. grace@example.com)" class="sleek-input" style="margin-bottom: 10px; width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px;">
+    <button type="button" class="premium-gold-btn" onclick="saveNewMember()" style="width: 100%; padding: 10px; font-weight: bold; border-radius: 6px; border: none; cursor: pointer;">SAVE MEMBER</button>
+</div>
+
+<!-- 2. Member WhatsApp / Email Directory Panel -->
+<div class="admin-panel" style="margin-bottom: 20px;">
+    <h2 class="gold-text" style="font-size: 1.1rem; margin-bottom: 5px;">Member Communication Directory</h2>
+    <p class="form-hint" style="font-size: 0.8rem; color: #aaa; margin-bottom: 10px;">Type a message below, then click WhatsApp or Email on any member.</p>
     
     <div style="margin-top: 10px;">
-    <textarea id="wa_quick_message" placeholder="Type message to send to selected member..." rows="3" spellcheck="true" class="sleek-input" style="margin-bottom: 5px; width: 100%; padding: 10px; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; resize: vertical;" oninput="updateCharCount(this)"></textarea>
-    
-    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: #aaa; margin-bottom: 15px;">
-        <span id="char-count">0 / 1000 chars</span>
-        <button type="button" onclick="polishMessage()" style="background: rgba(212,175,55,0.2); color: #D4AF37; border: 1px solid rgba(212,175,55,0.4); padding: 3px 8px; border-radius: 4px; cursor: pointer; font-size: 0.7rem;">✨ Polish Grammar</button>
+        <textarea id="wa_quick_message" placeholder="Type message to send to selected member..." rows="3" spellcheck="true" class="sleek-input" style="margin-bottom: 5px; width: 100%; padding: 10px; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; resize: vertical;" oninput="updateCharCount(this)"></textarea>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: #aaa; margin-bottom: 15px;">
+            <span id="char-count">0 / 1000 chars</span>
+            <button type="button" onclick="polishMessage()" style="background: rgba(212,175,55,0.2); color: #D4AF37; border: 1px solid rgba(212,175,55,0.4); padding: 3px 8px; border-radius: 4px; cursor: pointer; font-size: 0.7rem;">✨ Polish Grammar</button>
+        </div>
     </div>
-</div>
 
     <div id="member-directory-list" style="display: flex; flex-direction: column; gap: 10px; max-height: 250px; overflow-y: auto;">
         <p style="opacity: 0.3; text-align: center; padding: 10px;">Loading members...</p>
     </div>
 </div>
-            <!-- 2. Member WhatsApp Directory Panel -->
-            <div class="admin-panel" style="margin-bottom: 20px;">
-                <button class="premium-gold-btn" style="width: 100%; margin-bottom: 5px; font-size: 1.1rem; text-align: center; color: #000000; background: linear-gradient(135deg, #d4af37 0%, #aa7c11 100%); padding: 12px; border-radius: 6px; font-weight: bold; border: none; cursor: default;">Member WhatsApp Directory</button>
-                <p class="form-hint" style="font-size: 0.8rem; color: #aaa; margin-bottom: 10px;">Click a member to message them directly on WhatsApp</p>
-                
-                <div style="margin-top: 10px;">
-                    <input type="text" id="wa_quick_message" placeholder="Type message to send to selected member..." class="sleek-input" style="margin-bottom: 15px; width: 100%; padding: 10px; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff;">
-                </div>
-
-                <div id="member-directory-list" style="display: flex; flex-direction: column; gap: 10px; max-height: 250px; overflow-y: auto;">
-                    <p style="opacity: 0.3; text-align: center; padding: 10px;">Loading members...</p>
-                </div>
-            </div>
-
            <!-- 3. Modern Biblical Books & Media Panel -->
 <div class="admin-panel" style="margin-bottom: 20px;">
     <h2 class="gold-text" style="font-size: 1.2rem;">📖 Biblical Resources & Christian Media</h2>
