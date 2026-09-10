@@ -677,6 +677,17 @@ async function deleteMember(id) {
         }
     }
 }
+function sendWhatsApp(phone) {
+    const msgInput = document.getElementById('wa_quick_message');
+    const customMsg = msgInput ? msgInput.value.trim() : '';
+    const cleanPhone = phone.replace(/[^0-9+]/g, '');
+    
+    let url = `https://wa.me/${cleanPhone}`;
+    if (customMsg) {
+        url += `?text=${encodeURIComponent(customMsg)}`;
+    }
+    window.open(url, '_blank');
+}
 
 function loadMemberDirectory() {
     if (!db) return;
@@ -695,7 +706,6 @@ function loadMemberDirectory() {
             const data = doc.data();
             const docId = doc.id;
             const phone = data.phone || '';
-            const cleanPhone = phone.replace(/[^0-9+]/g, '');
 
             directoryContainer.innerHTML += `
                 <div style="background: rgba(255,255,255,0.05); padding: 10px 14px; border-radius: 6px; border: 1px solid rgba(212,175,55,0.2); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; color: #fff;">
@@ -707,7 +717,7 @@ function loadMemberDirectory() {
                         </p>
                     </div>
                     <div style="display: flex; gap: 6px; align-items: center;">
-                        ${phone ? `<a href="https://wa.me/${cleanPhone}" target="_blank" style="background: #25D366; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; text-decoration: none;">WhatsApp</a>` : ''}
+                        ${phone ? `<button onclick="sendWhatsApp('${phone}')" style="background: #25D366; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">WhatsApp</button>` : ''}
                         <button onclick="deleteMember('${docId}')" style="background: #e74c3c; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">Delete</button>
                     </div>
                 </div>
@@ -717,7 +727,6 @@ function loadMemberDirectory() {
         console.error("Error loading member directory:", error);
     });
 }
-
 // Automatically load directory when admin page opens
 window.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('member-directory-list')) {
