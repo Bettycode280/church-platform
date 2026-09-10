@@ -662,7 +662,6 @@ function loadMemberDirectory() {
         console.error("Error loading member directory:", error);
     });
 }
-
 async function deleteMember(id) {
     if (!db) return;
     if (confirm("Are you sure you want to remove this member?")) {
@@ -675,6 +674,37 @@ async function deleteMember(id) {
     }
 }
 
+// Paste it right here:
+async function saveNewMember() {
+    const nameInput = document.getElementById('new-member-name');
+    const phoneInput = document.getElementById('new-member-phone');
+    const emailInput = document.getElementById('new-member-email');
+
+    if (!nameInput || !nameInput.value.trim()) {
+        alert("Please enter the member's name.");
+        return;
+    }
+
+    try {
+        const db = firebase.firestore();
+        await db.collection("churchMembers").add({
+            name: nameInput.value.trim(),
+            phone: phoneInput ? phoneInput.value.trim() : '',
+            email: emailInput ? emailInput.value.trim() : '',
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        alert("Member added successfully!");
+        
+        nameInput.value = "";
+        if (phoneInput) phoneInput.value = "";
+        if (emailInput) emailInput.value = "";
+
+    } catch (error) {
+        console.error("Error adding member: ", error);
+        alert("Failed to add member.");
+    }
+}
 // ==========================================
 // HELPER FUNCTIONS & CONTROLS
 // ==========================================
