@@ -718,13 +718,7 @@ async function updateAppointmentStatusDirect(id, statusVal) {
         alert("Failed to update status.");
     }
 }
-// === PASTE IT RIGHT HERE ===
 async function checkAppointmentStatus() {
-    if (!db) {
-        alert("Database connection not found.");
-        return;
-    }
-
     const emailInput = document.getElementById('check-email');
     const resultDiv = document.getElementById('status-result');
 
@@ -737,7 +731,9 @@ async function checkAppointmentStatus() {
     resultDiv.innerHTML = "Searching records...";
 
     try {
-        const snapshot = await db.collection("churchPrayers")
+        const firestoreDb = (typeof db !== 'undefined' && db) ? db : firebase.firestore();
+        
+        const snapshot = await firestoreDb.collection("churchPrayers")
             .where("type", "==", "APPOINTMENT")
             .where("email", "==", cleanEmail)
             .get();
@@ -779,7 +775,7 @@ async function checkAppointmentStatus() {
         `;
     } catch (error) {
         console.error("Error checking appointment status by email:", error);
-        resultDiv.innerHTML = "<p style='color: #e74c3c;'>Error checking status. Ensure your Firestore index is set up for queries by type and email.</p>";
+        resultDiv.innerHTML = "<p style='color: #e74c3c;'>Error checking status. Check console for details.</p>";
     }
 }
 async function shareFeedItem(id) {
