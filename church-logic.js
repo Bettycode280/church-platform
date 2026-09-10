@@ -505,6 +505,7 @@ async function deleteRequest(docId) {
         alert("Failed to delete request. Check console for permissions.");
     }
 }
+// 1. Prayer & Appointment Request Sharing (Uses the 1-4 prompt)
 function shareRequest(name, text, phone, email) {
     const cleanName = name || 'Anonymous';
     const cleanText = text || 'No details provided.';
@@ -530,6 +531,63 @@ function shareRequest(name, text, phone, email) {
         navigator.clipboard.writeText(shareMessage).then(() => {
             alert("✅ Message copied to your clipboard!\n\nTikTok will now open. Just paste (Ctrl+V or long-press) into your caption box.");
             window.open("https://www.tiktok.com/", "_blank");
+        }).catch(err => {
+            console.error("Clipboard error:", err);
+            alert("Failed to copy message automatically.");
+        });
+    }
+}
+
+// 2. Character Counter for Directory Panel
+function updateCharCount(textarea) {
+    if (textarea) {
+        const count = textarea.value.length;
+        const counterEl = document.getElementById('char-count');
+        if (counterEl) {
+            counterEl.innerText = `${count} / 1000 chars`;
+        }
+    }
+}
+
+// 3. Grammar Polish for Directory Panel
+function polishMessage() {
+    const input = document.getElementById('wa_quick_message');
+    if (!input || !input.value.trim()) {
+        alert("Please type a message first to polish.");
+        return;
+    }
+    input.value = input.value.trim().replace(/\b[a-z]/g, function(letter) { return letter.toUpperCase(); });
+    updateCharCount(input);
+    alert("✨ Grammar polished successfully!");
+}
+
+// 4. Member Communication Directory Sharing (WhatsApp, Email, Facebook, TikTok)
+function shareDirectoryComm(platform) {
+    const input = document.getElementById('wa_quick_message');
+    if (!input || !input.value.trim()) {
+        alert("Please enter a message before sharing.");
+        return;
+    }
+    const message = input.value.trim();
+
+    if (platform === 'whatsapp') {
+        const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
+        window.open(url, '_blank');
+    } else if (platform === 'email') {
+        const url = `mailto:?subject=${encodeURIComponent("Church Communication")}&body=${encodeURIComponent(message)}`;
+        window.open(url, '_blank');
+    } else if (platform === 'facebook') {
+        navigator.clipboard.writeText(message).then(() => {
+            alert("✅ Message copied to your clipboard!\n\nFacebook will now open. Just paste (Ctrl+V or long-press) into your post.");
+            window.open('https://www.facebook.com/sharer/sharer.php', '_blank');
+        }).catch(err => {
+            console.error("Clipboard error:", err);
+            alert("Failed to copy message automatically.");
+        });
+    } else if (platform === 'tiktok') {
+        navigator.clipboard.writeText(message).then(() => {
+            alert("✅ Message copied to your clipboard!\n\nTikTok will now open. Just paste (Ctrl+V or long-press) into your caption box.");
+            window.open('https://www.tiktok.com/', '_blank');
         }).catch(err => {
             console.error("Clipboard error:", err);
             alert("Failed to copy message automatically.");
