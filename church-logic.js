@@ -631,50 +631,10 @@ function loadLiveFeed() {
     });
 }
 
-function loadMemberDirectory() {
-    if (!db) return;
-    const directoryContainer = document.getElementById('member-directory-list');
-    if (!directoryContainer) return;
+// ==========================================
+// CHURCH MEMBER DIRECTORY & MISSION CONTROL LOGIC
+// ==========================================
 
-    db.collection("churchMembers").orderBy("name", "asc").onSnapshot((snapshot) => {
-        directoryContainer.innerHTML = "";
-
-        if (snapshot.empty) {
-            directoryContainer.innerHTML = '<p style="opacity: 0.3; text-align: center; padding: 10px;">No members found in directory.</p>';
-            return;
-        }
-
-        snapshot.forEach((doc) => {
-            const data = doc.data();
-            const docId = doc.id;
-
-            directoryContainer.innerHTML += `
-                <div style="background: rgba(255,255,255,0.05); padding: 10px 14px; border-radius: 6px; border: 1px solid rgba(212,175,55,0.2); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; color: #fff;">
-                    <div>
-                        <strong style="color: #D4AF37;">${data.name || 'Unnamed'}</strong>
-                        <p style="margin: 2px 0 0 0; font-size: 0.8rem; opacity: 0.7;">📞 ${data.phone || 'N/A'} | 📧 ${data.email || 'N/A'}</p>
-                    </div>
-                    <button onclick="deleteMember('${docId}')" style="background: #e74c3c; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">Delete</button>
-                </div>
-            `;
-        });
-    }, (error) => {
-        console.error("Error loading member directory:", error);
-    });
-}
-async function deleteMember(id) {
-    if (!db) return;
-    if (confirm("Are you sure you want to remove this member?")) {
-        try {
-            await db.collection("churchMembers").doc(id).delete();
-        } catch (error) {
-            console.error("Error deleting member:", error);
-            alert("Failed to delete member.");
-        }
-    }
-}
-
-// Paste it right here:
 async function saveNewMember() {
     const nameInput = document.getElementById('new-member-name');
     const phoneInput = document.getElementById('new-member-phone');
@@ -705,6 +665,65 @@ async function saveNewMember() {
         alert("Failed to add member.");
     }
 }
+
+async function deleteMember(id) {
+    if (!db) return;
+    if (confirm("Are you sure you want to remove this member?")) {
+        try {
+            await db.collection("churchMembers").doc(id).delete();
+        } catch (error) {
+            console.error("Error deleting member:", error);
+            alert("Failed to delete member.");
+        }
+    }
+}
+
+function loadMemberDirectory() {
+    if (!db) return;
+    const directoryContainer = document.getElementById('member-directory-list');
+    if (!directoryContainer) return;
+
+    db.collection("churchMembers").orderBy("name", "asc").onSnapshot((snapshot) => {
+        directoryContainer.innerHTML = "";
+
+        if (snapshot.empty) {
+            directoryContainer.innerHTML = '<p style="opacity: 0.3; text-align: center; padding: 10px;">No members found in directory.</p>';
+            return;
+        }
+
+        snapshot.forEach((doc) => {
+            const data = doc.data();
+            const docId = doc.id;
+            const phone = data.phone || '';
+            const cleanPhone = phone.replace(/[^0-9+]/g, '');
+
+            directoryContainer.innerHTML += `
+                <div style="background: rgba(255,255,255,0.05); padding: 10px 14px; border-radius: 6px; border: 1px solid rgba(212,175,55,0.2); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; color: #fff;">
+                    <div>
+                        <strong style="color: #D4AF37;">${data.name || 'Unnamed'}</strong>
+                        <p style="margin: 2px 0 0 0; font-size: 0.8rem; opacity: 0.7;">
+                            📞 <a href="tel:${phone}" style="color: #fff; text-decoration: none;">${phone || 'N/A'}</a> | 
+                            📧 ${data.email || 'N/A'}
+                        </p>
+                    </div>
+                    <div style="display: flex; gap: 6px; align-items: center;">
+                        ${phone ? `<a href="https://wa.me/${cleanPhone}" target="_blank" style="background: #25D366; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; text-decoration: none;">WhatsApp</a>` : ''}
+                        <button onclick="deleteMember('${docId}')" style="background: #e74c3c; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">Delete</button>
+                    </div>
+                </div>
+            `;
+        });
+    }, (error) => {
+        console.error("Error loading member directory:", error);
+    });
+}
+
+// Automatically load directory when admin page opens
+window.addEventListener('DOMContentLoaded', () => {
+    if (document.getElementById('member-directory-list')) {
+        loadMemberDirectory();
+    }
+});
 // ==========================================
 // HELPER FUNCTIONS & CONTROLS
 // ==========================================
