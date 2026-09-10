@@ -78,9 +78,10 @@
     </div>
 </div>
 
-    <!-- Appointment Modal -->
+  <!-- Appointment Modal -->
 <div id="booking-modal" class="modal">
-    <div class="glass-card">
+    <!-- Added max-height and overflow-y: auto here to fix mobile cut-off -->
+    <div class="glass-card" style="max-height: 85vh; overflow-y: auto;">
         <h2 class="gold-text">Appointment</h2>
         <p class="form-hint">Request a Private Meeting</p>
         
@@ -104,7 +105,21 @@
         <input type="time" id="b_time" value="14:00" class="sleek-input" style="cursor: pointer;">
 
         <button class="premium-gold-btn" onclick="submitBooking()" style="margin-top: 10px;">REQUEST MEETING</button>
-        <div class="cancel-link" onclick="closeModals(); toggleMenu();">Back</div>
+
+        <!-- Built-in Status Checker by Name & Phone -->
+        <div style="margin-top: 15px; border-top: 1px solid rgba(212,175,55,0.2); padding-top: 12px; text-align: left;">
+            <h3 class="gold-text" style="font-size: 1rem; margin-bottom: 6px;">Check Status by Name & Phone</h3>
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+                <input type="text" id="check-name" placeholder="Your Full Name" class="sleek-input" style="margin: 0; font-size: 12px; padding: 8px;">
+                <input type="tel" id="check-phone" placeholder="Your Phone Number" class="sleek-input" style="margin: 0; font-size: 12px; padding: 8px;">
+                <button type="button" class="premium-gold-btn" onclick="checkAppointmentStatus()" style="width: 100%; padding: 8px; font-size: 12px; margin-top: 4px;">CHECK STATUS</button>
+            </div>
+            <div id="status-result" style="margin-top: 8px; font-size: 0.85rem; color: #fff;"></div>
+        </div>
+
+        <div class="cancel-link" onclick="closeModals(); toggleMenu();" style="margin-top: 12px;">Back</div>
+    </div>
+</div>
 
         <div id="my-appointment-status"></div>
 <!-- Built-in Status Checker by Name & Phone -->
@@ -341,7 +356,7 @@ async function submitPrayer() {
                     .get();
 
                 if (snapshot.empty) {
-                    resultDiv.innerHTML = `<p style="color: #f39c12;">No appointment found matching "${cleanName}" and "${cleanPhone}".</p>`;
+                    resultDiv.innerHTML = `<p style="color: #f39c12; font-size: 13px;">No appointment found matching "${cleanName}" and "${cleanPhone}".</p>`;
                     return;
                 }
 
@@ -358,7 +373,7 @@ async function submitPrayer() {
                 });
 
                 if (!latestDoc) {
-                    resultDiv.innerHTML = "<p style='color: #f39c12;'>No appointment data found.</p>";
+                    resultDiv.innerHTML = "<p style='color: #f39c12; font-size: 13px;'>No appointment data found.</p>";
                     return;
                 }
 
@@ -368,19 +383,24 @@ async function submitPrayer() {
                 if (latestDoc.status === "Rescheduled") statusColor = "#3498db"; 
 
                 resultDiv.innerHTML = `
-                    <div style="border: 1px solid ${statusColor}; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px; margin-top: 8px; text-align: left;">
+                    <div style="border: 1px solid ${statusColor}; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 6px; margin-top: 8px; text-align: left; font-size: 12px;">
                         <p style="margin: 0 0 4px 0;"><strong>Name:</strong> ${latestDoc.name}</p>
                         <p style="margin: 0 0 4px 0;"><strong>Requested:</strong> ${latestDoc.text}</p>
-                        <p style="margin: 0;"><strong>Status:</strong> <span style="color: ${statusColor}; font-weight: bold;">${latestDoc.status || 'Pending'}</span></p>
-                        ${latestDoc.rescheduledTime ? `<p style="margin: 4px 0 0 0; color: #3498db;"><strong>Proposed Reschedule:</strong> ${latestDoc.rescheduledTime}</p>` : ''}
+                        <p style="margin: 0 0 4px 0;"><strong>Status:</strong> <span style="color: ${statusColor}; font-weight: bold;">${latestDoc.status || 'Pending'}</span></p>
+                        ${latestDoc.rescheduledTime ? `<p style="margin: 0; color: #3498db;"><strong>Rescheduled Time:</strong> ${latestDoc.rescheduledTime}</p>` : ''}
                     </div>
                 `;
+
+                // Automatically scroll the result into clear view on mobile screens
+                setTimeout(() => {
+                    resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }, 100);
+
             } catch (error) {
                 console.error("Error checking appointment status:", error);
-                resultDiv.innerHTML = "<p style='color: #e74c3c;'>Error checking status. Check console for details.</p>";
+                resultDiv.innerHTML = "<p style='color: #e74c3c; font-size: 13px;'>Error checking status. Check console for details.</p>";
             }
         }
-
         async function submitTestimony() {
             const typeInput = document.getElementById('t_type');
             const nameInput = document.getElementById('t_name');
