@@ -77,8 +77,7 @@
         <div class="cancel-link" onclick="closeModals()">Cancel</div>
     </div>
 </div>
-
-  <!-- Appointment Modal -->
+<!-- Appointment Modal -->
 <div id="booking-modal" class="modal">
     <!-- Added max-height and overflow-y: auto here to fix mobile cut-off -->
     <div class="glass-card" style="max-height: 85vh; overflow-y: auto;">
@@ -103,6 +102,16 @@
 
         <label style="color: #D4AF37; font-size: 11px; display: block; text-align: left; margin: 4px 0;">Select Time</label>
         <input type="time" id="b_time" value="14:00" class="sleek-input" style="cursor: pointer;">
+
+        <!-- Purpose of Meeting Selector -->
+        <label style="color: #D4AF37; font-size: 11px; display: block; text-align: left; margin: 4px 0;">Purpose of Meeting</label>
+        <div id="purpose-selector-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-bottom: 10px;">
+            <button type="button" class="purpose-btn" onclick="selectPurpose('Spiritual Counseling', this)" style="padding: 8px; background: rgba(212,175,55,0.25); border: 1px solid #D4AF37; color: #fff; border-radius: 6px; cursor: pointer; font-size: 12px;">Counseling</button>
+            <button type="button" class="purpose-btn" onclick="selectPurpose('Prayer & Deliverance', this)" style="padding: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px; cursor: pointer; font-size: 12px;">Prayer</button>
+            <button type="button" class="purpose-btn" onclick="selectPurpose('General Consultation', this)" style="padding: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px; cursor: pointer; font-size: 12px;">Consultation</button>
+            <button type="button" class="purpose-btn" onclick="selectPurpose('Membership & Baptism', this)" style="padding: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px; cursor: pointer; font-size: 12px;">Membership</button>
+        </div>
+        <input type="hidden" id="b_purpose" value="Spiritual Counseling">
 
         <button class="premium-gold-btn" onclick="submitBooking()" style="margin-top: 10px;">REQUEST MEETING</button>
 
@@ -228,6 +237,21 @@
             buttonElement.style.borderColor = "#D4AF37";
         }
 
+        // Paste selectPurpose() right here:
+        function selectPurpose(purpose, buttonElement) {
+            const purposeInput = document.getElementById('b_purpose');
+            if (purposeInput) purposeInput.value = purpose;
+
+            const buttons = document.querySelectorAll('.purpose-btn');
+            buttons.forEach(btn => {
+                btn.style.background = "rgba(255,255,255,0.08)";
+                btn.style.borderColor = "rgba(212,175,55,0.3)";
+            });
+
+            buttonElement.style.background = "rgba(212, 175, 55, 0.25)";
+            buttonElement.style.borderColor = "#D4AF37";
+        }
+
         function selectTestimonyType(type, buttonElement) {
             const typeInput = document.getElementById('t_type');
             if (typeInput) typeInput.value = type;
@@ -296,43 +320,44 @@ async function submitPrayer() {
             }
         }
 
-        async function submitBooking() {
-            const nameInput = document.getElementById('b_name');
-            const emailInput = document.getElementById('b_email');
-            const phoneInput = document.getElementById('b_phone');
-            const dayInput = document.getElementById('b_day');
-            const timeInput = document.getElementById('b_time');
+      async function submitBooking() {
+    const nameInput = document.getElementById('b_name');
+    const emailInput = document.getElementById('b_email');
+    const phoneInput = document.getElementById('b_phone');
+    const dayInput = document.getElementById('b_day');
+    const timeInput = document.getElementById('b_time');
+    const purposeInput = document.getElementById('b_purpose');
 
-            if (!nameInput || !nameInput.value.trim()) {
-                alert("Please enter your full name for the appointment.");
-                return;
-            }
+    if (!nameInput || !nameInput.value.trim()) {
+        alert("Please enter your full name for the appointment.");
+        return;
+    }
 
-            try {
-                const db = firebase.firestore();
-                await db.collection("churchPrayers").add({
-                    type: "APPOINTMENT",
-                    name: nameInput.value.trim(),
-                    email: emailInput ? emailInput.value.trim() : '',
-                    phone: phoneInput ? phoneInput.value.trim() : '',
-                    day: dayInput ? dayInput.value : 'Monday',
-                    timeSlot: timeInput ? timeInput.value : '14:00',
-                    text: `Appointment requested for ${dayInput ? dayInput.value : 'Monday'} at ${timeInput ? timeInput.value : '14:00'}`,
-                    status: "Pending",
-                    time: firebase.firestore.FieldValue.serverTimestamp()
-                });
+    try {
+        const db = firebase.firestore();
+        await db.collection("churchPrayers").add({
+            type: "APPOINTMENT",
+            name: nameInput.value.trim(),
+            email: emailInput ? emailInput.value.trim() : '',
+            phone: phoneInput ? phoneInput.value.trim() : '',
+            day: dayInput ? dayInput.value : 'Monday',
+            timeSlot: timeInput ? timeInput.value : '14:00',
+            purpose: purposeInput ? purposeInput.value : 'Spiritual Counseling',
+            text: `${purposeInput ? purposeInput.value : 'Meeting'} requested for ${dayInput ? dayInput.value : 'Monday'} at ${timeInput ? timeInput.value : '14:00'}`,
+            status: "Pending",
+            time: firebase.firestore.FieldValue.serverTimestamp()
+        });
 
-                alert("Appointment Request Sent.");
-                closeModals();
-                nameInput.value = "";
-                if(emailInput) emailInput.value = "";
-                if(phoneInput) phoneInput.value = "";
-            } catch (error) {
-                console.error("Error submitting booking: ", error);
-                alert("Failed to submit appointment request.");
-            }
-        }
-
+        alert("Appointment Request Sent.");
+        closeModals();
+        nameInput.value = "";
+        if(emailInput) emailInput.value = "";
+        if(phoneInput) phoneInput.value = "";
+    } catch (error) {
+        console.error("Error submitting booking: ", error);
+        alert("Failed to submit appointment request.");
+    }
+}
         async function checkAppointmentStatus() {
             const nameInput = document.getElementById('check-name');
             const phoneInput = document.getElementById('check-phone');
