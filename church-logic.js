@@ -511,16 +511,32 @@ function shareRequest(name, text, phone, email) {
     const cleanText = text || 'No details provided.';
     const shareMessage = `Church Mission Request from ${cleanName}:\n"${cleanText}"\nPhone: ${phone || 'N/A'}\nEmail: ${email || 'N/A'}`;
     
-    const choice = prompt("Choose sharing method:\nEnter 1 for WhatsApp\nEnter 2 for Email", "1");
+    const choice = prompt("Choose sharing method:\nEnter 1 for WhatsApp\nEnter 2 for Email\nEnter 3 for Facebook\nEnter 4 for TikTok", "1");
+    
     if (choice === "1") {
         const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareMessage)}`;
         window.open(whatsappUrl, '_blank');
     } else if (choice === "2") {
         const mailtoUrl = `mailto:${email || ''}?subject=${encodeURIComponent("Church Mission Request: " + cleanName)}&body=${encodeURIComponent(shareMessage)}`;
         window.open(mailtoUrl, '_blank');
+    } else if (choice === "3") {
+        navigator.clipboard.writeText(shareMessage).then(() => {
+            alert("✅ Message copied to your clipboard!\n\nFacebook will now open. Just paste (Ctrl+V or long-press) into your post.");
+            window.open("https://www.facebook.com/sharer/sharer.php", "_blank");
+        }).catch(err => {
+            console.error("Clipboard error:", err);
+            alert("Failed to copy message automatically.");
+        });
+    } else if (choice === "4") {
+        navigator.clipboard.writeText(shareMessage).then(() => {
+            alert("✅ Message copied to your clipboard!\n\nTikTok will now open. Just paste (Ctrl+V or long-press) into your caption box.");
+            window.open("https://www.tiktok.com/", "_blank");
+        }).catch(err => {
+            console.error("Clipboard error:", err);
+            alert("Failed to copy message automatically.");
+        });
     }
 }
-
 function loadPrayers() {
     if (!db) return;
     const listDiv = document.getElementById('prayer-list');
