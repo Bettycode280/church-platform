@@ -521,12 +521,12 @@ function initLiveTestimonyListener() {
             div.innerHTML = `
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px;">
                     <div>
-                        <strong style="color: #27ae60; font-size: 0.9rem;">${record.name}</strong>
+                        <strong style="color: #27ae60; font-size: 0.9rem;">${record.name || 'Anonymous'}</strong>
                         <span style="opacity: 0.5; margin-left: 8px; font-size: 0.75rem;">Status: ${record.approved ? '✅ Approved' : '⏳ Pending'}</span>
                     </div>
                     <div>
                         ${!record.approved ? `<button type="button" onclick="approveTestimony('${id}')" style="background: #27ae60; color: #fff; border: none; padding: 3px 6px; border-radius: 3px; cursor: pointer; font-size: 0.7rem; margin-right: 4px;">✔ Approve</button>` : ''}
-                        <button type="button" onclick="shareTestimony('${id}', \`${encodeURIComponent(record.name)}\`, \`${encodeURIComponent(record.testimony || '')}\`, \`${encodeURIComponent(record.mediaUrl || '')}\`)" style="background: #2980b9; color: #fff; border: none; padding: 3px 6px; border-radius: 3px; cursor: pointer; font-size: 0.7rem; margin-right: 4px;">🔗 Share</button>
+                        <button type="button" onclick="shareTestimony('${id}', \`${encodeURIComponent(record.name || '')}\`, \`${encodeURIComponent(record.testimony || '')}\`, \`${encodeURIComponent(record.mediaUrl || '')}\`)" style="background: #2980b9; color: #fff; border: none; padding: 3px 6px; border-radius: 3px; cursor: pointer; font-size: 0.7rem; margin-right: 4px;">🔗 Share</button>
                         <button type="button" onclick="archiveTestimony('${id}')" style="background: #e67e22; color: #fff; border: none; padding: 3px 6px; border-radius: 3px; cursor: pointer; font-size: 0.7rem; margin-right: 4px;">📦 Archive</button>
                         <button type="button" onclick="deleteTestimonyRecord('${id}')" style="background: #c0392b; color: #fff; border: none; padding: 3px 6px; border-radius: 3px; cursor: pointer; font-size: 0.7rem;">🗑 Delete</button>
                     </div>
@@ -562,22 +562,16 @@ async function approveTestimony(id) {
 async function archiveTestimony(id) {
     const db = firebase.firestore();
     try {
-        await db.collection("testimonies").doc(id).set({ 
+        await db.collection("testimonies").doc(id).update({ 
             archived: true, 
             approved: false 
-        }, { merge: true });
+        });
         console.log("Successfully archived testimony:", id);
-        
-        // Refresh your live list so the item disappears from active view
-        if (typeof loadTestimonies === 'function') {
-            loadTestimonies();
-        }
     } catch (err) {
         console.error("Error archiving testimony:", err);
         alert("Failed to archive testimony: " + err.message);
     }
 }
-
 
 function renderArchivedTestimonies() {
     const container = document.getElementById('archive-feed-container');
@@ -630,6 +624,22 @@ async function restoreTestimony(id) {
         renderArchivedTestimonies();
     } catch (err) {
         alert("Failed to restore testimony: " + err.message);
+    }
+}
+
+// Modal Control Functions
+function openArchiveModal() {
+    const modal = document.getElementById('archive-modal');
+    if (modal) {
+        modal.style.display = 'flex';
+        renderArchivedTestimonies(); // Automatically pulls records when modal opens
+    }
+}
+
+function closeArchiveModal() {
+    const modal = document.getElementById('archive-modal');
+    if (modal) {
+        modal.style.display = 'none';
     }
 }
 
