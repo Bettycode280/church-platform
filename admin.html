@@ -567,6 +567,11 @@ async function archiveTestimony(id) {
             approved: false 
         }, { merge: true });
         console.log("Successfully archived testimony:", id);
+        
+        // Refresh your live list so the item disappears from active view
+        if (typeof loadTestimonies === 'function') {
+            loadTestimonies();
+        }
     } catch (err) {
         console.error("Error archiving testimony:", err);
         alert("Failed to archive testimony: " + err.message);
