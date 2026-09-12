@@ -737,44 +737,44 @@ async function saveNewMember() {
         alert("Failed to add member.");
     }
 }
-
 function filterMemberList() {
     const input = document.getElementById('member-search-input');
-    const filter = input.value.toLowerCase();
+    const filter = input.value.toLowerCase().trim();
     const listContainer = document.getElementById('member-directory-list');
     
-    // Look for member-card class, fallback to all child elements if not found
-    let memberCards = listContainer.getElementsByClassName('member-card');
+    // Find all member cards, or fallback to children excluding messages
+    let memberCards = listContainer.querySelectorAll('.member-card');
     if (memberCards.length === 0) {
-        memberCards = listContainer.children; 
+        // Fallback: get children that are not messages
+        memberCards = Array.from(listContainer.children).filter(child => 
+            child.id !== 'no-results-msg' && !child.textContent.includes('Loading members')
+        );
     }
 
     let visibleCount = 0;
 
-    for (let i = 0; i < memberCards.length; i++) {
-        // Skip our "no-results" message element if it exists
-        if (memberCards[i].id === 'no-results-msg') continue;
-
-        let cardText = memberCards[i].textContent || memberCards[i].innerText;
+    memberCards.forEach(card => {
+        let cardText = card.textContent || card.innerText;
         if (cardText.toLowerCase().indexOf(filter) > -1) {
-            memberCards[i].style.display = ""; // Show matching card
+            card.style.display = ""; // Show matching card
             visibleCount++;
         } else {
-            memberCards[i].style.display = "none"; // Hide non-matching card
+            card.style.display = "none"; // Hide non-matching card
         }
-    }
+    });
 
     // Handle "No members found" dynamic message
     let noResultsMsg = document.getElementById('no-results-msg');
+    
     if (visibleCount === 0 && filter !== '') {
         if (!noResultsMsg) {
             noResultsMsg = document.createElement('div');
             noResultsMsg.id = 'no-results-msg';
-            noResultsMsg.style.cssText = "font-size: 0.85rem; opacity: 0.7; text-align: center; padding: 10px; color: #aaa;";
+            noResultsMsg.style.cssText = "font-size: 0.85rem; opacity: 0.7; text-align: center; padding: 10px; color: #e74c3c; font-weight: bold;";
             noResultsMsg.innerText = "No members found matching your search.";
             listContainer.appendChild(noResultsMsg);
         }
-        noResultsMsg.style.display = "";
+        noResultsMsg.style.display = "block";
     } else {
         if (noResultsMsg) {
             noResultsMsg.style.display = "none";
