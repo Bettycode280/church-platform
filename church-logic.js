@@ -738,12 +738,16 @@ async function saveNewMember() {
     }
 }
 
-// --- SEARCH & FILTER FUNCTION ---
 function filterMemberList() {
     const input = document.getElementById('member-search-input');
     const filter = input.value.toLowerCase();
     const listContainer = document.getElementById('member-directory-list');
-    const memberCards = listContainer.getElementsByClassName('member-card'); // Assumes each member row has class 'member-card'
+    
+    // Look for member-card class, fallback to all child elements if not found
+    let memberCards = listContainer.getElementsByClassName('member-card');
+    if (memberCards.length === 0) {
+        memberCards = listContainer.children; 
+    }
 
     for (let i = 0; i < memberCards.length; i++) {
         let cardText = memberCards[i].textContent || memberCards[i].innerText;
