@@ -108,10 +108,11 @@
     </div>
     <p class="form-hint" style="font-size: 0.8rem; color: #aaa; margin-bottom: 12px;">Manage member info, compose broadcast notes, polish grammar, and share across platforms.</p>
     
-    <!-- Search Input Bar -->
-    <div style="margin-bottom: 10px;">
-        <input type="text" id="member-search-input" placeholder="🔍 Search members by name, phone, or email..." oninput="filterMemberList()" class="sleek-input" style="width: 100%; padding: 8px 10px; background: rgba(0,0,0,0.3); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px; font-size: 0.85rem; box-sizing: border-box;">
-    </div>
+    <!-- Search Input & Button Bar -->
+<div style="display: flex; gap: 8px; margin-bottom: 10px;">
+    <input type="text" id="member-search-input" placeholder="🔍 Search members by name, phone, email..." oninput="filterMemberList()" class="sleek-input" style="flex: 1; padding: 8px 10px; background: rgba(0,0,0,0.3); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px; font-size: 0.85rem; box-sizing: border-box;">
+    <button type="button" onclick="filterMemberList()" style="background: rgba(212,175,55,0.2); color: #D4AF37; border: 1px solid rgba(212,175,55,0.4); padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: bold; white-space: nowrap;">Search</button>
+</div>
 
     <!-- Member Details / List Container -->
     <div id="member-directory-list" style="margin-bottom: 15px; max-height: 200px; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 6px; border: 1px solid rgba(212,175,55,0.15);">
