@@ -578,6 +578,7 @@ async function archiveTestimony(id) {
     }
 }
 
+
 function renderArchivedTestimonies() {
     const container = document.getElementById('archive-feed-container');
     if (!container) return;
@@ -585,7 +586,10 @@ function renderArchivedTestimonies() {
     container.innerHTML = '<p style="opacity: 0.5; text-align: center; padding: 20px;">Loading archive...</p>';
 
     const db = firebase.firestore();
-    db.collection("testimonies").where("archived", "==", true).get().then((snapshot) => {
+    db.collection("testimonies")
+      .where("archived", "==", true)
+      .get()
+      .then((snapshot) => {
         container.innerHTML = '';
 
         if (snapshot.empty) {
@@ -615,7 +619,7 @@ function renderArchivedTestimonies() {
         });
     }).catch(err => {
         console.error("Error loading archive:", err);
-        container.innerHTML = `<p style="color: #ff4d4d; text-align: center; padding: 20px;">Failed to load archive. Check console for details.</p>`;
+        container.innerHTML = `<p style="color: #ff4d4d; text-align: center; padding: 20px;">Failed to load archive: ${err.message}</p>`;
     });
 }
 
