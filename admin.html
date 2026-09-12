@@ -344,18 +344,19 @@
 
     </div> <!-- Closes main container wrapper -->
 
- <script>
-    // --- Church Analytics & Testimony Recording Script ---
-
+ <!-- Combined Functions Script Block -->
+<script>
     // 1. Automatic Total Calculation Function
     function calculateAttendanceTotals() {
         const attMale = parseInt(document.getElementById('input-att-male').value) || 0;
         const attFemale = parseInt(document.getElementById('input-att-female').value) || 0;
-        document.getElementById('input-sunday-count').innerText = attMale + attFemale;
+        const attTotal = attMale + attFemale;
+        document.getElementById('input-sunday-count').innerText = attTotal;
 
         const visitorMale = parseInt(document.getElementById('input-visitor-male').value) || 0;
         const visitorFemale = parseInt(document.getElementById('input-visitor-female').value) || 0;
-        document.getElementById('input-visitors-count').innerText = visitorMale + visitorFemale;
+        const visitorTotal = visitorMale + visitorFemale;
+        document.getElementById('input-visitors-count').innerText = visitorTotal;
     }
 
     function getAnalyticsHistory() {
@@ -370,6 +371,7 @@
     function logAnalyticsRecord() {
         const dateInput = document.getElementById('input-analytics-date').value;
         
+        // Read male and female breakdown values directly
         const attMale = parseInt(document.getElementById('input-att-male').value) || 0;
         const attFemale = parseInt(document.getElementById('input-att-female').value) || 0;
         const attendance = attMale + attFemale;
@@ -378,7 +380,8 @@
         const visitorFemale = parseInt(document.getElementById('input-visitor-female').value) || 0;
         const visitors = visitorMale + visitorFemale;
 
-        const members = parseInt(document.getElementById('input-members-count').value) || 0;
+        const membersInput = document.getElementById('input-members-count').value;
+        const members = parseInt(membersInput) || 0;
 
         if (!dateInput) {
             alert('Please select a service date from the calendar.');
@@ -389,13 +392,13 @@
         
         history.push({
             date: dateInput,
-            attMale,
-            attFemale,
-            attendance,
-            visitorMale,
-            visitorFemale,
-            visitors,
-            members
+            attMale: attMale,
+            attFemale: attFemale,
+            attendance: attendance,
+            visitorMale: visitorMale,
+            visitorFemale: visitorFemale,
+            visitors: visitors,
+            members: members
         });
 
         history.sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -438,18 +441,25 @@
             const div = document.createElement('div');
             div.style.cssText = "display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 6px; border-left: 3px solid #d4af37; font-size: 0.8rem; color: #fff; margin-bottom: 6px;";
             
-            const formattedDate = new Date(record.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+            const dateObj = new Date(record.date);
+            const formattedDate = dateObj.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
 
             div.innerHTML = `
                 <div>
                     <strong style="color: #d4af37;">${formattedDate}</strong>
                     <span style="margin-left: 10px; opacity: 0.9;">📋 Att: ${record.attendance} (M:${record.attMale}, F:${record.attFemale}) | 🟢 Vis: ${record.visitors} (M:${record.visitorMale}, F:${record.visitorFemale}) | 🔵 Mem: ${record.members}</span>
                 </div>
-                <button onclick="deleteAnalyticsRecord(${index})" style="background: none; border: none; color: #ff4d4d; cursor: pointer; font-size: 0.9rem; font-weight: bold; padding: 2px 6px;">✕</button>
+                <button onclick="deleteAnalyticsRecord(${index})" style="background: none; border: none; color: #ff4d4d; cursor: pointer; font-size: 0.9rem; font-weight: bold; padding: 2px 6px; transition: opacity 0.2s;" onmouseover="this.style.opacity=0.7" onmouseout="this.style.opacity=1">✕</button>
             `;
             historyList.appendChild(div);
         });
     }
+
+    // Run render on page load
+    window.addEventListener('DOMContentLoaded', () => {
+        renderAnalyticsHistory();
+    });
+</script>
 
     // --- Testimony Recording & Mission Control ---
 
