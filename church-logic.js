@@ -749,12 +749,35 @@ function filterMemberList() {
         memberCards = listContainer.children; 
     }
 
+    let visibleCount = 0;
+
     for (let i = 0; i < memberCards.length; i++) {
+        // Skip our "no-results" message element if it exists
+        if (memberCards[i].id === 'no-results-msg') continue;
+
         let cardText = memberCards[i].textContent || memberCards[i].innerText;
         if (cardText.toLowerCase().indexOf(filter) > -1) {
             memberCards[i].style.display = ""; // Show matching card
+            visibleCount++;
         } else {
             memberCards[i].style.display = "none"; // Hide non-matching card
+        }
+    }
+
+    // Handle "No members found" dynamic message
+    let noResultsMsg = document.getElementById('no-results-msg');
+    if (visibleCount === 0 && filter !== '') {
+        if (!noResultsMsg) {
+            noResultsMsg = document.createElement('div');
+            noResultsMsg.id = 'no-results-msg';
+            noResultsMsg.style.cssText = "font-size: 0.85rem; opacity: 0.7; text-align: center; padding: 10px; color: #aaa;";
+            noResultsMsg.innerText = "No members found matching your search.";
+            listContainer.appendChild(noResultsMsg);
+        }
+        noResultsMsg.style.display = "";
+    } else {
+        if (noResultsMsg) {
+            noResultsMsg.style.display = "none";
         }
     }
 }
