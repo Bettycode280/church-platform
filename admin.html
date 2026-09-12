@@ -344,91 +344,122 @@
 
     </div> <!-- Closes main container wrapper -->
 
-    <!-- Combined Functions Script Block -->
-    <script>
-        // --- Analytics Functions ---
-        function getAnalyticsHistory() {
-            const data = localStorage.getItem('church_analytics_history');
-            return data ? JSON.parse(data) : [];
+   <!-- Combined Functions Script Block -->
+<script>
+    // 1. Automatic Total Calculation Function
+    function calculateAttendanceTotals() {
+        const attMale = parseInt(document.getElementById('input-att-male').value) || 0;
+        const attFemale = parseInt(document.getElementById('input-att-female').value) || 0;
+        const attTotal = attMale + attFemale;
+        document.getElementById('input-sunday-count').innerText = attTotal;
+
+        const visitorMale = parseInt(document.getElementById('input-visitor-male').value) || 0;
+        const visitorFemale = parseInt(document.getElementById('input-visitor-female').value) || 0;
+        const visitorTotal = visitorMale + visitorFemale;
+        document.getElementById('input-visitors-count').innerText = visitorTotal;
+    }
+
+    function getAnalyticsHistory() {
+        const data = localStorage.getItem('church_analytics_history');
+        return data ? JSON.parse(data) : [];
+    }
+
+    function saveAnalyticsHistory(history) {
+        localStorage.setItem('church_analytics_history', JSON.stringify(history));
+    }
+
+    function logAnalyticsRecord() {
+        const dateInput = document.getElementById('input-analytics-date').value;
+        
+        // Read male and female breakdown values directly
+        const attMale = parseInt(document.getElementById('input-att-male').value) || 0;
+        const attFemale = parseInt(document.getElementById('input-att-female').value) || 0;
+        const attendance = attMale + attFemale;
+
+        const visitorMale = parseInt(document.getElementById('input-visitor-male').value) || 0;
+        const visitorFemale = parseInt(document.getElementById('input-visitor-female').value) || 0;
+        const visitors = visitorMale + visitorFemale;
+
+        const membersInput = document.getElementById('input-members-count').value;
+        const members = parseInt(membersInput) || 0;
+
+        if (!dateInput) {
+            alert('Please select a service date from the calendar.');
+            return;
         }
 
-        function saveAnalyticsHistory(history) {
-            localStorage.setItem('church_analytics_history', JSON.stringify(history));
-        }
+        const history = getAnalyticsHistory();
+        
+        history.push({
+            date: dateInput,
+            attMale: attMale,
+            attFemale: attFemale,
+            attendance: attendance,
+            visitorMale: visitorMale,
+            visitorFemale: visitorFemale,
+            visitors: visitors,
+            members: members
+        });
 
-        function logAnalyticsRecord() {
-            const dateInput = document.getElementById('input-analytics-date').value;
-            const attendanceInput = document.getElementById('input-sunday-count').value;
-            const visitorsInput = document.getElementById('input-visitors-count').value;
-            const membersInput = document.getElementById('input-members-count').value;
+        history.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-            if (!dateInput) {
-                alert('Please select a service date from the calendar.');
-                return;
-            }
+        saveAnalyticsHistory(history);
+        renderAnalyticsHistory();
 
-            const attendance = parseInt(attendanceInput) || 0;
-            const visitors = parseInt(visitorsInput) || 0;
-            const members = parseInt(membersInput) || 0;
+        // Reset input fields and totals
+        document.getElementById('input-att-male').value = '';
+        document.getElementById('input-att-female').value = '';
+        document.getElementById('input-visitor-male').value = '';
+        document.getElementById('input-visitor-female').value = '';
+        document.getElementById('input-members-count').value = '';
+        document.getElementById('input-sunday-count').innerText = '0';
+        document.getElementById('input-visitors-count').innerText = '0';
+    }
 
+    function deleteAnalyticsRecord(index) {
+        if (confirm('Are you sure you want to delete this specific log entry?')) {
             const history = getAnalyticsHistory();
-            
-            history.push({
-                date: dateInput,
-                attendance: attendance,
-                visitors: visitors,
-                members: members
-            });
-
-            history.sort((a, b) => new Date(b.date) - new Date(a.date));
-
+            history.splice(index, 1);
             saveAnalyticsHistory(history);
             renderAnalyticsHistory();
+        }
+    }
 
-            document.getElementById('input-sunday-count').value = '';
-            document.getElementById('input-visitors-count').value = '';
-            document.getElementById('input-members-count').value = '';
+    function renderAnalyticsHistory() {
+        const historyList = document.getElementById('analytics-history-list');
+        if (!historyList) return;
+
+        const history = getAnalyticsHistory();
+        historyList.innerHTML = '';
+
+        if (history.length === 0) {
+            historyList.innerHTML = '<p style="opacity: 0.3; text-align: center; padding: 10px; font-size: 0.8rem;">No entries recorded yet.</p>';
+            return;
         }
 
-        function deleteAnalyticsRecord(index) {
-            if (confirm('Are you sure you want to delete this specific log entry?')) {
-                const history = getAnalyticsHistory();
-                history.splice(index, 1);
-                saveAnalyticsHistory(history);
-                renderAnalyticsHistory();
-            }
-        }
+        history.forEach((record, index) => {
+            const div = document.createElement('div');
+            div.style.cssText = "display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 6px; border-left: 3px solid #d4af37; font-size: 0.8rem; color: #fff; margin-bottom: 6px;";
+            
+            const dateObj = new Date(record.date);
+            const formattedDate = dateObj.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
 
-        function renderAnalyticsHistory() {
-            const historyList = document.getElementById('analytics-history-list');
-            if (!historyList) return;
+            div.innerHTML = `
+                <div>
+                    <strong style="color: #d4af37;">${formattedDate}</strong>
+                    <span style="margin-left: 10px; opacity: 0.9;">📋 Att: ${record.attendance} (M:${record.attMale}, F:${record.attFemale}) | 🟢 Vis: ${record.visitors} (M:${record.visitorMale}, F:${record.visitorFemale}) | 🔵 Mem: ${record.members}</span>
+                </div>
+                <button onclick="deleteAnalyticsRecord(${index})" style="background: none; border: none; color: #ff4d4d; cursor: pointer; font-size: 0.9rem; font-weight: bold; padding: 2px 6px; transition: opacity 0.2s;" onmouseover="this.style.opacity=0.7" onmouseout="this.style.opacity=1">✕</button>
+            `;
+            historyList.appendChild(div);
+        });
+    }
 
-            const history = getAnalyticsHistory();
-            historyList.innerHTML = '';
-
-            if (history.length === 0) {
-                historyList.innerHTML = '<p style="opacity: 0.3; text-align: center; padding: 10px; font-size: 0.8rem;">No entries recorded yet.</p>';
-                return;
-            }
-
-            history.forEach((record, index) => {
-                const div = document.createElement('div');
-                div.style.cssText = "display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 6px; border-left: 3px solid #d4af37; font-size: 0.8rem; color: #fff;";
-                
-                const dateObj = new Date(record.date);
-                const formattedDate = dateObj.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
-
-                div.innerHTML = `
-                    <div>
-                        <strong style="color: #d4af37;">${formattedDate}</strong>
-                        <span style="margin-left: 10px; opacity: 0.9;">📋 Att: ${record.attendance} | 🟢 Vis: ${record.visitors} | 🔵 Mem: ${record.members}</span>
-                    </div>
-                    <button onclick="deleteAnalyticsRecord(${index})" style="background: none; border: none; color: #ff4d4d; cursor: pointer; font-size: 0.9rem; font-weight: bold; padding: 2px 6px; transition: opacity 0.2s;" onmouseover="this.style.opacity=0.7" onmouseout="this.style.opacity=1">✕</button>
-                `;
-                historyList.appendChild(div);
-            });
-        }
-
+    // Run render on page load
+    window.addEventListener('DOMContentLoaded', () => {
+        renderAnalyticsHistory();
+    });
+</script>
 
         // --- Unified Testimony Recording & Pastor Mission Control System ---
 
