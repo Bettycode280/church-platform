@@ -703,7 +703,6 @@ function loadLiveFeed() {
         });
     });
 }
-
 // ==========================================
 // CHURCH MEMBER DIRECTORY & MISSION CONTROL LOGIC
 // ==========================================
@@ -739,6 +738,22 @@ async function saveNewMember() {
     }
 }
 
+// --- SEARCH & FILTER FUNCTION ---
+function filterMemberList() {
+    const input = document.getElementById('member-search-input');
+    const filter = input.value.toLowerCase();
+    const listContainer = document.getElementById('member-directory-list');
+    const memberCards = listContainer.getElementsByClassName('member-card'); // Assumes each member row has class 'member-card'
+
+    for (let i = 0; i < memberCards.length; i++) {
+        let cardText = memberCards[i].textContent || memberCards[i].innerText;
+        if (cardText.toLowerCase().indexOf(filter) > -1) {
+            memberCards[i].style.display = ""; // Show matching card
+        } else {
+            memberCards[i].style.display = "none"; // Hide non-matching card
+        }
+    }
+}
 async function deleteMember(id) {
     if (!db) return;
     if (confirm("Are you sure you want to remove this member?")) {

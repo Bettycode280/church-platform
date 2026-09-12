@@ -100,38 +100,41 @@
         <button type="button" class="premium-gold-btn" onclick="saveNewMember()" style="width: 100%; padding: 10px; font-weight: bold; border-radius: 6px; border: none; cursor: pointer; background: #D4AF37; color: #000;">SAVE MEMBER</button>
     </div>
 
-    <!-- 2. Member Communication & Directory Panel -->
-    <div class="admin-panel" style="background: rgba(255,255,255,0.05); padding: 18px; border-radius: 10px; border: 1px solid rgba(212,175,55,0.3); text-align: left; color: #fff; width: 100%; box-sizing: border-box;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-            <h2 class="gold-text" style="font-size: 1.1rem; margin: 0; color: #D4AF37;">Member Communication & Directory</h2>
-            <span style="font-size: 0.75rem; background: #D4AF37; color: #000; padding: 3px 8px; border-radius: 4px; font-weight: bold;">Active</span>
-        </div>
-        <p class="form-hint" style="font-size: 0.8rem; color: #aaa; margin-bottom: 12px;">Manage member info, compose broadcast notes, polish grammar, and share across platforms.</p>
-        
-        <!-- Member Details / List Container -->
-        <div id="member-directory-list" style="margin-bottom: 15px; max-height: 200px; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 6px; border: 1px solid rgba(212,175,55,0.15);">
-            <div style="font-size: 0.85rem; opacity: 0.7; text-align: center; padding: 10px;">Loading members and details...</div>
-        </div>
+  <!-- 2. Member Communication & Directory Panel -->
+<div class="admin-panel" style="background: rgba(255,255,255,0.05); padding: 18px; border-radius: 10px; border: 1px solid rgba(212,175,55,0.3); text-align: left; color: #fff; width: 100%; box-sizing: border-box;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+        <h2 class="gold-text" style="font-size: 1.1rem; margin: 0; color: #D4AF37;">Member Communication & Directory</h2>
+        <span style="font-size: 0.75rem; background: #D4AF37; color: #000; padding: 3px 8px; border-radius: 4px; font-weight: bold;">Active</span>
+    </div>
+    <p class="form-hint" style="font-size: 0.8rem; color: #aaa; margin-bottom: 12px;">Manage member info, compose broadcast notes, polish grammar, and share across platforms.</p>
+    
+    <!-- Search Input Bar -->
+    <div style="margin-bottom: 10px;">
+        <input type="text" id="member-search-input" placeholder="🔍 Search members by name, phone, or email..." oninput="filterMemberList()" class="sleek-input" style="width: 100%; padding: 8px 10px; background: rgba(0,0,0,0.3); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px; font-size: 0.85rem; box-sizing: border-box;">
+    </div>
 
-        <!-- Communication Textarea Input -->
-        <div style="margin-top: 10px;">
-            <textarea id="wa_quick_message" placeholder="Type message to send to members or post..." rows="3" spellcheck="true" class="sleek-input" style="margin-bottom: 8px; width: 100%; padding: 10px; border-radius: 6px; background: rgba(0,0,0,0.3); border: 1px solid rgba(212,175,55,0.2); color: #fff; resize: vertical; box-sizing: border-box;" oninput="updateCharCount(this)"></textarea>
-            
-            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: #aaa; margin-top: 5px; flex-wrap: wrap; gap: 8px;">
-                <span id="char-count">0 / 1000 chars</span>
-                <!-- Action Buttons Row -->
-                <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                    <button type="button" onclick="polishMessage()" style="background: rgba(212,175,55,0.2); color: #D4AF37; border: 1px solid rgba(212,175,55,0.4); padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">✨ Polish</button>
-                    <button type="button" onclick="shareDirectoryComm('whatsapp')" style="background: #25D366; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">WhatsApp</button>
-                    <button type="button" onclick="shareDirectoryComm('email')" style="background: #e67e22; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Email</button>
-                    <button type="button" onclick="shareDirectoryComm('facebook')" style="background: #1877F2; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Facebook</button>
-                    <button type="button" onclick="shareDirectoryComm('tiktok')" style="background: #000000; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold; border: 1px solid rgba(255,255,255,0.3);">TikTok</button>
-                    <button type="button" onclick="deleteMemberDirectoryData()" style="background: #e74c3c; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Delete</button>
-                </div>
+    <!-- Member Details / List Container -->
+    <div id="member-directory-list" style="margin-bottom: 15px; max-height: 200px; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 6px; border: 1px solid rgba(212,175,55,0.15);">
+        <div style="font-size: 0.85rem; opacity: 0.7; text-align: center; padding: 10px;">Loading members and details...</div>
+    </div>
+
+    <!-- Communication Textarea Input -->
+    <div style="margin-top: 10px;">
+        <textarea id="wa_quick_message" placeholder="Type message to send to members or post..." rows="3" spellcheck="true" class="sleek-input" style="margin-bottom: 8px; width: 100%; padding: 10px; border-radius: 6px; background: rgba(0,0,0,0.3); border: 1px solid rgba(212,175,55,0.2); color: #fff; resize: vertical; box-sizing: border-box;" oninput="updateCharCount(this)"></textarea>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: #aaa; margin-top: 5px; flex-wrap: wrap; gap: 8px;">
+            <span id="char-count">0 / 1000 chars</span>
+            <!-- Action Buttons Row -->
+            <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                <button type="button" onclick="polishMessage()" style="background: rgba(212,175,55,0.2); color: #D4AF37; border: 1px solid rgba(212,175,55,0.4); padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">✨ Polish</button>
+                <button type="button" onclick="shareDirectoryComm('whatsapp')" style="background: #25D366; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">WhatsApp</button>
+                <button type="button" onclick="shareDirectoryComm('email')" style="background: #e67e22; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Email</button>
+                <button type="button" onclick="shareDirectoryComm('facebook')" style="background: #1877F2; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Facebook</button>
+                <button type="button" onclick="shareDirectoryComm('tiktok')" style="background: #000000; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold; border: 1px solid rgba(255,255,255,0.3);">TikTok</button>
+                <button type="button" onclick="deleteMemberDirectoryData()" style="background: #e74c3c; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Delete</button>
             </div>
         </div>
     </div>
-
 </div>
            <!-- 3. Modern Biblical Books & Media Panel -->
 <div class="admin-panel" style="margin-bottom: 20px;">
