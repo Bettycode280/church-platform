@@ -344,19 +344,18 @@
 
     </div> <!-- Closes main container wrapper -->
 
- <!-- Combined Functions Script Block -->
-<script>
+ <script>
+    // --- Church Analytics & Testimony Management ---
+
     // 1. Automatic Total Calculation Function
     function calculateAttendanceTotals() {
         const attMale = parseInt(document.getElementById('input-att-male').value) || 0;
         const attFemale = parseInt(document.getElementById('input-att-female').value) || 0;
-        const attTotal = attMale + attFemale;
-        document.getElementById('input-sunday-count').innerText = attTotal;
+        document.getElementById('input-sunday-count').innerText = attMale + attFemale;
 
         const visitorMale = parseInt(document.getElementById('input-visitor-male').value) || 0;
         const visitorFemale = parseInt(document.getElementById('input-visitor-female').value) || 0;
-        const visitorTotal = visitorMale + visitorFemale;
-        document.getElementById('input-visitors-count').innerText = visitorTotal;
+        document.getElementById('input-visitors-count').innerText = visitorMale + visitorFemale;
     }
 
     function getAnalyticsHistory() {
@@ -371,7 +370,6 @@
     function logAnalyticsRecord() {
         const dateInput = document.getElementById('input-analytics-date').value;
         
-        // Read male and female breakdown values directly
         const attMale = parseInt(document.getElementById('input-att-male').value) || 0;
         const attFemale = parseInt(document.getElementById('input-att-female').value) || 0;
         const attendance = attMale + attFemale;
@@ -380,8 +378,7 @@
         const visitorFemale = parseInt(document.getElementById('input-visitor-female').value) || 0;
         const visitors = visitorMale + visitorFemale;
 
-        const membersInput = document.getElementById('input-members-count').value;
-        const members = parseInt(membersInput) || 0;
+        const members = parseInt(document.getElementById('input-members-count').value) || 0;
 
         if (!dateInput) {
             alert('Please select a service date from the calendar.');
@@ -392,13 +389,13 @@
         
         history.push({
             date: dateInput,
-            attMale: attMale,
-            attFemale: attFemale,
-            attendance: attendance,
-            visitorMale: visitorMale,
-            visitorFemale: visitorFemale,
-            visitors: visitors,
-            members: members
+            attMale,
+            attFemale,
+            attendance,
+            visitorMale,
+            visitorFemale,
+            visitors,
+            members
         });
 
         history.sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -441,190 +438,20 @@
             const div = document.createElement('div');
             div.style.cssText = "display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 6px; border-left: 3px solid #d4af37; font-size: 0.8rem; color: #fff; margin-bottom: 6px;";
             
-            const dateObj = new Date(record.date);
-            const formattedDate = dateObj.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+            const formattedDate = new Date(record.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
 
             div.innerHTML = `
                 <div>
                     <strong style="color: #d4af37;">${formattedDate}</strong>
                     <span style="margin-left: 10px; opacity: 0.9;">📋 Att: ${record.attendance} (M:${record.attMale}, F:${record.attFemale}) | 🟢 Vis: ${record.visitors} (M:${record.visitorMale}, F:${record.visitorFemale}) | 🔵 Mem: ${record.members}</span>
                 </div>
-                <button onclick="deleteAnalyticsRecord(${index})" style="background: none; border: none; color: #ff4d4d; cursor: pointer; font-size: 0.9rem; font-weight: bold; padding: 2px 6px; transition: opacity 0.2s;" onmouseover="this.style.opacity=0.7" onmouseout="this.style.opacity=1">✕</button>
+                <button type="button" onclick="deleteAnalyticsRecord(${index})" style="background: none; border: none; color: #ff4d4d; cursor: pointer; font-size: 0.9rem; font-weight: bold; padding: 2px 6px;">✕</button>
             `;
             historyList.appendChild(div);
         });
     }
 
-    // Run render on page load
-    window.addEventListener('DOMContentLoaded', () => {
-        renderAnalyticsHistory();
-    });
-</script>
-
-    // --- Testimony Recording & Mission Control ---
-
-    let mediaRecorder;
-    let recordedChunks = [];
-    let activeStream = null;
-    let currentMediaType = 'text';
-
-    function setTestimonyMode(mode) {
-        currentMediaType = mode;
-        document.querySelectorAll('.testimony-tab').forEach(t => {
-            t.style.background = 'rgba(255,255,255,0.1)';
-        });
-        document.getElementById(`tab-${mode}`).style.background = '#27ae60';
-        
-        const recorderBox = document.getElementById('recorder-ui-container');
-        if (mode === 'text') {
-            recorderBox.style.display = 'none';
-            stopAllMediaStreams();
-        } else {
-            recorderBox.style.display = 'block';
-            initMediaRecorder(mode);
-        }
-    }
-
-    async function initMediaRecorder(type) {
-        const previewContainer = document.getElementById('media-preview-area');
-        previewContainer.innerHTML = '';
-        
-        try {
-            const constraints = type === 'video' ? { video: { width: 1280, height: 720 }, audio: true } : { audio: true };
-            activeStream = await navigator.mediaDevices.getUserMedia(constraints);
-
-            if (type === 'video') {
-                const videoElem = document.createElement('video');
-                videoElem.autoplay = true;
-                videoElem.muted = true;
-                videoElem.playsInline = true;
-                videoElem.srcObject = activeStream;
-                videoElem.style.cssText = "width: 100%; max-height: 160px; border-radius: 4px; background: #000;";
-                previewContainer.appendChild(videoElem);
-            } else {
-                previewContainer.innerHTML = `<p style="color: #27ae60; font-weight: bold; font-size: 0.75rem;">🎤 Microphone ready. Click Start Recording.</p>`;
-            }
-        } catch (err) {
-            console.error("Media access error:", err);
-            alert("Could not access camera or microphone. Please check permissions.");
-        }
-    }
-
-    function startRecordingSession() {
-        recordedChunks = [];
-        if (!activeStream) {
-            alert("Please select Audio or Video first.");
-            return;
-        }
-
-        try {
-            mediaRecorder = new MediaRecorder(activeStream, { mimeType: currentMediaType === 'video' ? 'video/webm;codecs=vp8,opus' : 'audio/webm' });
-        } catch (e) {
-            mediaRecorder = new MediaRecorder(activeStream);
-        }
-
-        mediaRecorder.ondataavailable = (event) => {
-            if (event.data && event.data.size > 0) {
-                recordedChunks.push(event.data);
-            }
-        };
-
-        mediaRecorder.onstop = async () => {
-            const blob = new Blob(recordedChunks, { type: currentMediaType === 'video' ? 'video/webm' : 'audio/webm' });
-            window.pendingRecordedBlob = blob;
-            document.getElementById('recording-status-text').innerText = "✅ Recording ready for submission!";
-        };
-
-        mediaRecorder.start();
-        document.getElementById('recording-status-text').innerText = "🔴 Recording in progress...";
-        document.getElementById('start-rec-btn').style.display = 'none';
-        document.getElementById('stop-rec-btn').style.display = 'inline-block';
-    }
-
-    function stopRecordingSession() {
-        if (mediaRecorder && mediaRecorder.state !== "inactive") {
-            mediaRecorder.stop();
-        }
-        stopAllMediaStreams();
-        document.getElementById('start-rec-btn').style.display = 'inline-block';
-        document.getElementById('stop-rec-btn').style.display = 'none';
-    }
-
-    function stopAllMediaStreams() {
-        if (activeStream) {
-            activeStream.getTracks().forEach(track => track.stop());
-            activeStream = null;
-        }
-    }
-
-    async function submitTestimonyForm() {
-        const name = document.getElementById('input-testifier-name').value.trim();
-        const phone = document.getElementById('input-testifier-phone').value.trim();
-        const email = document.getElementById('input-testifier-email').value.trim();
-        const testimonyText = document.getElementById('input-testimony-text').value.trim();
-
-        if (!name) {
-            alert("Please enter your name.");
-            return;
-        }
-
-        const db = firebase.firestore();
-        const storage = firebase.storage();
-
-        let mediaUrl = "";
-        let thumbnailUrl = "";
-        const submitBtn = document.getElementById('submit-testimony-btn');
-        submitBtn.innerText = "Submitting...";
-        submitBtn.disabled = true;
-
-        try {
-            if (window.pendingRecordedBlob && currentMediaType !== 'text') {
-                const fileName = `testimonies/${Date.now()}_${Math.random().toString(36).substring(7)}.webm`;
-                const fileRef = storage.ref().child(fileName);
-                
-                const uploadSnapshot = await fileRef.put(window.pendingRecordedBlob);
-                mediaUrl = await uploadSnapshot.ref.getDownloadURL();
-
-                if (currentMediaType === 'video' && typeof generateVideoThumbnail === 'function') {
-                    const thumbBlob = await generateVideoThumbnail(window.pendingRecordedBlob);
-                    if (thumbBlob) {
-                        const thumbRef = storage.ref().child(`thumbnails/${Date.now()}_thumb.jpg`);
-                        const thumbSnap = await thumbRef.put(thumbBlob);
-                        thumbnailUrl = await thumbSnap.ref.getDownloadURL();
-                    }
-                }
-            }
-
-            await db.collection("testimonies").add({
-                name,
-                phone: phone || "N/A",
-                email: email || "N/A",
-                testimony: testimonyText || "",
-                mediaType: currentMediaType,
-                mediaUrl,
-                thumbnailUrl,
-                approved: false,
-                archived: false,
-                viewed: false,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            });
-
-            alert("Testimony submitted successfully!");
-            document.getElementById('input-testifier-name').value = '';
-            document.getElementById('input-testifier-phone').value = '';
-            document.getElementById('input-testifier-email').value = '';
-            document.getElementById('input-testimony-text').value = '';
-            window.pendingRecordedBlob = null;
-            document.getElementById('media-preview-area').innerHTML = '';
-            setTestimonyMode('text');
-        } catch (error) {
-            console.error("Error submitting testimony:", error);
-            alert("Failed to submit testimony: " + error.message);
-        } finally {
-            submitBtn.innerText = "✨ Submit Testimony Record";
-            submitBtn.disabled = false;
-        }
-    }
+    // --- Pastor's Testimony Panel & Mission Control ---
 
     function initLiveTestimonyListener() {
         const historyList = document.getElementById('testimony-history-list');
@@ -638,7 +465,7 @@
             let pendingCount = 0;
 
             if (snapshot.empty) {
-                historyList.innerHTML = '<p style="opacity: 0.3; text-align: center; padding: 10px; font-size: 0.8rem;">No testimonies recorded yet.</p>';
+                historyList.innerHTML = '<p style="opacity: 0.3; text-align: center; padding: 10px; font-size: 0.8rem;">No testimonies received yet.</p>';
                 if (badgeElem) badgeElem.style.display = 'none';
                 return;
             }
@@ -656,28 +483,37 @@
                 const div = document.createElement('div');
                 div.style.cssText = "background: rgba(255,255,255,0.05); padding: 10px 12px; border-radius: 6px; border-left: 3px solid " + (record.approved ? "#27ae60" : "#e67e22") + "; font-size: 0.8rem; color: #fff; margin-bottom: 6px;";
                 
-                let mediaControls = '';
-                if (record.mediaType === 'audio' && record.mediaUrl) {
-                    mediaControls = `
-                        <div style="margin-top: 6px; padding: 8px; background: rgba(212,175,55,0.12); border-radius: 4px; display: flex; align-items: center; justify-content: space-between;">
-                            <span style="color: #d4af37; font-weight: bold; font-size: 0.75rem;">🎵 Audio Testimony</span>
-                            <div>
-                                <audio id="audio-elem-${id}" src="${record.mediaUrl}" preload="none"></audio>
-                                <button type="button" onclick="toggleAudioPlayback('${id}')" id="audio-btn-${id}" style="padding: 5px 12px; background: #27ae60; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.75rem;">▶ Listen Audio</button>
-                            </div>
-                        </div>`;
-                } else if (record.mediaType === 'video' && record.mediaUrl) {
-                    mediaControls = `
-                        <div style="margin-top: 6px; padding: 8px; background: rgba(212,175,55,0.12); border-radius: 4px;">
-                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
-                                <span style="color: #d4af37; font-weight: bold; font-size: 0.75rem;">🎬 Video Testimony</span>
-                                <button type="button" onclick="toggleVideoPlayback('${id}')" id="video-btn-${id}" style="padding: 5px 12px; background: #3498db; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.75rem;">▶ Watch Video</button>
-                            </div>
-                            ${record.thumbnailUrl ? `<div style="margin-bottom: 4px;"><img src="${record.thumbnailUrl}" style="width: 100%; max-height: 120px; object-fit: cover; border-radius: 4px;" alt="Thumbnail"></div>` : ''}
-                            <div id="video-container-${id}" style="display: none; margin-top: 6px;">
-                                <video id="video-elem-${id}" src="${record.mediaUrl}" controls style="width: 100%; max-height: 160px; border-radius: 4px;"></video>
-                            </div>
-                        </div>`;
+                let mediaAttachmentUI = '';
+                if (record.mediaUrl) {
+                    const isVideo = record.mediaType === 'video' || record.mediaUrl.includes('.mp4') || record.mediaUrl.includes('video');
+                    const isAudio = record.mediaType === 'audio' || record.mediaUrl.includes('.mp3') || record.mediaUrl.includes('.wav') || record.mediaUrl.includes('audio');
+                    
+                    if (isAudio) {
+                        mediaAttachmentUI = `
+                            <div style="margin-top: 6px; padding: 8px; background: rgba(212,175,55,0.12); border-radius: 4px; display: flex; align-items: center; justify-content: space-between;">
+                                <span style="color: #d4af37; font-weight: bold; font-size: 0.75rem;">🎵 Audio Testimony Attachment</span>
+                                <div>
+                                    <audio id="audio-elem-${id}" src="${record.mediaUrl}" preload="none"></audio>
+                                    <button type="button" onclick="toggleAudioPlayback('${id}')" id="audio-btn-${id}" style="padding: 5px 12px; background: #27ae60; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.75rem;">▶ Play Audio</button>
+                                </div>
+                            </div>`;
+                    } else if (isVideo) {
+                        mediaAttachmentUI = `
+                            <div style="margin-top: 6px; padding: 8px; background: rgba(212,175,55,0.12); border-radius: 4px;">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+                                    <span style="color: #d4af37; font-weight: bold; font-size: 0.75rem;">🎬 Video Testimony Attachment</span>
+                                    <button type="button" onclick="toggleVideoPlayback('${id}')" id="video-btn-${id}" style="padding: 5px 12px; background: #3498db; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.75rem;">▶ Open Video</button>
+                                </div>
+                                <div id="video-container-${id}" style="display: none; margin-top: 6px;">
+                                    <video id="video-elem-${id}" src="${record.mediaUrl}" controls style="width: 100%; max-height: 160px; border-radius: 4px;"></video>
+                                </div>
+                            </div>`;
+                    } else {
+                        mediaAttachmentUI = `
+                            <div style="margin-top: 6px; padding: 6px; background: rgba(255,255,255,0.1); border-radius: 4px;">
+                                <a href="${record.mediaUrl}" target="_blank" style="color: #3498db; text-decoration: underline; font-size: 0.75rem;">📎 Open Attachment File</a>
+                            </div>`;
+                    }
                 }
 
                 div.innerHTML = `
@@ -688,13 +524,14 @@
                         </div>
                         <div>
                             ${!record.approved ? `<button type="button" onclick="approveTestimony('${id}')" style="background: #27ae60; color: #fff; border: none; padding: 3px 6px; border-radius: 3px; cursor: pointer; font-size: 0.7rem; margin-right: 4px;">✔ Approve</button>` : ''}
+                            <button type="button" onclick="shareTestimony('${id}', \`${encodeURIComponent(record.name)}\`, \`${encodeURIComponent(record.testimony || '')}\`, \`${encodeURIComponent(record.mediaUrl || '')}\`)" style="background: #2980b9; color: #fff; border: none; padding: 3px 6px; border-radius: 3px; cursor: pointer; font-size: 0.7rem; margin-right: 4px;">🔗 Share</button>
                             <button type="button" onclick="archiveTestimony('${id}')" style="background: #e67e22; color: #fff; border: none; padding: 3px 6px; border-radius: 3px; cursor: pointer; font-size: 0.7rem; margin-right: 4px;">📦 Archive</button>
                             <button type="button" onclick="deleteTestimonyRecord('${id}')" style="background: #c0392b; color: #fff; border: none; padding: 3px 6px; border-radius: 3px; cursor: pointer; font-size: 0.7rem;">🗑 Delete</button>
                         </div>
                     </div>
                     <div style="opacity: 0.85; margin-bottom: 4px; font-size: 0.78rem;">📞 Phone: ${record.phone || 'N/A'} | ✉️ Email: ${record.email || 'N/A'}</div>
                     ${record.testimony ? `<p style="background: rgba(0,0,0,0.15); padding: 8px; border-radius: 4px; margin: 4px 0 0 0; color: #ddd; font-style: italic; font-size: 0.8rem;">"${record.testimony}"</p>` : ''}
-                    ${mediaControls}
+                    ${mediaAttachmentUI}
                 `;
                 historyList.appendChild(div);
             });
@@ -728,6 +565,27 @@
         }
     }
 
+    function shareTestimony(id, encodedName, encodedText, encodedUrl) {
+        const name = decodeURIComponent(encodedName);
+        const text = decodeURIComponent(encodedText);
+        const url = decodeURIComponent(encodedUrl);
+
+        const shareString = `Testimony from ${name}:\n"${text}"${url ? '\nAttachment: ' + url : ''}`;
+
+        if (navigator.share) {
+            navigator.share({
+                title: `Testimony by ${name}`,
+                text: shareString,
+            }).catch(err => console.log('Error sharing:', err));
+        } else {
+            navigator.clipboard.writeText(shareString).then(() => {
+                alert('Testimony copied to clipboard for sharing!');
+            }).catch(() => {
+                prompt('Copy testimony details below:', shareString);
+            });
+        }
+    }
+
     function toggleAudioPlayback(id) {
         const audioElem = document.getElementById(`audio-elem-${id}`);
         const audioBtn = document.getElementById(`audio-btn-${id}`);
@@ -735,15 +593,15 @@
 
         if (audioElem.paused) {
             audioElem.play().catch(e => console.error(e));
-            audioBtn.innerText = "⏸ Pause Audio";
+            audioBtn.innerText = "⏸ Pause";
             audioBtn.style.background = "#e67e22";
         } else {
             audioElem.pause();
-            audioBtn.innerText = "▶ Listen Audio";
+            audioBtn.innerText = "▶ Play Audio";
             audioBtn.style.background = "#27ae60";
         }
         audioElem.onended = () => {
-            audioBtn.innerText = "▶ Listen Audio";
+            audioBtn.innerText = "▶ Play Audio";
             audioBtn.style.background = "#27ae60";
         };
     }
@@ -762,7 +620,7 @@
         } else {
             videoElem.pause();
             videoContainer.style.display = "none";
-            videoBtn.innerText = "▶ Watch Video";
+            videoBtn.innerText = "▶ Open Video";
             videoBtn.style.background = "#3498db";
         }
     }
