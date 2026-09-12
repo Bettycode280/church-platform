@@ -562,37 +562,22 @@ async function approveTestimony(id) {
 async function archiveTestimony(id) {
     const db = firebase.firestore();
     try {
-        await db.collection("testimonies").doc(id).update({ archived: true, approved: false });
+        await db.collection("testimonies").doc(id).set({ 
+            archived: true, 
+            approved: false 
+        }, { merge: true });
+        console.log("Successfully archived testimony:", id);
     } catch (err) {
         console.error("Error archiving testimony:", err);
-        alert("Failed to archive testimony.");
+        alert("Failed to archive testimony: " + err.message);
     }
-}
-
-function deleteTestimonyRecord(id) {
-    if (confirm('Are you sure you want to delete this testimony record?')) {
-        firebase.firestore().collection("testimonies").doc(id).delete().then(() => {
-            renderArchivedTestimonies();
-        }).catch(() => {
-            alert('Failed to delete testimony.');
-        });
-    }
-}
-
-function openArchiveModal() {
-    const modal = document.getElementById('archive-modal');
-    if (modal) modal.style.display = 'flex';
-    renderArchivedTestimonies();
-}
-
-function closeArchiveModal() {
-    const modal = document.getElementById('archive-modal');
-    if (modal) modal.style.display = 'none';
 }
 
 function renderArchivedTestimonies() {
     const container = document.getElementById('archive-feed-container');
     if (!container) return;
+
+    container.innerHTML = '<p style="opacity: 0.5; text-align: center; padding: 20px;">Loading archive...</p>';
 
     const db = firebase.firestore();
     db.collection("testimonies").where("archived", "==", true).get().then((snapshot) => {
@@ -612,7 +597,7 @@ function renderArchivedTestimonies() {
             
             div.innerHTML = `
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px;">
-                    <strong style="color: #e67e22; font-size: 0.9rem;">${record.name}</strong>
+                    <strong style="color: #e67e22; font-size: 0.9rem;">${record.name || 'Anonymous'}</strong>
                     <div>
                         <button type="button" onclick="restoreTestimony('${id}')" style="background: #27ae60; color: #fff; border: none; padding: 3px 6px; border-radius: 3px; cursor: pointer; font-size: 0.7rem; margin-right: 4px;">🔄 Restore</button>
                         <button type="button" onclick="deleteTestimonyRecord('${id}')" style="background: #c0392b; color: #fff; border: none; padding: 3px 6px; border-radius: 3px; cursor: pointer; font-size: 0.7rem;">🗑 Delete</button>
@@ -625,7 +610,7 @@ function renderArchivedTestimonies() {
         });
     }).catch(err => {
         console.error("Error loading archive:", err);
-        container.innerHTML = '<p style="color: #ff4d4d; text-align: center;">Failed to load archive.</p>';
+        container.innerHTML = `<p style="color: #ff4d4d; text-align: center; padding: 20px;">Failed to load archive. Check console for details.</p>`;
     });
 }
 
