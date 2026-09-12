@@ -88,51 +88,50 @@
 
         <div class="admin-dashboard-grid">
             
-     <!-- 1. Add New Member Panel -->
-<div class="admin-panel" style="margin-bottom: 20px;">
-    <h2 class="gold-text" style="font-size: 1.1rem; margin-bottom: 10px;">Add New Member</h2>
-    <input type="text" id="new-member-name" placeholder="Member Name (e.g. Sister Grace)" class="sleek-input" style="margin-bottom: 10px; width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px;">
-    <input type="text" id="new-member-phone" placeholder="Phone Number (e.g. +1234567890)" class="sleek-input" style="margin-bottom: 10px; width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px;">
-    <input type="email" id="new-member-email" placeholder="Email Address (e.g. grace@example.com)" class="sleek-input" style="margin-bottom: 10px; width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px;">
-    <button type="button" class="premium-gold-btn" onclick="saveNewMember()" style="width: 100%; padding: 10px; font-weight: bold; border-radius: 6px; border: none; cursor: pointer;">SAVE MEMBER</button>
-</div>
+  <!-- Parent Grid Container: Forces equal widths and uniform spacing for all panels -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; align-items: start; width: 100%; box-sizing: border-box;">
 
-<!-- --- UNIFIED MEMBER COMMUNICATION & DIRECTORY PANEL --- -->
-<div class="admin-panel" style="background: rgba(255,255,255,0.05); padding: 18px; border-radius: 10px; border: 1px solid rgba(212,175,55,0.3); margin-bottom: 20px; text-align: left; color: #fff; width: 100%; box-sizing: border-box;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-        <h2 class="gold-text" style="font-size: 1.1rem; margin: 0; color: #D4AF37;">Member Communication & Directory</h2>
-        <span style="font-size: 0.75rem; background: #D4AF37; color: #000; padding: 3px 8px; border-radius: 4px; font-weight: bold;">Active</span>
-    </div>
-    <p class="form-hint" style="font-size: 0.8rem; color: #aaa; margin-bottom: 12px;">Manage member info, compose broadcast notes, polish grammar, and share across platforms.</p>
-    
-    <!-- Member Details / List Container joined inside -->
-    <div id="member-directory-list" style="margin-bottom: 15px; max-height: 200px; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 6px; border: 1px solid rgba(212,175,55,0.15);">
-        <!-- Dynamic member cards will inject here, or display placeholder -->
-        <div style="font-size: 0.85rem; opacity: 0.7; text-align: center; padding: 10px;">Loading members and details...</div>
+    <!-- 1. Add New Member Panel -->
+    <div class="admin-panel" style="background: rgba(255,255,255,0.05); padding: 18px; border-radius: 10px; border: 1px solid rgba(212,175,55,0.3); text-align: left; color: #fff; width: 100%; box-sizing: border-box;">
+        <h2 class="gold-text" style="font-size: 1.1rem; margin-top: 0; margin-bottom: 10px; color: #D4AF37;">Add New Member</h2>
+        <input type="text" id="new-member-name" placeholder="Member Name (e.g. Sister Grace)" class="sleek-input" style="margin-bottom: 10px; width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px; box-sizing: border-box;">
+        <input type="text" id="new-member-phone" placeholder="Phone Number (e.g. +1234567890)" class="sleek-input" style="margin-bottom: 10px; width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px; box-sizing: border-box;">
+        <input type="email" id="new-member-email" placeholder="Email Address (e.g. grace@example.com)" class="sleek-input" style="margin-bottom: 10px; width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px; box-sizing: border-box;">
+        <button type="button" class="premium-gold-btn" onclick="saveNewMember()" style="width: 100%; padding: 10px; font-weight: bold; border-radius: 6px; border: none; cursor: pointer; background: #D4AF37; color: #000;">SAVE MEMBER</button>
     </div>
 
-    <!-- Communication Textarea Input -->
-    <div style="margin-top: 10px;">
-        <textarea id="wa_quick_message" placeholder="Type message to send to members or post..." rows="3" spellcheck="true" class="sleek-input" style="margin-bottom: 8px; width: 100%; padding: 10px; border-radius: 6px; background: rgba(0,0,0,0.3); border: 1px solid rgba(212,175,55,0.2); color: #fff; resize: vertical; box-sizing: border-box;" oninput="updateCharCount(this)"></textarea>
+    <!-- 2. Member Communication & Directory Panel -->
+    <div class="admin-panel" style="background: rgba(255,255,255,0.05); padding: 18px; border-radius: 10px; border: 1px solid rgba(212,175,55,0.3); text-align: left; color: #fff; width: 100%; box-sizing: border-box;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+            <h2 class="gold-text" style="font-size: 1.1rem; margin: 0; color: #D4AF37;">Member Communication & Directory</h2>
+            <span style="font-size: 0.75rem; background: #D4AF37; color: #000; padding: 3px 8px; border-radius: 4px; font-weight: bold;">Active</span>
+        </div>
+        <p class="form-hint" style="font-size: 0.8rem; color: #aaa; margin-bottom: 12px;">Manage member info, compose broadcast notes, polish grammar, and share across platforms.</p>
         
-        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: #aaa; margin-top: 5px; flex-wrap: wrap; gap: 8px;">
-            <span id="char-count">0 / 1000 chars</span>
-            <!-- Action Buttons Row: Grammar, WhatsApp, Email, Facebook, TikTok, Delete -->
-            <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                <button type="button" onclick="polishMessage()" style="background: rgba(212,175,55,0.2); color: #D4AF37; border: 1px solid rgba(212,175,55,0.4); padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">✨ Polish</button>
-                <button type="button" onclick="shareDirectoryComm('whatsapp')" style="background: #25D366; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">WhatsApp</button>
-                <button type="button" onclick="shareDirectoryComm('email')" style="background: #e67e22; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Email</button>
-                <button type="button" onclick="shareDirectoryComm('facebook')" style="background: #1877F2; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Facebook</button>
-                <button type="button" onclick="shareDirectoryComm('tiktok')" style="background: #000000; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold; border: 1px solid rgba(255,255,255,0.3);">TikTok</button>
-                <button type="button" onclick="deleteMemberDirectoryData()" style="background: #e74c3c; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Delete</button>
+        <!-- Member Details / List Container -->
+        <div id="member-directory-list" style="margin-bottom: 15px; max-height: 200px; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 6px; border: 1px solid rgba(212,175,55,0.15);">
+            <div style="font-size: 0.85rem; opacity: 0.7; text-align: center; padding: 10px;">Loading members and details...</div>
+        </div>
+
+        <!-- Communication Textarea Input -->
+        <div style="margin-top: 10px;">
+            <textarea id="wa_quick_message" placeholder="Type message to send to members or post..." rows="3" spellcheck="true" class="sleek-input" style="margin-bottom: 8px; width: 100%; padding: 10px; border-radius: 6px; background: rgba(0,0,0,0.3); border: 1px solid rgba(212,175,55,0.2); color: #fff; resize: vertical; box-sizing: border-box;" oninput="updateCharCount(this)"></textarea>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: #aaa; margin-top: 5px; flex-wrap: wrap; gap: 8px;">
+                <span id="char-count">0 / 1000 chars</span>
+                <!-- Action Buttons Row -->
+                <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                    <button type="button" onclick="polishMessage()" style="background: rgba(212,175,55,0.2); color: #D4AF37; border: 1px solid rgba(212,175,55,0.4); padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">✨ Polish</button>
+                    <button type="button" onclick="shareDirectoryComm('whatsapp')" style="background: #25D366; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">WhatsApp</button>
+                    <button type="button" onclick="shareDirectoryComm('email')" style="background: #e67e22; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Email</button>
+                    <button type="button" onclick="shareDirectoryComm('facebook')" style="background: #1877F2; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Facebook</button>
+                    <button type="button" onclick="shareDirectoryComm('tiktok')" style="background: #000000; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold; border: 1px solid rgba(255,255,255,0.3);">TikTok</button>
+                    <button type="button" onclick="deleteMemberDirectoryData()" style="background: #e74c3c; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">Delete</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-    <div id="member-directory-list" style="display: flex; flex-direction: column; gap: 10px; max-height: 250px; overflow-y: auto;">
-        <p style="opacity: 0.3; text-align: center; padding: 10px;">Loading members...</p>
-    </div>
 </div>
            <!-- 3. Modern Biblical Books & Media Panel -->
 <div class="admin-panel" style="margin-bottom: 20px;">
