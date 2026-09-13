@@ -981,8 +981,7 @@ async function archiveFeedItem(id) {
         }
     }
 }
-
-// --- 2. Modal Controls ---
+// --- 1. Modal Controls ---
 function openArchiveModal() {
     const modal = document.getElementById('archive-modal');
     if (modal) modal.style.display = 'flex';
@@ -994,7 +993,7 @@ function closeArchiveModal() {
     if (modal) modal.style.display = 'none';
 }
 
-// --- 3. Load and Render Archive Feed from Firestore ---
+// --- 2. Load and Render Archive Feed from Firestore ---
 async function loadArchivedFeed() {
     const container = document.getElementById('archive-feed-container');
     if (!container) return;
@@ -1037,8 +1036,10 @@ async function loadArchivedFeed() {
     }
 }
 
-// --- 4. Generic Function to Archive an Item Properly ---
+// --- 3. Universal Archive Function (Works for Testimonies & Prayers) ---
 async function archiveItem(collectionName, docId, itemType) {
+    if (!confirm(`Move this ${itemType.toLowerCase()} to the archive?`)) return;
+    
     try {
         const docRef = firebase.firestore().collection(collectionName).doc(docId);
         const doc = await docRef.get();
@@ -1057,6 +1058,7 @@ async function archiveItem(collectionName, docId, itemType) {
             await docRef.delete();
             alert("Moved to archive successfully!");
             
+            // Refresh panels
             if (typeof loadLiveFeed === 'function') loadLiveFeed();
             if (typeof loadTestimonies === 'function') loadTestimonies();
         }
@@ -1066,7 +1068,12 @@ async function archiveItem(collectionName, docId, itemType) {
     }
 }
 
-// --- 5. Delete Permanently from Archive ---
+// --- Backward-compatible wrapper for prayer items ---
+async function archiveFeedItem(id) {
+    await archiveItem('churchPrayers', id, 'Prayer Request');
+}
+
+// --- 4. Delete Permanently from Archive ---
 async function deleteArchivedItem(id) {
     if (confirm("Are you sure you want to permanently delete this archived item?")) {
         try {
@@ -1079,7 +1086,7 @@ async function deleteArchivedItem(id) {
     }
 }
 
-// --- 6. Restore Item Back to Active Records ---
+// --- 5. Restore Item Back to Active Records ---
 async function restoreArchivedItem(id) {
     if (confirm("Restore this item back to active records?")) {
         try {
@@ -1087,24 +1094,29 @@ async function restoreArchivedItem(id) {
             const doc = await docRef.get();
             if (doc.exists) {
                 const data = doc.data();
+                
+                // Determine target collection based on item type
                 let targetCollection = 'churchTestimonies';
                 if (data.type === 'Prayer Request' || data.type === 'Appointment') {
                     targetCollection = 'churchPrayers';
                 }
                 
                 await firebase.firestore().collection(targetCollection).add({
-                    name: data.name,
-                    phone: data.phone,
-                    email: data.email,
-                    text: data.text,
-                    type: data.type,
+                    name: data.name || 'Anonymous',
+                    phone: data.phone || 'N/A',
+                    email: data.email || 'N/A',
+                    text: data.text || '',
+                    type: data.type || 'Record',
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
                 
                 await docRef.delete();
                 loadArchivedFeed();
+                
+                // Refresh both panel feeds
                 if (typeof loadLiveFeed === 'function') loadLiveFeed();
                 if (typeof loadTestimonies === 'function') loadTestimonies();
+                
                 alert("Item successfully restored!");
             }
         } catch (error) {
