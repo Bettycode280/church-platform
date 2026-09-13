@@ -26,6 +26,7 @@
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
 </body>
 </html>
 
@@ -143,7 +144,7 @@
         </div>
     <!-- Testimony Modal -->
 <div id="testimony-modal" class="modal">
-    <div class="glass-card">
+    <div class="glass-card" style="max-height: 85vh; overflow-y: auto;">
         <h2 class="gold-text">Testimony & Praise</h2>
         <p class="form-hint">Share What God Has Done</p>
         
@@ -159,9 +160,9 @@
         <input type="tel" id="t_phone" placeholder="Phone Number" class="sleek-input">
         <input type="email" id="t_email" placeholder="Email Address (Optional)" class="sleek-input">
         
-        <!-- Added File Input for Audio & Video Uploads -->
+        <!-- Permanent File Input for Audio & Video Uploads -->
         <div style="margin: 8px 0; text-align: left;">
-            <label style="color: #D4AF37; font-size: 11px; display: block; margin-bottom: 4px;">Attach Audio or Video File (Optional)</label>
+            <label style="color: #D4AF37; font-size: 11px; display: block; margin-bottom: 4px;">Attach Audio or Video File (Optional for text)</label>
             <input type="file" id="t_file" accept="audio/*,video/*" class="sleek-input" style="padding: 6px; background: rgba(255,255,255,0.05); color: #fff; font-size: 11px;">
         </div>
         
@@ -173,7 +174,6 @@
         <div class="cancel-link" onclick="closeModals()">Cancel</div>
     </div>
 </div>
-
     <!-- Giving Modal -->
     <div id="giving-modal" class="modal">
         <div class="glass-card">
