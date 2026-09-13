@@ -979,7 +979,7 @@ async function archiveFeedItem(id) {
             console.error("Error archiving document: ", error);
             alert("Failed to archive item.");
         }
-    }
+  // --- Modal & Archive Controls ---
 function openArchiveModal() {
     const modal = document.getElementById('archive-modal');
     if (modal) modal.style.display = 'flex';
@@ -991,6 +991,7 @@ function closeArchiveModal() {
     if (modal) modal.style.display = 'none';
 }
 
+// --- Load and Render Archive Feed ---
 async function loadArchivedFeed() {
     const container = document.getElementById('archive-feed-container');
     if (!container) return;
@@ -1013,10 +1014,14 @@ async function loadArchivedFeed() {
             const id = doc.id;
             const item = document.createElement('div');
             item.style.cssText = "background: rgba(255,255,255,0.03); padding: 10px; border-radius: 6px; margin-bottom: 8px; border: 1px solid rgba(230,126,34,0.2);";
+            
             item.innerHTML = `
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px;">
-                    <h4 style="margin:0; color:#e67e22;">${data.name || 'Anonymous'}</h4>
-                    <button type="button" onclick="deleteArchivedItem('${id}')" style="background: #e74c3c; color: #fff; border: none; padding: 3px 6px; border-radius: 3px; cursor: pointer; font-size: 0.7rem;">🗑 Delete</button>
+                    <h4 style="margin:0; color:#e67e22;">${data.name || 'Anonymous'} (${data.type || 'Testimony'})</h4>
+                    <div style="display: flex; gap: 4px;">
+                        <button type="button" onclick="restoreArchivedItem('${id}')" style="background: #27ae60; color: #fff; border: none; padding: 3px 6px; border-radius: 3px; cursor: pointer; font-size: 0.7rem;">♻ Restore</button>
+                        <button type="button" onclick="deleteArchivedItem('${id}')" style="background: #e74c3c; color: #fff; border: none; padding: 3px 6px; border-radius: 3px; cursor: pointer; font-size: 0.7rem;">🗑 Delete</button>
+                    </div>
                 </div>
                 <p style="margin:0 0 4px 0; font-size:0.8rem; opacity:0.8;">📧 ${data.email || 'N/A'} | 📞 ${data.phone || 'N/A'}</p>
                 <p style="margin:0; font-size:0.85rem;">${data.text || ''}</p>
@@ -1029,6 +1034,7 @@ async function loadArchivedFeed() {
     }
 }
 
+// --- Delete Function Fix ---
 async function deleteArchivedItem(id) {
     if (confirm("Are you sure you want to permanently delete this archived item?")) {
         try {
@@ -1039,6 +1045,36 @@ async function deleteArchivedItem(id) {
             alert("Failed to delete item from archive.");
         }
     }
+}
+
+// --- Restore Function ---
+async function restoreArchivedItem(id) {
+    if (confirm("Restore this item back to active records?")) {
+        try {
+            const docRef = firebase.firestore().collection("churchArchive").doc(id);
+            const doc = await docRef.get();
+            if (doc.exists) {
+                const data = doc.data();
+                // Push back to active collection based on its original type
+                const targetCollection = data.type === 'Prayer Request' ? 'churchPrayerRequests' : 'churchTestimonies';
+                await firebase.firestore().collection(targetCollection).add({
+                    name: data.name,
+                    phone: data.phone,
+                    email: data.email,
+                    text: data.text,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                // Remove from archive after restoring
+                await docRef.delete();
+                loadArchivedFeed();
+                alert("Item successfully restored!");
+            }
+        } catch (error) {
+            console.error("Error restoring item: ", error);
+            alert("Failed to restore item.");
+        }
+    }
+}
 } // <--- Added missing closing brace here
 }function polishMessage() {
     const input = document.getElementById('wa_quick_message');
