@@ -142,31 +142,37 @@
             <div id="status-result" style="margin-top: 8px; font-size: 0.85rem; color: #fff;"></div>
         </div>
     <!-- Testimony Modal -->
-    <div id="testimony-modal" class="modal">
-        <div class="glass-card">
-            <h2 class="gold-text">Testimony & Praise</h2>
-            <p class="form-hint">Share What God Has Done</p>
-            
-            <label style="color: #D4AF37; font-size: 11px; display: block; text-align: left; margin: 4px 0;">Testimony Format</label>
-            <div id="testimony-type-selector" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 10px;">
-                <button type="button" class="testimony-type-btn" onclick="selectTestimonyType('Text', this)" style="padding: 8px 4px; background: rgba(212,175,55,0.25); border: 1px solid #D4AF37; color: #fff; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold;">📝 Text</button>
-                <button type="button" class="testimony-type-btn" onclick="selectTestimonyType('Audio', this)" style="padding: 8px 4px; background: rgba(255,255,255,0.08); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold;">🎙️ Audio</button>
-                <button type="button" class="testimony-type-btn" onclick="selectTestimonyType('Video', this)" style="padding: 8px 4px; background: rgba(255,255,255,0.08); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold;">📹 Video</button>
-            </div>
-            <input type="hidden" id="t_type" value="Text">
-
-            <input type="text" id="t_name" placeholder="Full Name" class="sleek-input">
-            <input type="tel" id="t_phone" placeholder="Phone Number" class="sleek-input">
-            <input type="email" id="t_email" placeholder="Email Address (Optional)" class="sleek-input">
-            
-            <div id="testimony-input-container">
-                <textarea id="t_msg" placeholder="Write your testimony or praise report here..." rows="4" class="sleek-input"></textarea>
-            </div>
-            
-            <button type="button" class="premium-gold-btn" onclick="submitTestimony()" style="margin-top: 10px;">SUBMIT TESTIMONY</button>
-            <div class="cancel-link" onclick="closeModals()">Cancel</div>
+<div id="testimony-modal" class="modal">
+    <div class="glass-card">
+        <h2 class="gold-text">Testimony & Praise</h2>
+        <p class="form-hint">Share What God Has Done</p>
+        
+        <label style="color: #D4AF37; font-size: 11px; display: block; text-align: left; margin: 4px 0;">Testimony Format</label>
+        <div id="testimony-type-selector" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 10px;">
+            <button type="button" class="testimony-type-btn" onclick="selectTestimonyType('Text', this)" style="padding: 8px 4px; background: rgba(212,175,55,0.25); border: 1px solid #D4AF37; color: #fff; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold;">📝 Text</button>
+            <button type="button" class="testimony-type-btn" onclick="selectTestimonyType('Audio', this)" style="padding: 8px 4px; background: rgba(255,255,255,0.08); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold;">🎙️ Audio</button>
+            <button type="button" class="testimony-type-btn" onclick="selectTestimonyType('Video', this)" style="padding: 8px 4px; background: rgba(255,255,255,0.08); border: 1px solid rgba(212,175,55,0.3); color: #fff; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold;">📹 Video</button>
         </div>
+        <input type="hidden" id="t_type" value="Text">
+
+        <input type="text" id="t_name" placeholder="Full Name" class="sleek-input">
+        <input type="tel" id="t_phone" placeholder="Phone Number" class="sleek-input">
+        <input type="email" id="t_email" placeholder="Email Address (Optional)" class="sleek-input">
+        
+        <!-- Added File Input for Audio & Video Uploads -->
+        <div style="margin: 8px 0; text-align: left;">
+            <label style="color: #D4AF37; font-size: 11px; display: block; margin-bottom: 4px;">Attach Audio or Video File (Optional)</label>
+            <input type="file" id="t_file" accept="audio/*,video/*" class="sleek-input" style="padding: 6px; background: rgba(255,255,255,0.05); color: #fff; font-size: 11px;">
+        </div>
+        
+        <div id="testimony-input-container">
+            <textarea id="t_msg" placeholder="Write your testimony or praise report here..." rows="4" class="sleek-input"></textarea>
+        </div>
+        
+        <button type="button" class="premium-gold-btn" onclick="submitTestimony()" style="margin-top: 10px;">SUBMIT TESTIMONY</button>
+        <div class="cancel-link" onclick="closeModals()">Cancel</div>
     </div>
+</div>
 
     <!-- Giving Modal -->
     <div id="giving-modal" class="modal">
@@ -427,40 +433,72 @@ async function submitPrayer() {
             }
         }
         async function submitTestimony() {
-            const typeInput = document.getElementById('t_type');
-            const nameInput = document.getElementById('t_name');
-            const phoneInput = document.getElementById('t_phone');
-            const emailInput = document.getElementById('t_email');
-            const msgInput = document.getElementById('t_msg');
+    const typeInput = document.getElementById('t_type');
+    const nameInput = document.getElementById('t_name');
+    const phoneInput = document.getElementById('t_phone');
+    const emailInput = document.getElementById('t_email');
+    const msgInput = document.getElementById('t_msg');
+    const fileInput = document.getElementById('t_file'); // Make sure you have <input type="file" id="t_file"> in your HTML form
 
-            if (!nameInput || !nameInput.value.trim()) {
-                alert("Please enter your full name.");
-                return;
-            }
+    if (!nameInput || !nameInput.value.trim()) {
+        alert("Please enter your full name.");
+        return;
+    }
 
-            try {
-                const db = firebase.firestore();
-                await db.collection("testimonies").add({
-                    type: typeInput ? typeInput.value : 'Text',
-                    name: nameInput.value.trim(),
-                    phone: phoneInput ? phoneInput.value.trim() : '',
-                    email: emailInput ? emailInput.value.trim() : '',
-                    testimony: msgInput ? msgInput.value.trim() : 'Media submission',
-                    date: new Date().toISOString().split('T')[0],
-                    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                alert("Testimony Submitted Successfully.");
-                closeModals();
-                nameInput.value = "";
-                if(phoneInput) phoneInput.value = "";
-                if(emailInput) emailInput.value = "";
-                if(msgInput) msgInput.value = "";
-            } catch (error) {
-                console.error("Error submitting testimony: ", error);
-                alert("Failed to submit testimony.");
+    try {
+        const db = firebase.firestore();
+        let mediaUrl = "";
+        let mediaType = typeInput ? typeInput.value : 'Text';
+
+        // 1. If a file is attached, upload it to Firebase Storage first
+        if (fileInput && fileInput.files && fileInput.files[0]) {
+            const file = fileInput.files[0];
+            const storageRef = firebase.storage().ref();
+            const fileRef = storageRef.child(`testimonies/${Date.now()}_${file.name}`);
+            
+            // Upload file
+            const snapshot = await fileRef.put(file);
+            mediaUrl = await snapshot.ref.getDownloadURL();
+
+            // Automatically determine media type if generic
+            if (file.type.startsWith('video/')) {
+                mediaType = 'video';
+            } else if (file.type.startsWith('audio/')) {
+                mediaType = 'audio';
             }
         }
+
+        // 2. Save complete record to Firestore
+        await db.collection("testimonies").add({
+            type: mediaType,
+            mediaType: mediaType,
+            mediaUrl: mediaUrl, // This is what the admin panel looks for!
+            name: nameInput.value.trim(),
+            phone: phoneInput ? phoneInput.value.trim() : '',
+            email: emailInput ? emailInput.value.trim() : '',
+            testimony: msgInput ? msgInput.value.trim() : 'Media submission',
+            date: new Date().toISOString().split('T')[0],
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+            approved: false,
+            archived: false
+        });
+
+        alert("Testimony Submitted Successfully.");
+        if (typeof closeModals === 'function') closeModals();
+        
+        // Reset form fields
+        nameInput.value = "";
+        if (phoneInput) phoneInput.value = "";
+        if (emailInput) emailInput.value = "";
+        if (msgInput) msgInput.value = "";
+        if (fileInput) fileInput.value = "";
+
+    } catch (error) {
+        console.error("Error submitting testimony: ", error);
+        alert("Failed to submit testimony: " + error.message);
+    }
+}
     </script>
 
     <!-- Additional External Logic Script -->
