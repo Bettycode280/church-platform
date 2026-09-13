@@ -433,6 +433,7 @@ async function submitPrayer() {
             }
         }
         async function submitTestimony() {
+            console.log("Storage check:", typeof firebase.storage); // <-- Add this line here
     const typeInput = document.getElementById('t_type');
     const nameInput = document.getElementById('t_name');
     const phoneInput = document.getElementById('t_phone');
