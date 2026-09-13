@@ -292,54 +292,54 @@
     </div>
 </div>
         <!-- 9. Member Testimonies & Praise Reports Panel -->
-    <div class="admin-panel" style="margin-top: 20px; margin-bottom: 20px; max-height: 550px; overflow-y: auto; padding-right: 5px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; gap: 8px;">
-            <button class="premium-gold-btn" style="flex: 1; font-size: 1.1rem; text-align: center; color: #000000; background: linear-gradient(135deg, #d4af37 0%, #aa7c11 100%); padding: 12px; border-radius: 6px; font-weight: bold; border: none; cursor: default;">🙏 Member Testimonies & Praise Reports</button>
-            
-            <!-- 📂 View Archive Button added right here -->
-            <button type="button" onclick="openArchiveModal()" style="background: #e67e22; color: #fff; border: none; padding: 12px 14px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: bold; white-space: nowrap;">📂 View Archive</button>
-            
-            <div id="notification-badge" style="display: none; background: #e74c3c; color: #fff; font-weight: bold; padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; margin-left: 2px;">0</div>
+<div class="admin-panel" style="margin-top: 20px; margin-bottom: 20px; max-height: 550px; overflow-y: auto; padding-right: 5px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; gap: 8px;">
+        <button class="premium-gold-btn" style="flex: 1; font-size: 1.1rem; text-align: center; color: #000000; background: linear-gradient(135deg, #d4af37 0%, #aa7c11 100%); padding: 12px; border-radius: 6px; font-weight: bold; border: none; cursor: default;">🙏 Member Testimonies & Praise Reports</button>
+        
+        <!-- 📂 View Archive Button -->
+        <button type="button" onclick="openArchiveModal()" style="background: #e67e22; color: #fff; border: none; padding: 12px 14px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: bold; white-space: nowrap;">📂 View Archive</button>
+        
+        <div id="notification-badge" style="display: none; background: #e74c3c; color: #fff; font-weight: bold; padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; margin-left: 2px;">0</div>
+    </div>
+    <p class="form-hint" style="font-size: 0.8rem; color: #aaa; margin-bottom: 10px;">Receive, record directly, and review testimonies with multimedia support.</p>
+    
+    <!-- Testimony Input & Direct Recording Box -->
+    <div style="background: rgba(255,255,255,0.02); padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 15px;">
+        <div style="display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap;">
+            <input type="text" id="input-testifier-name" placeholder="Member Name" class="sleek-input" style="flex: 1; min-width: 140px; padding: 10px; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; font-size: 0.85rem;">
+            <input type="tel" id="input-testifier-phone" placeholder="Phone Number" class="sleek-input" style="flex: 1; min-width: 120px; padding: 10px; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; font-size: 0.85rem;">
         </div>
-        <p class="form-hint" style="font-size: 0.8rem; color: #aaa; margin-bottom: 10px;">Receive, record directly, and review testimonies with multimedia support.</p>
-            <!-- Testimony Input & Direct Recording Box -->
-            <div style="background: rgba(255,255,255,0.02); padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 15px;">
-                <div style="display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap;">
-                    <input type="text" id="input-testifier-name" placeholder="Member Name" class="sleek-input" style="flex: 1; min-width: 140px; padding: 10px; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; font-size: 0.85rem;">
-                    <input type="tel" id="input-testifier-phone" placeholder="Phone Number" class="sleek-input" style="flex: 1; min-width: 120px; padding: 10px; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; font-size: 0.85rem;">
-                </div>
-                <div style="margin-bottom: 10px;">
-                    <input type="email" id="input-testifier-email" placeholder="Email Address (Optional)" class="sleek-input" style="width: 100%; padding: 10px; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; font-size: 0.85rem;">
-                </div>
-                <div style="margin-bottom: 10px;">
-                    <textarea id="input-testimony-text" placeholder="Share testimony details or praise report..." class="sleek-input" rows="3" style="width: 100%; padding: 10px; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; font-size: 0.85rem; resize: vertical;"></textarea>
-                </div>
-
-                <!-- Media Mode Selection Tabs -->
-                <div style="display: flex; gap: 6px; margin-bottom: 10px;">
-                    <button type="button" id="tab-text" class="testimony-tab active" onclick="setTestimonyMode('text')" style="flex: 1; padding: 6px; background: #27ae60; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">📝 Text Only</button>
-                    <button type="button" id="tab-audio" class="testimony-tab" onclick="setTestimonyMode('audio')" style="flex: 1; padding: 6px; background: rgba(255,255,255,0.1); color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">🎤 Record Audio</button>
-                    <button type="button" id="tab-video" class="testimony-tab" onclick="setTestimonyMode('video')" style="flex: 1; padding: 6px; background: rgba(255,255,255,0.1); color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">📹 Record Video</button>
-                </div>
-
-                <!-- Recorder UI Container (Hidden by default for text) -->
-                <div id="recorder-ui-container" style="display: none; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 6px; margin-bottom: 10px; text-align: center;">
-                    <div id="media-preview-area" style="margin-bottom: 8px;"></div>
-                    <p id="recording-status-text" style="font-size: 0.75rem; color: #d4af37; margin-bottom: 6px;">Ready to record</p>
-                    <button type="button" id="start-rec-btn" onclick="startRecordingSession()" style="padding: 6px 14px; background: #e74c3c; color: #fff; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.75rem;">🔴 Start Recording</button>
-                    <button type="button" id="stop-rec-btn" onclick="stopRecordingSession()" style="display: none; padding: 6px 14px; background: #7f8c8d; color: #fff; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.75rem;">⏹ Stop Recording</button>
-                </div>
-
-                <button type="button" id="submit-testimony-btn" onclick="submitTestimonyForm()" style="width: 100%; padding: 10px; background: #d4af37; color: #000; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.9rem;">✨ Submit Testimony Record</button>
-            </div>
-
-            <!-- Testimony Records List Area -->
-            <h3 style="font-size: 0.9rem; color: #d4af37; margin-bottom: 8px; font-weight: bold;">📜 Received Testimonies Archive</h3>
-            <div id="testimony-history-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 260px; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px;">
-                <p style="opacity: 0.3; text-align: center; padding: 10px; font-size: 0.8rem;">No testimonies recorded yet.</p>
-            </div>
+        <div style="margin-bottom: 10px;">
+            <input type="email" id="input-testifier-email" placeholder="Email Address (Optional)" class="sleek-input" style="width: 100%; padding: 10px; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; font-size: 0.85rem;">
+        </div>
+        <div style="margin-bottom: 10px;">
+            <textarea id="input-testimony-text" placeholder="Share testimony details or praise report..." class="sleek-input" rows="3" style="width: 100%; padding: 10px; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; font-size: 0.85rem; resize: vertical;"></textarea>
         </div>
 
+        <!-- Media Mode Selection Tabs -->
+        <div style="display: flex; gap: 6px; margin-bottom: 10px;">
+            <button type="button" id="tab-text" class="testimony-tab active" onclick="setTestimonyMode('text')" style="flex: 1; padding: 6px; background: #27ae60; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">📝 Text Only</button>
+            <button type="button" id="tab-audio" class="testimony-tab" onclick="setTestimonyMode('audio')" style="flex: 1; padding: 6px; background: rgba(255,255,255,0.1); color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">🎤 Record Audio</button>
+            <button type="button" id="tab-video" class="testimony-tab" onclick="setTestimonyMode('video')" style="flex: 1; padding: 6px; background: rgba(255,255,255,0.1); color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">📹 Record Video</button>
+        </div>
+
+        <!-- Recorder UI Container -->
+        <div id="recorder-ui-container" style="display: none; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 6px; margin-bottom: 10px; text-align: center;">
+            <div id="media-preview-area" style="margin-bottom: 8px;"></div>
+            <p id="recording-status-text" style="font-size: 0.75rem; color: #d4af37; margin-bottom: 6px;">Ready to record</p>
+            <button type="button" id="start-rec-btn" onclick="startRecordingSession()" style="padding: 6px 14px; background: #e74c3c; color: #fff; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.75rem;">🔴 Start Recording</button>
+            <button type="button" id="stop-rec-btn" onclick="stopRecordingSession()" style="display: none; padding: 6px 14px; background: #7f8c8d; color: #fff; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.75rem;">⏹ Stop Recording</button>
+        </div>
+
+        <button type="button" id="submit-testimony-btn" onclick="submitTestimonyForm()" style="width: 100%; padding: 10px; background: #d4af37; color: #000; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.9rem;">✨ Submit Testimony Record</button>
+    </div>
+
+    <!-- Testimony Records List Area -->
+    <h3 style="font-size: 0.9rem; color: #d4af37; margin-bottom: 8px; font-weight: bold;">📜 Received Testimonies Archive</h3>
+    <div id="testimony-history-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 260px; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px;">
+        <p style="opacity: 0.3; text-align: center; padding: 10px; font-size: 0.80rem;">No testimonies recorded yet.</p>
+    </div>
+</div>
         <!-- Logout Button -->
         <div style="text-align: center; margin-top: 40px; padding-bottom: 40px;">
             <button onclick="location.reload()" style="background:none; border:none; color:rgba(255,255,255,0.3); cursor:pointer;">Logout & Lock</button>
@@ -716,15 +716,17 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
-<!-- Archive Modal -->
+<!-- ========================================== -->
+<!-- ARCHIVED TESTIMONIES MODAL                 -->
+<!-- ========================================== -->
 <div id="archive-modal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; justify-content:center; align-items:center;">
     <div class="glass-card" style="background:#1a1a1a; padding:20px; border-radius:8px; width:90%; max-width:600px; max-height:80vh; overflow-y:auto; color:#fff; border: 1px solid #e67e22;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-            <h2 class="gold-text" style="margin:0; color:#e67e22;">📂 Archived Requests</h2>
+            <h2 class="gold-text" style="margin:0; color:#e67e22;">📂 Archived Testimonies</h2>
             <button onclick="closeArchiveModal()" style="background:none; border:none; color:#fff; font-size:1.2rem; cursor:pointer;">✕</button>
         </div>
         <div id="archive-feed-container">
-            <!-- Archived items load here automatically -->
+            <!-- Dynamically populated archived records load here -->
         </div>
     </div>
 </div>
